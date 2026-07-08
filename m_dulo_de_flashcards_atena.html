@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Atena: Módulo de Flashcards SRS</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {},
+      },
+    }
+  </script>
+  
+  <!-- React and ReactDOM -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  
+  <script>window.react = window.React;</script>
+  
+  <!-- Lucide React -->
+  <script src="https://unpkg.com/lucide-react@0.263.1/dist/umd/lucide-react.js"></script>
+
+  <!-- Babel Standalone -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+    const { 
+      Layers, AlertTriangle, Star, ThumbsUp, ThumbsDown, 
+      Flame, ArrowLeft, RefreshCw, CheckCircle, XCircle, Trophy, Play,
+      CalendarClock, BookOpen, LogOut, FileText, Sun, Moon
+    } = LucideReact;
+
+// --- BANCO DE DADOS COMPLETO (61 CARTÕES) ---
+const bancosDeQuestoes = [
+  {
+    id: "dp",
+    titulo: "Direito Penal",
+    sigla: "DP",
+    descricao: "Lei no Tempo, Extraterritorialidade e Conflito de Normas (Gargalos).",
+    cards: [
+      { id: "dp1", assunto: "Lei Penal no Tempo", frente: "Aplica-se a lei penal mais benigna ao crime continuado se a lei mais grave entrou em vigor ANTES de cessar a continuidade?", verso: "NÃO. Aplica-se a LEI MAIS GRAVE (Súmula 711 do STF)." },
+      { id: "dp2", assunto: "Extraterritorialidade", frente: "Genocídio cometido contra brasileiro no exterior exige que o agente entre no Brasil para ser punido?", verso: "NÃO. Extraterritorialidade INCONDICIONADA." },
+      { id: "dp3", assunto: "Abolitio Criminis", frente: "A abolitio criminis apaga também os efeitos extrapenais (civis) da condenação?", verso: "NÃO. Apenas os EFEITOS PENAIS." },
+      { id: "dp4", assunto: "Tempo do Crime", frente: "Para a definição do tempo do crime, adotou-se a Teoria da Ubiquidade?", verso: "NÃO. Tempo = ATIVIDADE. Lugar = UBIQUIDADE (L-U-T-A)." },
+      { id: "dp5", assunto: "Conflito de Normas", frente: "Falsidade ideológica usada apenas como meio para estelionato é absorvida?", verso: "SIM. Princípio da Consunção (Súmula 17 STJ)." },
+      { id: "dp6", assunto: "Teoria do Crime", frente: "A legítima defesa putativa exclui a ilicitude do fato?", verso: "NÃO. Exclui a CULPABILIDADE (se inevitável) ou reduz a pena/desclassifica para culposo (se evitável), por ser Erro de Tipo Permissivo." },
+      { id: "dp7", assunto: "Crimes contra a Vida", frente: "O perdão judicial no homicídio aplica-se a modalidades dolosas?", verso: "NÃO. Somente ao homicídio CULPOSO." },
+      { id: "dp8", assunto: "Roubo e Furto", frente: "O sistema de câmeras de segurança torna o furto crime impossível?", verso: "NÃO. Súmula 567 do STJ: não torna o crime impossível." },
+      { id: "dp9", assunto: "Penas", frente: "A pena de multa pode ser convertida em detenção se o condenado não pagar?", verso: "NÃO. A multa passa a ser dívida de valor, cobrada pela Fazenda Pública." },
+      { id: "dp10", assunto: "Crime Impossível", frente: "A ineficácia relativa do meio ou impropriedade relativa do objeto configuram crime impossível?", verso: "NÃO. Devem ser ABSOLUTAS (Art. 17, CP)." }
+    ]
+  },
+  {
+    id: "dpp",
+    titulo: "Dir. Processual Penal",
+    sigla: "DPP",
+    descricao: "Inquérito Policial, Prisões e Ação Penal.",
+    cards: [
+      { id: "dpp1", assunto: "Inquérito Policial", frente: "O delegado de polícia pode mandar arquivar os autos de inquérito se não achar provas?", verso: "NÃO. O arquivamento é de competência do Ministério Público / Juiz, JAMAIS da autoridade policial (Art. 17, CPP)." },
+      { id: "dpp2", assunto: "Prisão em Flagrante", frente: "Qualquer do povo DEVE prender quem quer que seja encontrado em flagrante delito?", verso: "NÃO. O cidadão comum PODE prender (faculdade). Quem DEVE prender é a autoridade policial e seus agentes." },
+      { id: "dpp3", assunto: "Ação Penal", frente: "A representação do ofendido na ação penal pública condicionada pode ser retratada após o oferecimento da denúncia?", verso: "NÃO. A retratação só é possível ATÉ o oferecimento da denúncia (Art. 25, CPP)." },
+      { id: "dpp4", assunto: "Provas", frente: "São inadmissíveis as provas derivadas das ilícitas, sem qualquer exceção?", verso: "NÃO. Há exceções: fonte independente e descoberta inevitável." },
+      { id: "dpp5", assunto: "Prisão Preventiva", frente: "Pode ser decretada prisão preventiva como antecipação de cumprimento de pena?", verso: "NÃO. A prisão preventiva não pode ter finalidade de antecipação de pena (Art. 313, §2º)." },
+      { id: "dpp6", assunto: "Acordo de Não Persecução", frente: "O ANPP cabe em crimes cometidos com violência ou grave ameaça?", verso: "NÃO. O ANPP exige infração sem violência ou grave ameaça e pena mínima < 4 anos." },
+      { id: "dpp7", assunto: "Inquérito Policial", frente: "É garantido ao advogado acessar os autos do inquérito de forma irrestrita, inclusive diligências em andamento?", verso: "NÃO. O acesso abrange apenas os elementos JÁ DOCUMENTADOS (Súmula Vinculante 14)." },
+      { id: "dpp8", assunto: "Competência", frente: "O juízo competente para julgar estelionato por cheque sem fundo é o do local de recusa?", verso: "SIM. Súmula 521 STF / Art. 70, §4º, CPP (Local da agência bancária sacada)." },
+      { id: "dpp9", assunto: "Prisão Temporária", frente: "A prisão temporária pode ser decretada de ofício pelo Juiz?", verso: "NÃO. Depende SEMPRE de representação da autoridade policial ou requerimento do MP." },
+      { id: "dpp10", assunto: "Provas", frente: "O juiz pode fundamentar sua decisão EXCLUSIVAMENTE nos elementos informativos do Inquérito?", verso: "NÃO. Vedação expressa no art. 155, CPP (salvo provas cautelares, não repetíveis e antecipadas)." }
+    ]
+  },
+  {
+    id: "dc",
+    titulo: "Direito Constitucional",
+    sigla: "DC",
+    descricao: "Controle de Constitucionalidade e Direitos Fundamentais.",
+    cards: [
+      { id: "dc1", assunto: "Eficácia das Normas", frente: "A norma que garante o direito de greve no serviço público é de eficácia plena?", verso: "NÃO. É de eficácia LIMITADA, dependendo de lei específica para seu exercício." },
+      { id: "dc2", assunto: "Habeas Corpus", frente: "Cabe Habeas Corpus contra punição disciplinar militar?", verso: "NÃO. Salvo para questionar os pressupostos de legalidade (hierarquia, poder de punir), mas não o mérito." },
+      { id: "dc3", assunto: "Remédios Constitucionais", frente: "O Mandado de Injunção serve para suprir falta de norma regulamentadora de qualquer direito?", verso: "NÃO. Apenas para direitos, liberdades constitucionais, nacionalidade, soberania e cidadania." },
+      { id: "dc4", assunto: "Segurança Pública", frente: "As guardas municipais fazem parte do rol dos órgãos de segurança pública stricto sensu (Art. 144, incisos I a VI)?", verso: "NÃO. Estão previstas no §8º do Art. 144, com função de proteção de bens, serviços e instalações." },
+      { id: "dc5", assunto: "CPI", frente: "A CPI pode determinar quebra de sigilo bancário sem autorização judicial?", verso: "SIM. A CPI possui poderes de investigação próprios das autoridades judiciais (cláusula de reserva de jurisdição atenuada)." },
+      { id: "dc6", assunto: "Extradição", frente: "O brasileiro nato pode ser extraditado se o crime foi cometido no exterior?", verso: "NÃO. O brasileiro nato NUNCA pode ser extraditado." },
+      { id: "dc7", assunto: "CPI", frente: "A CPI pode decretar prisão preventiva de testemunha que mente?", verso: "NÃO. CPI não pode decretar prisão, exceto em flagrante delito." },
+      { id: "dc8", assunto: "Competência", frente: "A segurança viária nas rodovias federais é de competência da Polícia Federal?", verso: "NÃO. É de competência da Polícia Rodoviária Federal." },
+      { id: "dc9", assunto: "Súmula Vinculante", frente: "Qualquer pessoa pode propor a edição, revisão ou cancelamento de Súmula Vinculante?", verso: "NÃO. Apenas os legitimados da Ação Direta de Inconstitucionalidade (Art. 103) e outros específicos." },
+      { id: "dc10", assunto: "Mandado de Segurança", frente: "Cabe mandado de segurança contra lei em tese?", verso: "NÃO. Salvo se a lei produzir efeitos concretos imediatos (Súmula 266 STF)." },
+      { id: "dc11", assunto: "Classificação das Constituições", frente: "A Constituição Outorgada tem participação popular em sua elaboração, enquanto a Cesarista não tem?", verso: "NÃO. Nenhuma tem participação na elaboração. A diferença é que a Cesarista (ex: Napoleão) prevê RATIFICAÇÃO POPULAR POSTERIOR (plebiscito de fachada). A Outorgada é 100% imposta (ex: 1824, 1937, 1967)." }
+    ]
+  },
+  {
+    id: "da",
+    titulo: "Dir. Administrativo",
+    sigla: "DA",
+    descricao: "Atos, Poderes Administrativos e Responsabilidade Civil.",
+    cards: [
+      { id: "da1", assunto: "Atos Administrativos", frente: "A revogação de um ato administrativo produz efeitos ex tunc (retroativos)?", verso: "NÃO. A revogação produz efeitos EX NUNC (daqui para frente). A anulação é que produz efeitos ex tunc." },
+      { id: "da2", assunto: "Poder de Polícia", frente: "O poder de polícia pode ser delegado integralmente à iniciativa privada?", verso: "NÃO. STF decidiu que apenas fases de consentimento, fiscalização e sanção (em empresas públicas/sociedade economia mista que prestam serviço público em regime não concorrencial) podem, mas nunca legislar/ordem." },
+      { id: "da3", assunto: "Responsabilidade Civil", frente: "A responsabilidade civil do Estado por conduta omissiva é sempre objetiva?", verso: "NÃO. Via de regra, a omissão estatal enseja responsabilidade SUBJETIVA (teoria da culpa do serviço/faute du service)." },
+      { id: "da4", assunto: "Atributos do Ato", frente: "A presunção de legitimidade dos atos administrativos é absoluta?", verso: "NÃO. É presunção RELATIVA (juris tantum), admitindo prova em contrário." },
+      { id: "da5", assunto: "Poder Disciplinar", frente: "O poder disciplinar abrange a aplicação de multa a um cidadão por excesso de velocidade?", verso: "NÃO. Multa de trânsito é exercício do Poder de POLÍCIA (vínculo geral). Poder Disciplinar exige vínculo específico (servidor ou contratado)." },
+      { id: "da6", assunto: "Concessão", frente: "A concessão de serviço público exige lei autorizadora e licitação na modalidade concorrência ou diálogo competitivo?", verso: "SIM. Sempre exige licitação nas modalidades concorrência ou diálogo." },
+      { id: "da7", assunto: "Improbidade", frente: "Após a Lei 14.230/21, admite-se ato de improbidade administrativa culposo?", verso: "NÃO. A nova lei exige DOLO ESPECÍFICO para todas as modalidades." },
+      { id: "da8", assunto: "Agentes Públicos", frente: "É permitida a acumulação remunerada de um cargo de professor com outro técnico ou científico?", verso: "SIM, desde que haja compatibilidade de horários (Art. 37, XVI, CF)." },
+      { id: "da9", assunto: "Licitação", frente: "Na inexigibilidade de licitação, a competição é inviável, mas há vários possíveis fornecedores?", verso: "NÃO. Inexigibilidade decorre justamente da inviabilidade de competição (ex: fornecedor exclusivo, artista consagrado)." },
+      { id: "da10", assunto: "Bens Públicos", frente: "Os bens de uso comum do povo e de uso especial são alienáveis?", verso: "NÃO. São inalienáveis enquanto mantiverem essa destinação. Só alienáveis após desafetação." }
+    ]
+  },
+  {
+    id: "lpe",
+    titulo: "Leg. Penal Especial",
+    sigla: "LPE",
+    descricao: "Maria da Penha, Drogas, Desarmamento e Tortura.",
+    cards: [
+      { id: "lpe1", assunto: "Maria da Penha", frente: "A Lei Maria da Penha (Lei 11.340) aplica-se somente quando a vítima for mulher e o agressor for homem?", verso: "NÃO. O agressor pode ser de qualquer gênero (inclusive outra mulher), desde que a violência seja baseada em gênero contra a mulher." },
+      { id: "lpe2", assunto: "Lei de Drogas", frente: "O crime de porte de drogas para consumo pessoal (Art. 28) é punido com pena de prisão?", verso: "NÃO. Não há pena privativa de liberdade. Apenas advertência, prestação de serviços ou medida educativa (despenalização)." },
+      { id: "lpe3", assunto: "Estatuto do Desarmamento", frente: "O porte de arma de fogo de uso permitido, se a arma estiver desmuniciada, não é crime?", verso: "NÃO. O STF e STJ consideram crime de perigo abstrato. É CRIME mesmo desmuniciada." },
+      { id: "lpe4", assunto: "Crime de Tortura", frente: "O crime de tortura é inafiançável e imprescritível?", verso: "NÃO. É inafiançável, insuscetível de graça ou anistia. MAS É PRESCRITÍVEL (apenas racismo e ação de grupos armados são imprescritíveis)." },
+      { id: "lpe5", assunto: "Crimes Hediondos", frente: "O roubo com restrição de liberdade da vítima (sequestro relâmpago) é considerado crime hediondo?", verso: "SIM. Incluído pelo Pacote Anticrime na Lei 8.072/90." },
+      { id: "lpe6", assunto: "ECA", frente: "Vender bebida alcoólica para adolescente é apenas infração administrativa?", verso: "NÃO. É CRIME previsto no ECA (Art. 243) com pena de detenção." },
+      { id: "lpe7", assunto: "Abuso de Autoridade", frente: "Existe crime de abuso de autoridade culposo na Lei 13.869/19?", verso: "NÃO. Todos os crimes da lei de abuso exigem DOLO ESPECÍFICO." },
+      { id: "lpe8", assunto: "Lei de Drogas", frente: "A associação para o tráfico (Art. 35) é considerada crime hediondo?", verso: "NÃO. O tráfico (Art. 33) e financiamento (Art. 36) são equiparados a hediondos. A associação NÃO É." },
+      { id: "lpe9", assunto: "Crimes Ambientais", frente: "Pessoas jurídicas podem ser responsabilizadas penalmente por crimes ambientais?", verso: "SIM. Responsabilidade penal da pessoa jurídica é expressamente admitida na CF e na Lei 9.605/98." },
+      { id: "lpe10", assunto: "Organização Criminosa", frente: "A infiltração policial em organização criminosa pode ser feita sem autorização judicial?", verso: "NÃO. Exige, em qualquer hipótese, prévia autorização judicial motivada." }
+    ]
+  },
+  {
+    id: "dcv",
+    titulo: "Direito Civil",
+    sigla: "DCV",
+    descricao: "LINDB, Pessoas e Capacidade (Gargalos).",
+    cards: [
+      { id: "dcv1", assunto: "LINDB - Integração Normativa", frente: "Na ausência de norma, o juiz aplicará a lei segundo a analogia, a equidade, os costumes e os princípios gerais do direito?", verso: "NÃO. A ordem de integração (Art. 4º LINDB) é: 1º Analogia, 2º Costumes, 3º Princípios gerais de direito. A EQUIDADE NÃO ESTÁ NO ROL." },
+      { id: "dcv2", assunto: "LINDB - Subsunção x Integração", frente: "A subsunção ocorre quando o juiz preenche uma lacuna da lei usando a analogia?", verso: "NÃO. Subsunção é o enquadramento do fato à norma EXISTENTE. Preencher lacuna é INTEGRAÇÃO." },
+      { id: "dcv3", assunto: "Das Pessoas - Nascituro", frente: "O STJ, na prática jurisprudencial, adota integralmente a Teoria Natalista descrita no art. 2º do CC?", verso: "NÃO. O CC adota a Natalista na letra fria, mas o STJ tende para a Teoria CONCEPCIONISTA (reconhece danos morais por morte de nascituro e alimentos gravídicos)." },
+      { id: "dcv4", assunto: "Capacidade Civil", frente: "Após o Estatuto da Pessoa com Deficiência, quem são os absolutamente incapazes no Direito Civil brasileiro?", verso: "APENAS os menores de 16 anos. Os enfermos/deficientes mentais saíram do rol e agora são capazes ou relativamente incapazes." },
+      { id: "dcv5", assunto: "Desconsideração da PJ", frente: "Para ocorrer a desconsideração da Personalidade Jurídica (Art. 50, CC), basta demonstrar a insolvência ou encerramento irregular da empresa?", verso: "NÃO. A regra (Teoria Maior) exige ABUSO DA PERSONALIDADE, caracterizado por Desvio de Finalidade OU Confusão Patrimonial." },
+      { id: "dcv6", assunto: "Desconsideração Direta x Inversa", frente: "Na desconsideração INVERSA da personalidade jurídica, os bens da pessoa jurídica respondem por dívidas pessoais do sócio?", verso: "SIM. É muito comum em varas de Família (ex: sócio oculta patrimônio na empresa para fugir de partilha ou pensão)." }
+    ]
+  },
+  {
+    id: "ml",
+    titulo: "Medicina Legal",
+    sigla: "ML",
+    descricao: "Perícias, Documentos, Infortunística e Traumatologia.",
+    cards: [
+      { id: "ml1", assunto: "Corpo de Delito", frente: "Se houver trauma (energia atingiu o corpo) mas não houver lesão constatável (nenhum vestígio físico), o crime a ser registrado é Lesão Corporal leve?", verso: "NÃO. Sem vestígio, o laudo será negativo. A conduta deve ser desclassificada para VIAS DE FATO (Art. 21 da LCP)." },
+      { id: "ml2", assunto: "Peritos", frente: "Na ausência de perito oficial, o exame de corpo de delito pode ser feito por apenas 1 (uma) pessoa idônea com diploma superior?", verso: "NÃO. Na falta de perito oficial (onde 1 basta), exige-se a nomeação de 2 (DUAS) pessoas idôneas com curso superior (Art. 159, §1º, CPP)." },
+      { id: "ml3", assunto: "Documentos Médico-Legais", frente: "O 'Parecer' é o exame direto e minucioso realizado pelo perito no corpo da vítima, reduzido a termo?", verso: "NÃO. Isso é o RELATÓRIO/LAUDO. O Parecer é apenas uma OPINIÃO TÉCNICA sobre um exame/laudo já realizado por outro profissional." },
+      { id: "ml4", assunto: "Infortunística", frente: "O acidente de percurso (trajeto de casa para o trabalho) é equiparado a acidente de trabalho, garantindo direitos previdenciários?", verso: "SIM. É o chamado acidente atípico (ou por equiparação), mesmo ocorrendo fora das dependências e do horário de trabalho." }
+    ]
+  }
+];
+
+// --- COMPONENTE DE HIGHLIGHT ---
+const HighlightText = ({ text }) => {
+  const keywords = ['Exceção', 'Súmula', 'Vedada', 'Proibida', 'Prazo', 'NÃO', 'INCONDICIONADA', 'GRAVE', 'SIM', 'SEMPRE', 'NUNCA', 'JAMAIS', 'APENAS'];
+  const regex = new RegExp(`\\b(${keywords.join('|')})\\b`, 'gi');
+  
+  const parts = text.split(regex);
+  
+  return (
+    <span>
+      {parts.map((part, i) => {
+        const isKeyword = keywords.find(k => k.toLowerCase() === part.toLowerCase());
+        if (isKeyword) {
+          return (
+            <span key={i} className="inline-flex items-center gap-1 bg-[#fff4ed] dark:bg-[#331500] text-[#ff6b00] dark:text-[#ff8533] font-bold px-1.5 py-0.5 rounded border border-[#ffe6d4] dark:border-[#662a00] shadow-sm">
+              <AlertTriangle size={14} className="text-[#ff6b00] dark:text-[#ff8533]" />
+              {part.toUpperCase()}
+            </span>
+          );
+        }
+        return <span key={i}>{part}</span>;
+      })}
+    </span>
+  );
+};
+
+// --- APLICAÇÃO PRINCIPAL ---
+function App() {
+  const [currentScreen, setCurrentScreen] = useState('decks');
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  
+  // SRS State
+  const [srsData, setSrsData] = useState({});
+  const [todayCards, setTodayCards] = useState([]);
+  
+  // Review Session State
+  const [currentDeck, setCurrentDeck] = useState([]);
+  const [deckName, setDeckName] = useState("");
+  const [cardIndex, setCardIndex] = useState(0);
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [currentStreak, setCurrentStreak] = useState(0);
+  const [correctCount, setCorrectCount] = useState(0);
+  const [incorrectCards, setIncorrectCards] = useState([]);
+
+  // Init Theme and Load
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('atena_theme');
+    if (savedTheme === 'dark') {
+      setIsDarkMode(true);
+      document.documentElement.classList.add('dark');
+    } else if (savedTheme === 'light') {
+      setIsDarkMode(false);
+      document.documentElement.classList.remove('dark');
+    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      setIsDarkMode(true);
+      document.documentElement.classList.add('dark');
+    }
+
+    const savedSrs = localStorage.getItem('atena_srs');
+    if (savedSrs) {
+      const parsedSrs = JSON.parse(savedSrs);
+      setSrsData(parsedSrs);
+      calculateTodayCards(parsedSrs);
+    } else {
+      calculateTodayCards({}); // initial calculation for empty SRS
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    setIsDarkMode(prev => {
+      const newTheme = !prev;
+      if (newTheme) {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('atena_theme', 'dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('atena_theme', 'light');
+      }
+      return newTheme;
+    });
+  };
+
+  const calculateTodayCards = (srs) => {
+    const now = new Date().getTime();
+    let due = [];
+    const allCards = bancosDeQuestoes.flatMap(deck => deck.cards);
+    
+    allCards.forEach(card => {
+      const cardSrs = srs[card.id];
+      if (cardSrs) {
+        if (new Date(cardSrs.nextReview).getTime() <= now) {
+          due.push(card);
+        }
+      }
+    });
+    
+    setTodayCards(due);
+  };
+
+  const startDeck = (deck, name) => {
+    if(deck.length === 0) return;
+    setCurrentDeck(deck);
+    setDeckName(name);
+    setCardIndex(0);
+    setIsFlipped(false);
+    setCurrentStreak(0);
+    setCorrectCount(0);
+    setIncorrectCards([]);
+    setCurrentScreen('flashcards');
+  };
+
+  const handleAnswer = (isCorrect) => {
+    const card = currentDeck[cardIndex];
+    let newSrs = { ...srsData };
+    let cardData = newSrs[card.id] || { interval: 0, ease: 2.5, nextReview: new Date().toISOString() };
+    
+    if (isCorrect) {
+      setCorrectCount(prev => prev + 1);
+      setCurrentStreak(prev => prev + 1);
+      cardData.interval = cardData.interval === 0 ? 1 : Math.round(cardData.interval * cardData.ease);
+    } else {
+      setCurrentStreak(0);
+      setIncorrectCards(prev => [...prev, card]);
+      cardData.interval = 1; 
+      cardData.ease = Math.max(1.3, cardData.ease - 0.2); 
+    }
+    
+    const nextDate = new Date();
+    nextDate.setDate(nextDate.getDate() + cardData.interval);
+    cardData.nextReview = nextDate.toISOString();
+    
+    newSrs[card.id] = cardData;
+    setSrsData(newSrs);
+    localStorage.setItem('atena_srs', JSON.stringify(newSrs));
+
+    if (cardIndex < currentDeck.length - 1) {
+      setIsFlipped(false);
+      setCardIndex(prev => prev + 1);
+    } else {
+      finishSession(newSrs);
+    }
+  };
+
+  const finishSession = (newSrs) => {
+    try {
+      const logsStr = localStorage.getItem('delta_estudos') || '[]';
+      const logs = JSON.parse(logsStr);
+      const now = new Date();
+      const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+      const tempoTotal = Math.round(currentDeck.length * 1.5);
+      
+      logs.push({
+        date: dateStr,
+        mat: 'RLM/REV',
+        assunto: `Flashcards: ${deckName}`,
+        tempo: tempoTotal,
+        qts: currentDeck.length,
+        acertos: isFlipped ? correctCount : correctCount + 1, 
+        obs: 'Registro Automático: Método SRS Atena'
+      });
+      
+      localStorage.setItem('delta_estudos', JSON.stringify(logs));
+    } catch (e) {
+      console.error("Erro ao integrar tracker", e);
+    }
+
+    calculateTodayCards(newSrs);
+    setCurrentScreen('report');
+  };
+
+  // --- RENDERS ---
+  const renderDecks = () => {
+    return (
+      <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-5xl mx-auto pb-12">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+          <Layers className="text-[#ff6b00]" /> Biblioteca de Baralhos
+        </h2>
+
+        {/* SRS Section */}
+        <div className="bg-[#fff4ed] dark:bg-[#1a0a00] border border-[#ffe6d4] dark:border-[#4d1f00] rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow mb-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h3 className="text-xl font-bold text-[#803200] dark:text-[#ff9955] flex items-center gap-2">
+                <CalendarClock className="text-[#ff6b00]" size={24}/>
+                Revisões do Dia
+              </h3>
+              <p className="text-[#a64800] dark:text-[#cc6611] mt-2 font-medium">Você tem <span className="font-bold text-xl">{todayCards.length}</span> cartões agendados pelo algoritmo de Revisão Espaçada para hoje.</p>
+            </div>
+            <button 
+              onClick={() => startDeck(todayCards, "Revisões do Dia")}
+              disabled={todayCards.length === 0}
+              className={`px-8 py-3 rounded-xl font-bold flex items-center gap-2 transition-colors shrink-0 shadow-md ${todayCards.length > 0 ? 'bg-[#ff6b00] hover:bg-[#e65c00] text-white' : 'bg-gray-300 dark:bg-slate-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'}`}
+            >
+              <Play size={20} />
+              Revisar Agora
+            </button>
+          </div>
+        </div>
+
+        {/* All Decks Grid */}
+        <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-4">Baralhos por Matéria (Estudo Direto)</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {bancosDeQuestoes.map(deck => (
+            <div key={deck.id} className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all group flex flex-col justify-between">
+              <div>
+                <span className="text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400 font-bold">{deck.sigla} • Carreira Policial</span>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mt-1">{deck.titulo}</h3>
+                <p className="text-gray-600 dark:text-gray-300 mt-2 text-sm leading-relaxed">{deck.descricao}</p>
+              </div>
+              <div className="mt-6 flex justify-between items-center border-t border-gray-100 dark:border-slate-700 pt-4">
+                <span className="text-gray-500 dark:text-gray-400 text-sm font-semibold flex items-center gap-1.5"><BookOpen size={16}/> {deck.cards.length} Cartões</span>
+                <button 
+                  onClick={() => startDeck(deck.cards, deck.titulo)}
+                  className="text-[#ff6b00] dark:text-[#ff8533] font-bold flex items-center gap-1 group-hover:gap-2 transition-all"
+                >
+                  Estudar <ArrowLeft size={16} className="rotate-180" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const renderFlashcard = () => {
+    if(!currentDeck || currentDeck.length === 0) return null;
+    const card = currentDeck[cardIndex];
+
+    return (
+      <div className="max-w-2xl mx-auto flex flex-col items-center animate-in fade-in zoom-in-95 duration-300">
+        <div className="w-full flex justify-between items-center mb-6">
+          <div className="flex flex-col">
+            <span className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">{deckName}</span>
+            <span className="text-gray-900 dark:text-gray-100 font-bold">Cartão {cardIndex + 1} de {currentDeck.length}</span>
+          </div>
+          <div className="flex gap-4">
+            <div className="flex items-center gap-1.5 bg-[#fff4ed] dark:bg-[#331500] px-4 py-2 rounded-full border border-[#ffe6d4] dark:border-[#662a00]">
+              <Flame size={18} className="text-[#ff6b00] dark:text-[#ff8533]" />
+              <span className="text-[#803200] dark:text-[#ffad77] font-bold text-sm">Ofensiva: {currentStreak}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="w-full min-h-[400px] perspective-1000">
+          <div className={`relative w-full h-full transition-all duration-500 transform-style-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
+            
+            <div className={`absolute w-full h-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-3xl p-8 shadow-lg flex flex-col backface-hidden ${isFlipped ? 'invisible' : 'visible'}`}>
+              <div className="mb-6 flex justify-between items-center">
+                <span className="bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300 text-xs px-2.5 py-1 rounded-md font-semibold tracking-wide uppercase">{card.assunto}</span>
+              </div>
+              <div className="flex-1 flex items-center justify-center text-center">
+                <h2 className="text-2xl font-semibold text-gray-900 dark:text-white leading-relaxed">{card.frente}</h2>
+              </div>
+            </div>
+
+            <div className={`absolute w-full h-full bg-[#fff4ed] dark:bg-[#1a0a00] border-2 border-[#ffe6d4] dark:border-[#4d1f00] rounded-3xl p-8 shadow-lg flex flex-col backface-hidden rotate-y-180 ${!isFlipped ? 'invisible' : 'visible'}`}>
+               <div className="mb-6">
+                <span className="bg-[#ffe6d4] dark:bg-[#4d1f00] text-[#803200] dark:text-[#ffad77] text-xs px-2.5 py-1 rounded-md font-bold tracking-wide uppercase">Resposta e Explicação</span>
+              </div>
+              <div className="flex-1 flex flex-col justify-center">
+                <p className="text-lg text-[#803200] dark:text-[#ffcfb3] leading-relaxed font-medium">
+                  <HighlightText text={card.verso} />
+                </p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div className="mt-8 w-full flex gap-4 h-16">
+          {!isFlipped ? (
+            <button 
+              onClick={() => setIsFlipped(true)}
+              className="flex-1 bg-gray-900 dark:bg-gray-100 hover:bg-gray-800 dark:hover:bg-white text-white dark:text-gray-900 rounded-2xl font-bold text-lg shadow-md transition-all active:scale-95"
+            >
+              Revelar Resposta
+            </button>
+          ) : (
+            <>
+              <button 
+                onClick={() => handleAnswer(false)}
+                className="flex-1 bg-red-50 dark:bg-red-950/30 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 transition-all active:scale-95"
+              >
+                <ThumbsDown size={22} /> Errei (Reiniciar)
+              </button>
+              <button 
+                onClick={() => handleAnswer(true)}
+                className="flex-1 bg-green-50 dark:bg-green-950/30 hover:bg-green-100 dark:hover:bg-green-900/50 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-900 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 transition-all active:scale-95"
+              >
+                <ThumbsUp size={22} /> Acertei (Espaçar)
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const renderReport = () => {
+    let actualCorrect = correctCount;
+    const accuracy = Math.round((actualCorrect / currentDeck.length) * 100) || 0;
+
+    return (
+      <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-500 pb-16">
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 text-center">Relatório de Sessão</h2>
+        <p className="text-gray-500 dark:text-gray-400 text-center mb-8">Essa sessão foi salva automaticamente no Tracker do Menu Principal.</p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm text-center">
+            <CheckCircle className="mx-auto text-green-500 dark:text-green-400 mb-2" size={32} />
+            <p className="text-gray-500 dark:text-gray-400 text-sm font-semibold uppercase tracking-wider">Desempenho</p>
+            <p className="text-4xl font-black text-gray-900 dark:text-white mt-1">{accuracy}%</p>
+            <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">{actualCorrect} de {currentDeck.length} corretos</p>
+          </div>
+          
+          <div className="bg-[#fff4ed] dark:bg-[#1a0a00] p-6 rounded-2xl border border-[#ffe6d4] dark:border-[#4d1f00] shadow-sm text-center flex flex-col justify-center items-center">
+            <FileText className="text-[#ff6b00] dark:text-[#ff8533] mb-2" size={32} />
+            <p className="text-[#803200] dark:text-[#ffad77] text-sm font-semibold uppercase tracking-wider">Sessão Salva</p>
+            <p className="text-lg font-bold text-[#ff6b00] dark:text-[#ff8533] mt-1">+ {Math.round(currentDeck.length * 1.5)} minutos registrados</p>
+          </div>
+        </div>
+
+        {incorrectCards.length > 0 && (
+          <div className="mb-10">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+              <XCircle className="text-red-500" /> Caderno de Erros ({incorrectCards.length})
+            </h3>
+            <div className="space-y-4">
+              {incorrectCards.map((card, idx) => (
+                <div key={idx} className="bg-white dark:bg-slate-800 border-l-4 border-l-red-500 border-t border-r border-b border-gray-200 dark:border-slate-700 rounded-r-xl p-5 shadow-sm">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-2 font-semibold">{card.assunto}</p>
+                  <p className="text-gray-900 dark:text-gray-100 font-medium mb-3">{card.frente}</p>
+                  <div className="bg-red-50/50 dark:bg-red-950/20 p-4 rounded-lg">
+                    <p className="text-red-900 dark:text-red-300 text-sm"><HighlightText text={card.verso} /></p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="flex gap-4 justify-center">
+          <button 
+            onClick={() => setCurrentScreen('decks')}
+            className="px-6 py-3 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-gray-300 font-bold rounded-xl hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors flex items-center gap-2"
+          >
+            <Layers size={20} /> Voltar aos Baralhos
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .perspective-1000 { perspective: 1000px; }
+        .transform-style-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+      `}</style>
+
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-200 font-sans">
+        
+        {/* HEADER */}
+        <header className="sticky top-0 z-50 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 shadow-sm px-4 py-3 transition-colors duration-200">
+          <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            
+            <div className="flex items-center gap-3">
+              <div className="flex flex-col">
+                <span className="text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400 font-bold leading-tight mb-0.5">Método de Revisão Espaçada</span>
+                <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight">
+                  <span className="text-gray-900 dark:text-white">Atena:</span> <span className="text-[#ff6b00]">Flashcards</span>
+                </h1>
+              </div>
+            </div>
+
+            <nav className="flex items-center gap-3">
+              <button 
+                onClick={toggleTheme} 
+                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-600 dark:text-gray-300 transition-colors"
+                title="Alternar Tema"
+              >
+                {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+              </button>
+              
+              <a href="./index.html" className="px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-white transition-colors shadow-sm">
+                <LogOut size={16} /> <span className="hidden sm:inline">Menu Principal</span>
+              </a>
+            </nav>
+          </div>
+        </header>
+
+        {/* MAIN CONTAINER */}
+        <main className="max-w-6xl mx-auto px-4 py-8 sm:py-12">
+          
+          {currentScreen === 'flashcards' && (
+            <button 
+              onClick={() => setCurrentScreen('decks')}
+              className="mb-8 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium flex items-center gap-2 transition-colors"
+            >
+              <ArrowLeft size={20} /> Abortar Sessão e Voltar
+            </button>
+          )}
+
+          {currentScreen === 'decks' && renderDecks()}
+          {currentScreen === 'flashcards' && renderFlashcard()}
+          {currentScreen === 'report' && renderReport()}
+
+        </main>
+      </div>
+    </>
+  );
+}
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>

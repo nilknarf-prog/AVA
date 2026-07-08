@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Biblioteca de Estudos Delta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --brand: #ff6b00;
+    --brand-dim: #cc5500;
+    --brand-soft: #fff5eb;
+    --brand-glow: rgba(255,107,0,0.10);
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --surface-hover: #fafbfc;
+    --border: #e2e8f0;
+    --border-hot: #ff6b00;
+    --text: #0f172a;
+    --text-muted: #475569;
+    --text-dim: #94a3b8;
+    --green: #10b981;
+    --amber: #f59e0b;
+    --slate: #64748b;
+    --r: 8px;
+    --r-sm: 5px;
+  }
+  body.dark-theme {
+    --brand: #ff6b00;
+    --brand-dim: #e65c00;
+    --brand-soft: rgba(255,107,0,0.15);
+    --brand-glow: rgba(255,107,0,0.15);
+    --bg: #09090b;
+    --surface: #18181b;
+    --surface-hover: #27272a;
+    --border: #27272a;
+    --border-hot: #ff6b00;
+    --text: #f8fafc;
+    --text-muted: #a1a1aa;
+    --text-dim: #71717a;
+    --green: #10b981;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Inter',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    line-height:1.6;
+    font-size:15px;
+    position:relative;
+  }
+  /* Watermark radial sutil */
+  body::before{
+    content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(ellipse 70% 50% at 15% 15%, rgba(255,107,0,0.06) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 40% at 95% 90%, rgba(255,107,0,0.04) 0%, transparent 55%);
+  }
+
+  /* ── HEADER ─────────────────────────────── */
+  header{
+    position:sticky;top:0;z-index:100;
+    background:rgba(255,255,255,0.95);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border);
+    padding:0 24px;
+  }
+  .header-inner{
+    max-width:1000px;margin:0 auto;
+    display:flex;align-items:center;justify-content:space-between;
+    height:64px;gap:16px;
+  }
+  .brand-mark{
+    font-size:11px;font-weight:700;letter-spacing:.16em;
+    color:var(--brand);text-transform:uppercase;
+    border:1px solid var(--brand);
+    padding:3px 9px;border-radius:20px;
+  }
+  .brand-side{
+    font-size:11px;color:var(--text-dim);
+    font-family:'IBM Plex Mono',monospace;
+    letter-spacing:.05em;
+  }
+  
+  /* ── THEME TOGGLE ────────────────────────── */
+  .theme-toggle-btn{
+    background:none;border:1px solid var(--border);
+    color:var(--text-dim);cursor:pointer;
+    width:34px;height:34px;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;
+    transition:all .2s;
+  }
+  .theme-toggle-btn:hover{
+    background:var(--surface-hover);color:var(--text);border-color:var(--text-dim);
+  }
+  .theme-toggle-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;}
+  body.dark-theme .moon-icon{display:none;}
+  body:not(.dark-theme) .sun-icon{display:none;}
+
+  /* ── MAIN ────────────────────────────────── */
+  main{
+    max-width:880px;margin:0 auto;
+    padding:48px 24px 80px;
+    position:relative;z-index:1;
+  }
+
+  /* ── HERO ────────────────────────────────── */
+  .hero{margin-bottom:44px;}
+  .hero h1{
+    font-size:36px;font-weight:800;letter-spacing:-.025em;
+    color:var(--text);
+    line-height:1.15;
+    margin-bottom:8px;
+  }
+  .hero h1 span{color:var(--brand);}
+  .hero p{
+    font-size:14px;color:var(--text-muted);
+    max-width:560px;line-height:1.6;
+  }
+  .hero-meta{
+    margin-top:18px;
+    display:flex;gap:24px;flex-wrap:wrap;
+    font-size:12px;color:var(--text-dim);
+    font-family:'IBM Plex Mono',monospace;
+    letter-spacing:.03em;
+  }
+  .hero-meta strong{color:var(--text);font-weight:600;}
+
+  /* ── DIVIDER ─────────────────────────────── */
+  .section-label{
+    font-size:11px;font-weight:700;letter-spacing:.14em;
+    color:var(--text-dim);text-transform:uppercase;
+    margin-bottom:18px;
+    display:flex;align-items:center;gap:12px;
+  }
+  .section-label::after{
+    content:'';flex:1;height:1px;background:var(--border);
+  }
+
+  /* ── MATÉRIA CARDS (accordion via <details>) ──── */
+  .materias{
+    display:flex;flex-direction:column;gap:10px;
+  }
+  details.materia{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--r);
+    transition:border-color .2s;
+    overflow:hidden;
+  }
+  details.materia:hover{border-color:#cbd5e1;}
+  details.materia[open]{border-color:var(--border-hot);}
+  details.materia summary{
+    list-style:none;cursor:pointer;
+    padding:18px 22px;
+    display:flex;align-items:center;justify-content:space-between;
+    gap:14px;user-select:none;
+    transition:background .15s;
+  }
+  details.materia summary:hover{background:var(--surface-hover);}
+  details.materia summary::-webkit-details-marker{display:none;}
+  .materia-left{
+    display:flex;align-items:center;gap:14px;flex:1;min-width:0;
+  }
+  .materia-tag{
+    font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    width:34px;height:34px;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+    background:var(--brand-soft);
+    color:var(--brand);
+    font-family:'IBM Plex Mono',monospace;
+  }
+  .materia-title{
+    font-size:15px;font-weight:700;color:var(--text);
+    line-height:1.3;
+  }
+  .materia-sub{
+    font-size:12px;color:var(--text-dim);margin-top:2px;
+    font-family:'IBM Plex Mono',monospace;
+    letter-spacing:.02em;
+  }
+  .materia-count{
+    flex-shrink:0;
+    font-size:11px;font-weight:600;
+    padding:4px 10px;border-radius:20px;
+    font-family:'IBM Plex Mono',monospace;
+    letter-spacing:.03em;
+  }
+  .count-active{
+    color:var(--green);
+    background:rgba(16,185,129,0.10);
+    border:1px solid rgba(16,185,129,0.25);
+  }
+  .count-empty{
+    color:var(--text-dim);
+    background:#f1f5f9;
+    border:1px solid var(--border);
+  }
+  .chevron-d{
+    color:var(--text-dim);
+    font-size:11px;
+    transition:transform .25s;
+    flex-shrink:0;
+    margin-left:4px;
+  }
+  details.materia[open] .chevron-d{transform:rotate(180deg);color:var(--brand);}
+
+  /* ── ASSUNTO LIST ────────────────────────── */
+  .assuntos{
+    padding:2px 22px 18px;
+    display:flex;flex-direction:column;gap:6px;
+  }
+  .assunto-row{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:12px;
+    padding:11px 14px;
+    border-radius:var(--r-sm);
+    transition:background .15s;
+    text-decoration:none;
+    color:var(--text);
+    border:1px solid transparent;
+  }
+  .assunto-row.linked{cursor:pointer;}
+  .assunto-row.linked:hover{
+    background:var(--brand-soft);
+    border-color:rgba(255,107,0,0.2);
+  }
+  .assunto-row.placeholder{cursor:default;opacity:.55;}
+  .assunto-left{
+    display:flex;align-items:center;gap:10px;flex:1;min-width:0;
+  }
+  .assunto-dot{
+    width:6px;height:6px;border-radius:50%;flex-shrink:0;
+    background:var(--brand);
+  }
+  .assunto-row.placeholder .assunto-dot{background:var(--text-dim);}
+  .assunto-title{
+    font-size:13.5px;font-weight:500;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .assunto-status{
+    font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--text-dim);
+    font-family:'IBM Plex Mono',monospace;
+    flex-shrink:0;
+  }
+  .assunto-row.linked .assunto-status{color:var(--brand);}
+  .assunto-arrow{
+    color:var(--text-dim);
+    font-size:13px;
+    transition:transform .2s, color .2s;
+  }
+  .assunto-row.linked:hover .assunto-arrow{
+    color:var(--brand);
+    transform:translateX(3px);
+  }
+  .assunto-row.placeholder .assunto-arrow{display:none;}
+
+  /* ── FOOTER ──────────────────────────────── */
+  footer{
+    margin-top:60px;padding:24px 0;
+    border-top:1px solid var(--border);
+    text-align:center;
+    font-size:11px;color:var(--text-dim);
+    font-family:'IBM Plex Mono',monospace;
+    letter-spacing:.04em;
+  }
+  footer span{color:var(--brand);}
+
+  /* ── RESPONSIVE ──────────────────────────── */
+  @media(max-width:600px){
+    main{padding:32px 18px 60px;}
+    .hero h1{font-size:28px;}
+    .hero-meta{gap:14px;}
+    details.materia summary{padding:16px 18px;}
+    .materia-left{gap:10px;}
+    .materia-tag{width:30px;height:30px;font-size:10px;}
+    .materia-title{font-size:14px;}
+    .assuntos{padding:0 18px 16px;}
+  }
+
+  /* ── TRACKER ──────────────────────────────── */
+  .tracker-section{
+    margin-bottom: 40px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  }
+  .tracker-header{
+    display:flex; justify-content:space-between; align-items:flex-end;
+    margin-bottom: 20px;
+  }
+  .tracker-title{font-size:16px; font-weight:800; color:var(--text);}
+  .tracker-stats{
+    display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; margin-bottom:24px;
+  }
+  .stat-card{
+    background: var(--surface-hover); padding: 12px; border-radius: var(--r-sm);
+    border: 1px solid var(--border); text-align:center;
+  }
+  .stat-val{font-size:22px; font-weight:800; color:var(--brand); line-height:1;}
+  .stat-lbl{font-size:11px; font-weight:600; color:var(--text-dim); text-transform:uppercase; margin-top:4px;}
+  
+  .tracker-body{ display:flex; gap: 30px; }
+  .tracker-form{ flex:1; display:flex; flex-direction:column; gap:12px; }
+  .form-row{ display:flex; gap:12px; }
+  .form-group{ flex:1; display:flex; flex-direction:column; gap:4px; }
+  .form-group label{ font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; }
+  .form-group input, .form-group select{
+    padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--r-sm);
+    background: var(--bg); color: var(--text); font-family:'Inter', sans-serif; font-size:13px;
+  }
+  .form-group input:focus, .form-group select:focus{ border-color:var(--brand); outline:none; }
+  .btn-save{
+    background: var(--brand); color: #fff; border:none; padding:10px; border-radius:var(--r-sm);
+    font-weight:700; font-size:13px; cursor:pointer; margin-top:8px; transition:opacity .2s;
+  }
+  .btn-save:hover{ opacity:.9; }
+  .btn-util{
+    background: transparent; border: 1px solid var(--border); color: var(--text-dim);
+    padding:6px 10px; border-radius:var(--r-sm); font-size:11px; font-weight:600; cursor:pointer;
+  }
+  .btn-util:hover{ background: var(--surface-hover); color: var(--text); }
+
+  .tracker-cal{ width: 280px; }
+  .streak-box{
+    display:flex; align-items:center; justify-content:space-between;
+    background: var(--surface-hover); padding: 10px 14px; border-radius: var(--r-sm);
+    margin-bottom: 12px; border: 1px solid var(--border);
+  }
+  .streak-val{ font-size: 16px; font-weight: 800; color: var(--green); }
+  .cal-grid{
+    display: grid; grid-template-columns: repeat(7, 1fr); gap:4px;
+  }
+  .cal-day{
+    aspect-ratio: 1; border-radius: 3px; background: var(--surface-hover);
+    display:flex; align-items:center; justify-content:center;
+    font-size:10px; color:var(--text-dim); font-weight:600;
+  }
+  .cal-day.active{ background: var(--green); color: #fff; border-color:var(--green); }
+  .cal-day.today{ border: 1px solid var(--brand); }
+  
+  .nudge-banner {
+    display: none; background: rgba(255,107,0,0.1); border: 1px solid var(--brand);
+    color: var(--brand); padding: 10px 14px; border-radius: var(--r-sm);
+    font-size: 13px; font-weight: 600; margin-bottom: 20px; text-align:center;
+  }
+
+  /* ── HISTORY ──────────────────────────────── */
+  .history-section { margin-top: 24px; border-top: 1px solid var(--border); padding-top: 24px; }
+  .history-title { font-size:14px; font-weight:700; color:var(--text); margin-bottom: 12px; }
+  .history-list { display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto; padding-right: 4px; }
+  .history-item { 
+    display: flex; align-items: center; justify-content: space-between; 
+    padding: 12px 14px; background: var(--bg); border: 1px solid var(--border); 
+    border-radius: var(--r-sm); transition: border-color .2s;
+  }
+  .history-item:hover { border-color: var(--brand); }
+  .history-item-left { display: flex; flex-direction: column; gap: 4px; }
+  .history-item-top { display: flex; gap: 8px; align-items: center; }
+  .history-tag { font-size: 10px; font-weight: 700; background: var(--brand-soft); color: var(--brand); padding: 2px 6px; border-radius: 4px; }
+  .history-date { font-size: 11px; color: var(--text-muted); font-family: 'IBM Plex Mono', monospace; }
+  .history-assunto { font-size: 13.5px; font-weight: 600; color: var(--text); }
+  .history-item-bottom { font-size: 12px; color: var(--text-dim); }
+  .history-item-right { display: flex; gap: 16px; align-items: center; text-align: right; }
+  .history-stats-mini { display: flex; flex-direction: column; gap: 2px; font-size: 11.5px; font-family: 'IBM Plex Mono', monospace; color: var(--text-muted); }
+  .btn-del { 
+    background: transparent; border: none; color: #ef4444; font-size: 18px; 
+    cursor: pointer; opacity: 0.4; transition: opacity .2s; padding: 4px; 
+  }
+  .btn-del:hover { opacity: 1; }
+
+  /* SCROLLBAR CUSTOM FOR HISTORY */
+  .history-list::-webkit-scrollbar { width: 6px; }
+  .history-list::-webkit-scrollbar-track { background: var(--bg); border-radius: 10px; }
+  .history-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+  .history-list::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+
+  @media(max-width:768px){
+    .tracker-body{ flex-direction: column; }
+    .tracker-cal{ width: 100%; }
+    .tracker-stats{ grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══════════════════════════════ -->
+<header>
+  <div class="header-inner">
+    <span class="brand-mark">⚖️ Delta</span>
+    <button id="themeToggle" class="theme-toggle-btn" aria-label="Alternar tema">
+      <svg class="moon-icon" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+      <svg class="sun-icon" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="5"></circle>
+        <line x1="12" y1="1" x2="12" y2="3"></line>
+        <line x1="12" y1="21" x2="12" y2="23"></line>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+        <line x1="1" y1="12" x2="3" y2="12"></line>
+        <line x1="21" y1="12" x2="23" y2="12"></line>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<!-- ═══ MAIN ══════════════════════════════════ -->
+<main>
+
+  <!-- HERO -->
+  <section class="hero">
+    <h1>Biblioteca de<br/>Estudos <span>Delta</span></h1>
+    <p>Catálogo central dos painéis de estudo. Cada assunto leva ao painel completo — referência para consulta, não substituto de questões e anotação ativa.</p>
+    <div class="hero-meta">
+      <span><strong>10</strong> matérias</span>
+      <span><strong>6</strong> painéis disponíveis</span>
+      <span>preparação 48 semanas</span>
+    </div>
+    <div style="margin-top:20px;">
+      <a href="./m_dulo_de_flashcards_atena.html" style="display:inline-block; padding:10px 16px; background:var(--brand); color:white; text-decoration:none; border-radius:8px; font-weight:bold; font-size:13px; font-family:'IBM Plex Mono',monospace;">⚡ Acessar Módulo de Flashcards Atena</a>
+    </div>
+  </section>
+
+  <!-- NUDGE BANNER -->
+  <div id="nudgeBanner" class="nudge-banner">⚠️ Você ainda não registrou estudo hoje. Mantenha a ofensiva!</div>
+
+  <!-- TRACKER SECTION -->
+  <section class="tracker-section">
+    <div class="tracker-header">
+      <div class="tracker-title">Acompanhamento Diário</div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn-util" onclick="exportData()">Exportar</button>
+        <button class="btn-util" onclick="importData()">Importar</button>
+      </div>
+    </div>
+    
+    <div class="tracker-stats">
+      <div class="stat-card">
+        <div class="stat-val" id="stHours">0h</div>
+        <div class="stat-lbl">Horas Est.</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="stSess">0</div>
+        <div class="stat-lbl">Sessões</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="stQ">0</div>
+        <div class="stat-lbl">Questões</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="stPct">0%</div>
+        <div class="stat-lbl">Acertos</div>
+      </div>
+    </div>
+
+    <div class="tracker-body">
+      <div class="tracker-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Data</label>
+            <input type="date" id="tfDate" />
+          </div>
+          <div class="form-group">
+            <label>Matéria</label>
+            <select id="tfMat">
+              <option value="DP">Direito Penal (DP)</option>
+              <option value="DC">Dir. Constitucional (DC)</option>
+              <option value="DCV">Direito Civil (DCV)</option>
+              <option value="DA">Dir. Administrativo (DA)</option>
+              <option value="DPP">Processo Penal (DPP)</option>
+              <option value="ML">Medicina Legal (ML)</option>
+              <option value="LPE">Leg. Penal Especial (LPE)</option>
+              <option value="DH">Direitos Humanos (DH)</option>
+              <option value="DE">Dir. Empresarial (DE)</option>
+              <option value="CR">Criminologia (CR)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Assunto</label>
+          <input type="text" id="tfAssunto" placeholder="Ex: Teoria do Crime" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tempo (min)</label>
+            <input type="number" id="tfTempo" placeholder="60" min="0" />
+          </div>
+          <div class="form-group">
+            <label>Questões</label>
+            <input type="number" id="tfQts" placeholder="0" min="0" />
+          </div>
+          <div class="form-group">
+            <label>Acertos</label>
+            <input type="number" id="tfAcertos" placeholder="0" min="0" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Observação</label>
+          <input type="text" id="tfObs" placeholder="(Opcional)" />
+        </div>
+        <button id="btnSave" class="btn-save" onclick="saveSession()">+ SALVAR SESSÃO</button>
+      </div>
+
+      <div class="tracker-cal">
+        <div class="streak-box">
+          <span style="font-size:13px; font-weight:700; color:var(--text-muted);">OFENSIVA</span>
+          <span class="streak-val" id="streakVal">0 dias 🔥</span>
+        </div>
+        <div style="font-size:10px; color:var(--text-dim); margin-bottom:8px; font-weight:600; text-align:center;">ÚLTIMOS 28 DIAS</div>
+        <div class="cal-grid" id="calGrid">
+          <!-- JS fills this -->
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTORY SECTION -->
+    <div class="history-section">
+      <div class="history-title">Histórico de Sessões</div>
+      <div class="history-list" id="historyList">
+        <!-- JS fills this -->
+      </div>
+    </div>
+  </section>
+
+  <!-- DIVIDER -->
+  <div class="section-label">Matérias do Edital</div>
+
+  <!-- MATÉRIAS -->
+  <div class="materias">
+
+    <!-- Direito Constitucional -->
+    <details class="materia">
+      <summary>
+        <div class="materia-left">
+          <div class="materia-tag">DC</div>
+          <div>
+            <div class="materia-title">Direito Constitucional</div>
+            <div class="materia-sub">Teoria · Organização do Estado · Direitos fundamentais</div>
+          </div>
+        </div>
+        <span class="materia-count count-active">1 painel</span>
+        <span class="chevron-d">▼</span>
+      </summary>
+      <div class="assuntos">
+        <a class="assunto-row linked" href="./direito-constitucional-teoria.html">
+          <div class="assunto-left">
+            <div class="assunto-dot"></div>
+            <span class="assunto-title">Teoria da Constituição</span>
+          </div>
+          <span class="assunto-status">Cebraspe</span>
+          <span class="assunto-arrow">→</span>
+        </a>
+      </div>
+    </details>
+
+    <!-- Direito Administrativo -->
+    <details class="materia" open>
+      <summary>
+        <div class="materia-left">
+          <div class="materia-tag">DA</div>
+          <div>
+            <div class="materia-title">Direito Administrativo</div>
+            <div class="materia-sub">Poderes · Atos · Agentes · Serviços públicos · Licitações</div>
+          </div>
+        </div>
+        <span class="materia-count count-active">1 painel</span>
+        <span class="chevron-d">▼</span>
+      </summary>
+      <div class="assuntos">
+        <a class="assunto-row linked" href="./dir-adm-poderes-administracao.html">
+          <div class="assunto-left">
+            <div class="assunto-dot"></div>
+            <span class="assunto-title">Poderes da Administração</span>
+          </div>
+          <span class="assunto-status">4 blocos · Cebraspe</span>
+          <span class="assunto-arrow">→</span>
+        </a>
+      </div>
+    </details>
+
+    <!-- Direito Civil -->
+    <details class="materia">
+      <summary>
+        <div class="materia-left">
+          <div class="materia-tag">DCV</div>
+          <div>
+            <div class="materia-title">Direito Civil</div>
+            <div class="materia-sub">LINDB · Pessoas · Bens · Negócio jurídico · Responsabilidade civil</div>
+          </div>
+        </div>
+        <span class="materia-count count-active">1 painel</span>
+        <span class="chevron-d">▼</span>
+      </summary>
+      <div class="assuntos">
+        <a class="assunto-row linked" href="./direito-civil-lindb-pessoas.html">
+          <div class="assunto-left">
+            <div class="assunto-dot"></div>
+            <span class="assunto-title">LINDB e Pessoas</span>
+          </div>
+          <span class="assunto-status">Cebraspe</span>
+          <span class="assunto-arrow">→</span>
+        </a>
+      </div>
+    </details>
+
+    <!-- Direito Penal -->
+    <details class="materia">
+      <summary>
+        <div class="materia-left">
+          <div class="materia-tag">DP</div>
+          <div>
+            <div class="materia-title">Direito Penal</div>
+            <div class="materia-sub">Princípios · Teoria do crime · Penas · Parte especial</div>
+          </div>
+        </div>
+        <span class="materia-count count-active">2 painéis</span>
+        <span class="chevron-d">▼</span>
+      </summary>
+      <div class="assuntos">
+        <a class="assunto-row linked" href="./direito-penal-nocoes-principios.html">
+          <div class="assunto-left">
+            <div class="assunto-dot"></div>
+            <span class="assunto-title">Noções e Princípios</span>
+          </div>
+          <span class="assunto-status">Cebraspe</span>
+          <span class="assunto-arrow">→</span>
+        </a>
+        <a class="assunto-row linked" href="./direito_penal_teoria_do_crime.html">
+          <div class="assunto-left">
+            <div class="assunto-dot"></div>
+            <span class="assunto-title">Teoria do Crime</span>
+          </div>
+          <span class="assunto-status">Cebraspe/PF</span>
+          <span class="assunto-arrow">→</span>
+        </a>
+      </div>
+    </details>
+
+    <!-- Direito Processual Penal -->
+    <details class="materia">
+      <summary>
+        <div class="materia-left">
+          <div class="materia-tag">DPP</div>
+          <div>
+            <div class="materia-title">Direito Processual Penal</div>
+            <div class="materia-sub">Inquérito · Provas · Medidas cautelares · Procedimentos</div>
+          </div>
+        </div>
+        <span class="materia-count count-empty">em breve</span>
+        <span class="chevron-d">▼</span>
+      </summary>
+      <div class="assuntos">
+        <div class="assunto-row placeholder">
+          <div class="assunto-left">
+            <div class="assunto-dot"></div>
+            <span class="assunto-title">Em produção — painéis virão conforme avanço no G7 e DD</span>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <!-- Direito Empresarial -->
+    <details class="materia">
+      <summary>
+        <div class="materia-left">
+          <div class="materia-tag">DE</div>
+          <div>
+            <div class="materia-title">Direito Empresarial</div>
+            <div class="materia-sub">Empresário · Sociedades · Títulos · Falência e recuperação</div>
+          </div>
+        </div>
+        <span class="materia-count count-empty">em breve</span>
+        <span class="chevron-d">▼</span>
+      </summary>
+      <div class="assuntos">
+        <div class="assunto-row placeholder">
+          <div class="assunto-left">
+            <div class="assunto-dot"></div>
+            <span class="assunto-title">Em produção — painéis virão conforme avanço no G7 e DD</span>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <!-- Direitos Humanos -->
+    <details class="materia">
+      <summary>
+        <div class="materia-left">
+          <div class="materia-tag">DH</div>
+          <div>
+            <div class="materia-title">Direitos Humanos</div>
+            <div class="materia-sub">Sistema interamericano · Convenções · Jurisprudência da Corte IDH</div>
+          </div>
+        </div>
+        <span class="materia-count count-empty">em breve</span>
+        <span class="chevron-d">▼</span>
+      </summary>
+      <div class="assuntos">
+        <div class="assunto-row placeholder">
+          <div class="assunto-left">
+            <div class="assunto-dot"></div>
+            <span class="assunto-title">Em produção — painéis virão conforme avanço no G7 e DD</span>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <!-- Legislação Penal Especial -->
+    <details class="materia">
+      <summary>
+        <div class="materia-left">
+          <div class="materia-tag">LPE</div>
+          <div>
+            <div class="materia-title">Legislação Penal Especial</div>
+            <div class="materia-sub">Drogas · ECA · LMP · Tortura · Organização criminosa · Crimes hediondos</div>
+          </div>
+        </div>
+        <span class="materia-count count-empty">em breve</span>
+        <span class="chevron-d">▼</span>
+      </summary>
+      <div class="assuntos">
+        <div class="assunto-row placeholder">
+          <div class="assunto-left">
+            <div class="assunto-dot"></div>
+            <span class="assunto-title">Em produção — painéis virão conforme avanço no G7 e DD</span>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <!-- Medicina Legal -->
+    <details class="materia">
+      <summary>
+        <div class="materia-left">
+          <div class="materia-tag">ML</div>
+          <div>
+            <div class="materia-title">Medicina Legal</div>
+            <div class="materia-sub">Perícias · Tanatologia · Lesões · Sexologia forense · Toxicologia</div>
+          </div>
+        </div>
+        <span class="materia-count count-active">1 painel</span>
+        <span class="chevron-d">▼</span>
+      </summary>
+      <div class="assuntos">
+        <a class="assunto-row linked" href="./medicina-legal-pericias-documentos.html">
+          <div class="assunto-left">
+            <div class="assunto-dot"></div>
+            <span class="assunto-title">Perícias e Documentos</span>
+          </div>
+          <span class="assunto-status">Cebraspe</span>
+          <span class="assunto-arrow">→</span>
+        </a>
+      </div>
+    </details>
+
+    <!-- Criminologia -->
+    <details class="materia">
+      <summary>
+        <div class="materia-left">
+          <div class="materia-tag">CR</div>
+          <div>
+            <div class="materia-title">Criminologia</div>
+            <div class="materia-sub">Escolas · Teorias da criminalidade · Vitimologia · Prevenção</div>
+          </div>
+        </div>
+        <span class="materia-count count-empty">em breve</span>
+        <span class="chevron-d">▼</span>
+      </summary>
+      <div class="assuntos">
+        <div class="assunto-row placeholder">
+          <div class="assunto-left">
+            <div class="assunto-dot"></div>
+            <span class="assunto-title">Em produção — painéis virão conforme avanço no G7 e DD</span>
+          </div>
+        </div>
+      </div>
+    </details>
+
+  </div><!-- /materias -->
+
+</main>
+
+<footer>
+  Biblioteca de Estudos <span>Delta</span>
+</footer>
+
+<script>
+  const STORAGE_KEY = 'delta_estudos';
+  
+  const SEED_DATA = [
+    { date: '2026-06-30', mat: 'DA', assunto: 'Onboarding', tempo: 0, qts: 0, acertos: 0, obs: 'Marco inicial' },
+    { date: '2026-07-07', mat: 'DP', assunto: 'Teoria do Crime', tempo: 70, qts: 0, acertos: 0, obs: 'Estudo de ontem' },
+    { date: '2026-07-08', mat: 'DC', assunto: 'Diagnóstico Semana 01', tempo: 62, qts: 56, acertos: 48, obs: '85.7%' },
+    { date: '2026-07-08', mat: 'DCV', assunto: 'Revisão Missão 1', tempo: 45, qts: 0, acertos: 0, obs: 'Revisão aprofundada' }
+  ];
+
+  let logs = [];
+
+  function initTracker() {
+    const savedTheme = localStorage.getItem('delta_theme');
+    if (savedTheme === 'dark') {
+      document.body.classList.add('dark-theme');
+    }
+    
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      document.body.classList.toggle('dark-theme');
+      localStorage.setItem('delta_theme', document.body.classList.contains('dark-theme') ? 'dark' : 'light');
+    });
+
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) {
+      logs = SEED_DATA;
+      saveLocal();
+    } else {
+      logs = JSON.parse(saved);
+    }
+    
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    const todayStr = `${yyyy}-${mm}-${dd}`;
+    document.getElementById('tfDate').value = todayStr;
+
+    renderTracker(todayStr);
+  }
+
+  function saveLocal() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
+  }
+
+  function renderTracker(todayStr) {
+    let totalMins = 0;
+    let totalQts = 0;
+    let totalAcertos = 0;
+    const daysStudied = new Set();
+
+    logs.forEach(l => {
+      totalMins += parseInt(l.tempo || 0);
+      totalQts += parseInt(l.qts || 0);
+      totalAcertos += parseInt(l.acertos || 0);
+      if (parseInt(l.tempo || 0) > 0 || parseInt(l.qts || 0) > 0) {
+        daysStudied.add(l.date);
+      }
+    });
+
+    const totalHours = (totalMins / 60).toFixed(1);
+    const pct = totalQts > 0 ? Math.round((totalAcertos / totalQts) * 100) : 0;
+
+    document.getElementById('stHours').innerText = `${totalHours}h`;
+    document.getElementById('stSess').innerText = logs.length;
+    document.getElementById('stQ').innerText = totalQts;
+    document.getElementById('stPct').innerText = `${pct}%`;
+
+    if (!daysStudied.has(todayStr)) {
+      document.getElementById('nudgeBanner').style.display = 'block';
+    } else {
+      document.getElementById('nudgeBanner').style.display = 'none';
+    }
+
+    renderCalendar(daysStudied, todayStr);
+    calcStreak(daysStudied, todayStr);
+    renderHistory();
+  }
+
+  function renderHistory() {
+    const container = document.getElementById('historyList');
+    container.innerHTML = '';
+    
+    if (logs.length === 0) {
+      container.innerHTML = '<div style="font-size:13px; color:var(--text-dim); text-align:center; padding: 20px;">Nenhum estudo registrado.</div>';
+      return;
+    }
+    
+    // Sort logs descending (newest first)
+    const sortedLogs = [...logs].map((l, i) => ({...l, originalIndex: i})).sort((a,b) => new Date(b.date) - new Date(a.date));
+    
+    sortedLogs.forEach(l => {
+      const div = document.createElement('div');
+      div.className = 'history-item';
+      
+      let statsHTML = '';
+      if (l.tempo > 0) statsHTML += `<div>⏳ ${l.tempo} min</div>`;
+      if (l.qts > 0) {
+        const pct = Math.round((l.acertos / l.qts) * 100) || 0;
+        statsHTML += `<div>🎯 ${l.acertos}/${l.qts} (${pct}%)</div>`;
+      }
+      
+      const dateParts = l.date.split('-');
+      const formattedDate = dateParts.length === 3 ? `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}` : l.date;
+
+      div.innerHTML = `
+        <div class="history-item-left">
+          <div class="history-item-top">
+            <span class="history-tag">${l.mat}</span>
+            <span class="history-date">${formattedDate}</span>
+          </div>
+          <div class="history-assunto">${l.assunto}</div>
+          ${l.obs ? `<div class="history-item-bottom">📝 ${l.obs}</div>` : ''}
+        </div>
+        <div class="history-item-right">
+          <div class="history-stats-mini">${statsHTML}</div>
+          <button class="btn-del" onclick="deleteSession(${l.originalIndex})" title="Excluir">&times;</button>
+        </div>
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  function deleteSession(index) {
+    if (confirm('Tem certeza que deseja excluir este registro?')) {
+      logs.splice(index, 1);
+      saveLocal();
+      const now = new Date();
+      const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+      renderTracker(todayStr);
+    }
+  }
+
+  function renderCalendar(daysStudied, todayStr) {
+    const cal = document.getElementById('calGrid');
+    cal.innerHTML = '';
+    
+    const todayObj = new Date(todayStr + 'T00:00:00');
+    
+    const start = new Date(todayObj);
+    start.setDate(start.getDate() - 27);
+    
+    for (let i = 0; i <= 27; i++) {
+      const d = new Date(start);
+      d.setDate(d.getDate() + i);
+      const dy = d.getFullYear();
+      const dm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      const dStr = `${dy}-${dm}-${dd}`;
+      
+      const div = document.createElement('div');
+      div.className = 'cal-day';
+      div.innerText = dd;
+      div.title = dStr;
+      
+      if (dStr === todayStr) div.classList.add('today');
+      if (daysStudied.has(dStr)) div.classList.add('active');
+      
+      cal.appendChild(div);
+    }
+  }
+
+  function calcStreak(daysStudied, todayStr) {
+    let streak = 0;
+    const d = new Date(todayStr + 'T00:00:00');
+    
+    if (daysStudied.has(todayStr)) {
+      streak++;
+      d.setDate(d.getDate() - 1);
+    } else {
+      d.setDate(d.getDate() - 1);
+    }
+
+    while(true) {
+      const dy = d.getFullYear();
+      const dm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      const dStr = `${dy}-${dm}-${dd}`;
+      
+      if (daysStudied.has(dStr)) {
+        streak++;
+        d.setDate(d.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+    
+    document.getElementById('streakVal').innerText = `${streak} dias 🔥`;
+  }
+
+  function saveSession() {
+    const dt = document.getElementById('tfDate').value;
+    const mat = document.getElementById('tfMat').value;
+    const assunto = document.getElementById('tfAssunto').value;
+    const tempo = document.getElementById('tfTempo').value;
+    const qts = document.getElementById('tfQts').value;
+    const acertos = document.getElementById('tfAcertos').value;
+    const obs = document.getElementById('tfObs').value;
+
+    if (!dt || !assunto) {
+      alert('Data e Assunto são obrigatórios!');
+      return;
+    }
+
+    logs.push({
+      date: dt,
+      mat: mat,
+      assunto: assunto,
+      tempo: tempo ? parseInt(tempo) : 0,
+      qts: qts ? parseInt(qts) : 0,
+      acertos: acertos ? parseInt(acertos) : 0,
+      obs: obs
+    });
+
+    saveLocal();
+    document.getElementById('tfAssunto').value = '';
+    document.getElementById('tfTempo').value = '';
+    document.getElementById('tfQts').value = '';
+    document.getElementById('tfAcertos').value = '';
+    document.getElementById('tfObs').value = '';
+    
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    renderTracker(`${yyyy}-${mm}-${dd}`);
+
+    // Visual feedback
+    const btn = document.getElementById('btnSave');
+    const oldText = btn.innerText;
+    btn.innerText = '✔️ SALVO!';
+    btn.style.background = 'var(--green)';
+    setTimeout(() => {
+      btn.innerText = oldText;
+      btn.style.background = '';
+    }, 1500);
+  }
+
+  function exportData() {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(logs));
+    const a = document.createElement('a');
+    a.setAttribute("href", dataStr);
+    a.setAttribute("download", "delta_estudos_backup.json");
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
+  function importData() {
+    const p = prompt("Cole aqui o JSON de backup:");
+    if (p) {
+      try {
+        const parsed = JSON.parse(p);
+        if (Array.isArray(parsed)) {
+          logs = parsed;
+          saveLocal();
+          location.reload();
+        }
+      } catch (e) {
+        alert("JSON inválido");
+      }
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', initTracker);
+</script>
+</body>
+</html>

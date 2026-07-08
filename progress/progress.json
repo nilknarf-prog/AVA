@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "learner": { 
+    "foco": "PC/PF - Matérias Gerais para Delegado", 
+    "background": "Estudou forte p/ Agente PF em 2025 (5-8h/dia) e Pol. Leg. 2026. Parou em Abril. DD na Semana 03. Usará G7 p/ aprofundamento.", 
+    "carga_horaria_diaria": "2 a 3 horas líquidas (escala 2x2 noturna no TJ)", 
+    "started": "2026-06-30" 
+  },
+  "topic": "Aprovação no Concurso para Delegado de Polícia",
+  "current_stage": "Fase 1 - Missão 1 CONCLUÍDA. Próximo: Missão 2 (Revisão Semana 02)",
+  "stats": {
+      "sessoes": 2,
+      "minutos_estudo": 107,
+      "topicos_dominados": 0,
+      "flashcards_total": 13,
+      "flashcards_devidos": 0,
+      "questoes_resolvidas": 56,
+      "pecas_redigidas": 0,
+      "feynman_attempts": 0,
+      "dias_ofensiva": 1,
+      "data_ultima_sessao": "2026-07-08"
+  },
+  "review_tracking": {
+      "data_ultima_revisao": "2026-07-08",
+      "aproveitamento_ultima_revisao": 85.7,
+      "cards_consolidados": 0,
+      "taxa_consolidacao": 0.0
+  },
+  "ciclos": []
+}

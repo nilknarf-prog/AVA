@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Delta · Direito Penal - Teoria do Crime · Delegado</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  /* ── VARIÁVEIS - TEMA CLARO (Padrão Index) ── */
+  :root {
+    --brand: #ff6b00;
+    --brand-dim: #cc5500;
+    --brand-glow: rgba(255,107,0,0.10);
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --surface2: #f1f5f9;
+    --surface3: #e2e8f0;
+    --border: #e2e8f0;
+    --border-hot: #ff6b00;
+    --text: #0f172a;
+    --text-muted: #475569;
+    --text-dim: #94a3b8;
+    
+    /* Cores Semânticas */
+    --yellow: #f59e0b;
+    --yellow-bg: rgba(245, 158, 11, 0.12);
+    --yellow-border: rgba(245, 158, 11, 0.25);
+    
+    --red: #ef4444;
+    --red-bg: rgba(239, 68, 68, 0.12);
+    --red-border: rgba(239, 68, 68, 0.25);
+    
+    --blue: #3b82f6;
+    --blue-bg: rgba(59, 130, 246, 0.12);
+    --blue-border: rgba(59, 130, 246, 0.25);
+    
+    --green: #10b981;
+    --green-bg: rgba(16, 185, 129, 0.12);
+    --green-border: rgba(16, 185, 129, 0.25);
+    
+    --purple: #8b5cf6;
+    --purple-bg: rgba(139, 92, 246, 0.12);
+    --purple-border: rgba(139, 92, 246, 0.25);
+    
+    --r: 8px;
+    --r-sm: 5px;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  }
+
+  /* ── VARIÁVEIS - TEMA ESCURO (Padrão Dir Adm) ── */
+  body.dark-theme {
+    --brand: #ff6b00;
+    --brand-dim: #cc5500;
+    --brand-glow: rgba(255,107,0,0.18);
+    --bg: #0b0f1a;
+    --surface: #131929;
+    --surface2: #1a2235;
+    --surface3: #1f2a3c;
+    --border: rgba(255,255,255,0.08);
+    --border-hot: rgba(255,107,0,0.35);
+    --text: #e8eaf0;
+    --text-muted: #8a93a8;
+    --text-dim: #5a6478;
+
+    --yellow: #fbbf24;
+    --yellow-bg: rgba(251, 191, 36, 0.12);
+    --yellow-border: rgba(251, 191, 36, 0.25);
+
+    --red: #f87171;
+    --red-bg: rgba(248, 113, 113, 0.12);
+    --red-border: rgba(248, 113, 113, 0.25);
+
+    --blue: #60a5fa;
+    --blue-bg: rgba(96, 165, 250, 0.12);
+    --blue-border: rgba(96, 165, 250, 0.25);
+
+    --green: #4ade80;
+    --green-bg: rgba(74, 222, 128, 0.12);
+    --green-border: rgba(74, 222, 128, 0.25);
+
+    --purple: #c084fc;
+    --purple-bg: rgba(192, 132, 252, 0.12);
+    --purple-border: rgba(192, 132, 252, 0.25);
+
+    --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+  }
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Inter',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    line-height:1.65;
+    font-size:15px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* BG texture */
+  body::before{
+    content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(ellipse 80% 50% at 10% 10%, var(--brand-glow) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 90% 80%, rgba(255,107,0,0.04) 0%, transparent 60%);
+    transition: background 0.3s ease;
+  }
+
+  /* ── HEADER ─────────────────────────────── */
+  header{
+    position:sticky;top:0;z-index:100;
+    background:var(--surface);
+    backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--border-hot);
+    padding:0 24px;
+    transition: background-color 0.3s ease;
+  }
+  body:not(.dark-theme) header {
+      background: rgba(255, 255, 255, 0.92);
+  }
+  body.dark-theme header {
+      background: rgba(11, 15, 26, 0.92);
+  }
+
+  .header-inner{
+    max-width:1100px;margin:0 auto;
+    display:flex;align-items:center;justify-content:space-between;
+    height:60px;gap:16px;
+  }
+  .brand{
+    font-size:13px;font-weight:800;letter-spacing:.12em;
+    color:var(--brand);text-transform:uppercase;white-space:nowrap;
+  }
+  .title-block{flex:1;min-width:0;}
+  .title-block h1{
+    font-size:14px;font-weight:700;
+    color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .title-block .badge{
+    display:inline-block;margin-top:2px;
+    font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;
+    color:var(--brand);background:var(--brand-glow);
+    border:1px solid rgba(255,107,0,0.3);
+    padding:1px 7px;border-radius:20px;
+  }
+  .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+  }
+  .theme-toggle-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 50%;
+      width: 34px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.2s;
+  }
+  .theme-toggle-btn:hover {
+      background: var(--surface2);
+      color: var(--text);
+  }
+  
+  /* ── MAIN ────────────────────────────────── */
+  main{max-width:1100px;margin:0 auto;padding:28px 20px 80px; position:relative; z-index:1;}
+
+  /* ── TABS ────────────────────────────────── */
+  .tabs-nav{
+    display:flex;gap:4px;
+    border-bottom:1px solid var(--border);
+    margin-bottom:28px;
+    overflow-x:auto;
+    scrollbar-width:none;
+  }
+  .tabs-nav::-webkit-scrollbar{display:none;}
+  .tab-btn{
+    flex-shrink:0;
+    padding:10px 18px;
+    font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--text-muted);background:transparent;border:none;cursor:pointer;
+    border-bottom:2px solid transparent;
+    transition:all .2s;
+  }
+  .tab-btn:hover{color:var(--text);}
+  .tab-btn.active{color:var(--brand);border-bottom-color:var(--brand);}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;animation:fadeIn .25s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+  /* ── SEARCH ──────────────────────────────── */
+  .search-wrap{margin-bottom:22px;position:relative;}
+  .search-input{
+    width:100%;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--r);
+    padding:10px 14px 10px 40px;
+    color:var(--text);
+    font-family:'Inter',sans-serif;font-size:14px;
+    outline:none;transition:border-color .2s;
+    box-shadow: var(--shadow);
+  }
+  .search-input:focus{border-color:var(--border-hot);}
+  .search-icon{
+    position:absolute;left:13px;top:50%;transform:translateY(-50%);
+    color:var(--text-dim);font-size:15px;pointer-events:none;
+  }
+  .search-clear{
+    position:absolute;right:12px;top:50%;transform:translateY(-50%);
+    color:var(--text-dim);background:none;border:none;cursor:pointer;
+    font-size:16px;padding:4px;display:none;
+  }
+
+  /* ── SECTION HEADING ─────────────────────── */
+  .sec-header{
+    display:flex;align-items:center;gap:10px;
+    margin-bottom:18px;
+  }
+  .sec-header h2{
+    font-size:16px;font-weight:800;letter-spacing:-.01em;color:var(--text);
+  }
+  .sec-header .tag{
+    font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--brand);background:var(--brand-glow);
+    border:1px solid rgba(255,107,0,.3);
+    padding:2px 8px;border-radius:20px;
+  }
+
+  /* ── CARDS (Genéricos) ───────────────────── */
+  .info-card{
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--r);
+    margin-bottom:14px;overflow:hidden;
+    transition:border-color .2s, box-shadow 0.2s;
+    box-shadow: var(--shadow);
+  }
+  .info-card:hover{border-color:var(--border-hot);}
+  .card-head{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 18px;cursor:pointer;gap:12px;
+    user-select:none;
+  }
+  .card-head-left{display:flex;align-items:center;gap:12px;flex:1;min-width:0;}
+  .card-head h3{
+      font-size:14px;font-weight:700;color:var(--text);
+      overflow:hidden;text-overflow:ellipsis;
+  }
+  .chevron{color:var(--text-dim);transition:transform .25s;font-size:12px;flex-shrink:0;}
+  .card-body{
+    padding:0 18px;max-height:0;overflow:hidden;
+    transition:max-height .4s ease, padding .4s ease;
+  }
+  .card-body.open{max-height:2000px;padding:0 18px 18px;}
+  
+  /* ── BADGES & ELEMENTS ───────────────────── */
+  .badge-tag{
+    font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    padding:3px 9px;border-radius:20px;flex-shrink:0;
+  }
+  .bg-brand { color: var(--brand); background: var(--brand-glow); border: 1px solid rgba(255,107,0,.3); }
+  .bg-blue { color: var(--blue); background: var(--blue-bg); border: 1px solid var(--blue-border); }
+  .bg-yellow { color: var(--yellow); background: var(--yellow-bg); border: 1px solid var(--yellow-border); }
+  .bg-green { color: var(--green); background: var(--green-bg); border: 1px solid var(--green-border); }
+  .bg-red { color: var(--red); background: var(--red-bg); border: 1px solid var(--red-border); }
+
+  .blockquote{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;line-height:1.7;
+    color:var(--text); /* Adaptado para light/dark */
+    background:var(--surface2);
+    border-left:4px solid var(--brand);
+    border-radius:0 var(--r-sm) var(--r-sm) 0;
+    padding:12px 16px;
+    margin-bottom:14px;
+  }
+  
+  .detail-row{
+    display:flex;gap:10px;align-items:flex-start;
+    padding:10px 0;border-top:1px solid var(--border);
+    font-size:13.5px;
+  }
+  .detail-row:first-of-type{border-top:none;}
+  .detail-icon{font-size:15px;flex-shrink:0;margin-top:2px;}
+  .detail-label{font-weight:700;color:var(--text-muted);margin-right:4px;}
+  .detail-text{color:var(--text);flex:1;}
+  
+  mark.y{background:var(--yellow-bg);color:var(--yellow);border-radius:2px;padding:0 2px;}
+  mark.r{background:var(--red-bg);color:var(--red);border-radius:2px;padding:0 2px;}
+  mark.b{background:var(--blue-bg);color:var(--blue);border-radius:2px;padding:0 2px;}
+  mark.g{background:var(--green-bg);color:var(--green);border-radius:2px;padding:0 2px;}
+
+  .false-stmt{
+    font-size:13.5px;font-style:italic;
+    color:var(--red);
+    background:var(--red-bg);
+    border:1px solid var(--red-border);
+    border-radius:var(--r-sm);
+    padding:10px 14px;
+    margin-bottom:14px;
+    line-height:1.6;
+  }
+  .false-stmt::before{content:'❝ ';font-style:normal;opacity:.6;}
+  
+  .stmt-box{
+    font-size:13px;font-style:italic;
+    color:var(--yellow);
+    background:var(--yellow-bg);
+    border:1px solid var(--yellow-border);
+    border-radius:var(--r-sm);
+    padding:10px 13px;margin-top:8px;
+    line-height:1.6;
+  }
+  
+  .simulado-box{
+    background:var(--surface2);border:1px solid var(--border);
+    border-radius:var(--r-sm);padding:14px 16px;margin-top:12px;
+  }
+  .simulado-label{
+    font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--text-dim);margin-bottom:10px;
+  }
+  .simulado-q{
+    font-size:13.5px;color:var(--text-muted);
+    font-style:italic;line-height:1.6;margin-bottom:12px;
+  }
+
+  .fonte-tag{
+    font-size:11px;color:var(--brand);
+    background:var(--brand-glow);
+    border:1px solid rgba(255,107,0,.2);
+    padding:2px 8px;border-radius:20px;
+    display:inline-block;margin-top:10px;
+  }
+  
+  /* Discursivas Specific */
+  .skeleton-list {
+      list-style: none;
+      margin-top: 10px;
+  }
+  .skeleton-list li {
+      position: relative;
+      padding-left: 20px;
+      margin-bottom: 8px;
+      font-size: 13.5px;
+      color: var(--text);
+  }
+  .skeleton-list li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: var(--brand);
+      font-weight: bold;
+      font-size: 16px;
+  }
+
+  /* ── FOOTER ──────────────────────────────── */
+  footer{
+    text-align:center;padding:28px;
+    font-size:12px;color:var(--text-dim);
+    border-top:1px solid var(--border);
+  }
+  footer span{color:var(--brand); font-weight: 600;}
+
+  /* ── RESPONSIVE ──────────────────────────── */
+  @media(max-width:600px){
+    .header-inner{padding:0 4px;}
+    main{padding:20px 12px 60px;}
+    .tab-btn{padding:9px 12px;font-size:11px;}
+    .card-head h3{font-size:13px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══════════════════════════════ -->
+<header>
+  <div class="header-inner">
+    <div class="brand">⚖️ Delta</div>
+    <div class="title-block">
+      <h1>Direito Penal · Teoria do Crime</h1>
+      <span class="badge">Delegado PC · PF · Cebraspe</span>
+    </div>
+    <div class="header-actions">
+        <button class="theme-toggle-btn" id="themeToggle" onclick="toggleTheme()" title="Alternar Tema Claro/Escuro">
+            ☀️
+        </button>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ MAIN ══════════════════════════════════ -->
+<main>
+
+  <!-- SEARCH -->
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" class="search-input" id="searchInput" placeholder="Buscar em todos os blocos..." oninput="handleSearch()" />
+    <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
+  </div>
+
+  <!-- TABS NAV -->
+  <nav class="tabs-nav" role="tablist">
+    <button class="tab-btn active" onclick="showTab('literais',this)">📌 Literais</button>
+    <button class="tab-btn" onclick="showTab('pegadinhas',this)">🔥 Pegadinhas</button>
+    <button class="tab-btn" onclick="showTab('juris',this)">🏛️ Jurisprudência</button>
+    <button class="tab-btn" onclick="showTab('apostas',this)">🎯 Apostas 2026</button>
+    <button class="tab-btn" onclick="showTab('discursivas',this)">✍️ Discursivas</button>
+  </nav>
+
+  <!-- ═══ TAB 1: LITERAIS ═══════════════════════ -->
+  <div class="tab-panel active" id="tab-literais">
+    <div class="sec-header">
+      <h2>Textos Literais Críticos</h2>
+      <span class="tag">Estrutura do Crime</span>
+    </div>
+
+    <!-- Art. 1º LICP -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Art. 1º LICC/LCP</span>
+          <h3>Diferença: Crime x Contravenção</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge-tag bg-yellow">Altíssima</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="blockquote">"Considera-se <strong>crime</strong> a infração penal a que a lei comina pena de <strong>reclusão ou de detenção</strong>, quer isoladamente, quer alternativa ou cumulativamente com a pena de multa; <strong>contravenção</strong>, a infração penal a que a lei comina, isoladamente, pena de <strong>prisão simples</strong> ou de multa, ou ambas, alternativa ou cumulativamente."</div>
+        <div class="detail-row">
+          <span class="detail-icon">🔄</span>
+          <div><span class="detail-label">Substituição Clássica da Banca:</span><span class="detail-text">A banca afirma que a diferença entre crime e contravenção é ontológica (de essência). <mark class="r">Errado</mark>. A diferença no Brasil é meramente <strong>quantitativa</strong> e <strong>qualitativa (espécie de pena)</strong>. Adotamos o sistema dualista ou binário.</span></div>
+        </div>
+        <div class="detail-row">
+          <span class="detail-icon">⚠️</span>
+          <div><span class="detail-label">Distrator Frequente:</span><span class="detail-text">Afirmar que admite-se tentativa em contravenção penal ou extraterritorialidade. <mark class="r">Errado.</mark> Contravenção não pune tentativa (art. 4º da LCP) e não admite extraterritorialidade (art. 2º da LCP).</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Art. 13, §2º CP -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Art. 13, §2º CP</span>
+          <h3>Omissão Penalmente Relevante (Garante)</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge-tag bg-yellow">Altíssima</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="blockquote">"A omissão é penalmente relevante quando o omitente <strong>devia e podia</strong> agir para evitar o resultado. O dever de agir incumbe a quem:<br><br>
+        a) tenha por lei obrigação de cuidado, proteção ou vigilância;<br>
+        b) de outra forma, assumiu a responsabilidade de impedir o resultado;<br>
+        c) com seu comportamento anterior, criou o risco da ocorrência do resultado."</div>
+        <div class="detail-row">
+          <span class="detail-icon">🔑</span>
+          <div><span class="detail-label">Subsunção:</span><span class="detail-text">Nos crimes omissivos impróprios (comissivos por omissão), a tipicidade é <strong>indireta</strong> (Tipo penal + art. 13, §2º). O agente responde pelo <strong>resultado</strong>, não por mera omissão.</span></div>
+        </div>
+        <div class="detail-row">
+          <span class="detail-icon">⚠️</span>
+          <div><span class="detail-label">Erro Frequente:</span><span class="detail-text">Afirmar que o salva-vidas que cruza os braços e deixa o banhista morrer comete crime de omissão de socorro. <mark class="r">Errado.</mark> Ele é o garante (alínea 'b' ou 'a'), responde por homicídio (art. 121 c/c art. 13, §2º).</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Art. 14, II CP -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Art. 14, II CP</span>
+          <h3>Tentativa e Iter Criminis</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge-tag bg-green">Alta</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="blockquote">Diz-se o crime: [...] II - tentado, quando, <strong>iniciada a execução</strong>, não se consuma por <strong>circunstâncias alheias à vontade</strong> do agente.</div>
+        <div class="detail-row">
+          <span class="detail-icon">🩸</span>
+          <div><span class="detail-label">Classificação da Tentativa:</span><span class="detail-text">
+            <strong>Branca/Incruenta:</strong> O objeto material (vítima) não é atingido.<br>
+            <strong>Vermelha/Cruenta:</strong> O objeto material sofre lesão efetiva.<br>
+            <strong>Crime falho:</strong> Tentativa perfeita/acabada (pratica todos os atos executórios, mas o resultado não ocorre).
+          </span></div>
+        </div>
+        <div class="detail-row">
+          <span class="detail-icon">⚠️</span>
+          <div><span class="detail-label">Distrator Frequente:</span><span class="detail-text">A banca chama crime impossível de "crime falho". <mark class="r">Errado.</mark> Crime impossível é o "quase-crime". Crime falho é a tentativa perfeita.</span></div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /tab-literais -->
+
+  <!-- ═══ TAB 2: PEGADINHAS ══════════════════════ -->
+  <div class="tab-panel" id="tab-pegadinhas">
+    <div class="sec-header">
+      <h2>Mapa de Pegadinhas</h2>
+      <span class="tag">Mais erradas em provas</span>
+    </div>
+
+    <!-- TRAP 1 -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-red">🔥🔥🔥</span>
+          <h3>Coação Moral vs Coação Física Irresistível</h3>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="false-stmt">"A coação moral irresistível afasta a conduta do agente, excluindo, por consequência, o fato típico da estrutura do crime."</div>
+        <div class="detail-row">
+          <span class="detail-icon" style="color:var(--red);">✗</span>
+          <div><span class="detail-label" style="color:var(--red);">O ERRO:</span> A coação <strong>moral</strong> irresistível (*vis compulsiva*) vicia a vontade, mas a vontade existe. Logo, há conduta e fato típico. Ela atua como excludente de <strong>culpabilidade</strong> (inexigibilidade de conduta diversa).</div>
+        </div>
+        <div class="detail-row">
+          <span class="detail-icon" style="color:var(--green);">✓</span>
+          <div><span class="detail-label" style="color:var(--green);">O CORRETO:</span> Apenas a coação <strong>FÍSICA</strong> irresistível (*vis absoluta*) exclui a vontade e, portanto, <strong>exclui a conduta (fato típico)</strong>.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRAP 2 -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-red">🔥🔥🔥</span>
+          <h3>Teorias da Conduta (Onde fica o Dolo?)</h3>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="false-stmt">"Para a Teoria Finalista da ação, atualmente adotada pelo Código Penal, o dolo e a culpa integram a culpabilidade como seus elementos, ao lado da imputabilidade."</div>
+        <div class="detail-row">
+          <span class="detail-icon" style="color:var(--red);">✗</span>
+          <div><span class="detail-label" style="color:var(--red);">O ERRO:</span> Confusão com a teoria clássica (causalista). No <strong>Finalismo</strong> (adotado pelo CP), o dolo e a culpa foram retirados da culpabilidade e migraram para o <strong>Fato Típico</strong> (dentro da Conduta).</div>
+        </div>
+        <div class="detail-row">
+          <span class="detail-icon" style="color:var(--green);">✓</span>
+          <div><span class="detail-label" style="color:var(--green);">O CORRETO:</span> No Finalismo, o dolo é <strong>natural</strong> e integra o Fato Típico. A Culpabilidade tornou-se "vazia" de elementos psicológicos, sendo puramente normativa (imputabilidade, potencial consciência da ilicitude e exigibilidade de conduta diversa).</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRAP 3 -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-yellow">🔥🔥</span>
+          <h3>Tentativa em Crimes Omissivos</h3>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="false-stmt">"Os crimes omissivos, em qualquer de suas modalidades (próprios ou impróprios), são incompatíveis com o instituto da tentativa."</div>
+        <div class="detail-row">
+          <span class="detail-icon" style="color:var(--red);">✗</span>
+          <div><span class="detail-label" style="color:var(--red);">O ERRO:</span> Generalização perigosa. Crimes omissivos <strong>próprios/puros</strong> (ex: omissão de socorro) são unissubsistentes e de fato <strong>NÃO</strong> admitem tentativa. Porém, a regra muda para os impróprios.</div>
+        </div>
+        <div class="detail-row">
+          <span class="detail-icon" style="color:var(--green);">✓</span>
+          <div><span class="detail-label" style="color:var(--green);">O CORRETO:</span> Crimes omissivos <strong>impróprios (comissivos por omissão) ADMITEM</strong> tentativa. Ex: a mãe deixa de alimentar o bebê com a intenção de matá-lo, mas o vizinho percebe e salva a criança (tentativa de homicídio por omissão).</div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /tab-pegadinhas -->
+
+  <!-- ═══ TAB 3: JURISPRUDÊNCIA ══════════════════ -->
+  <div class="tab-panel" id="tab-juris">
+    <div class="sec-header">
+      <h2>Jurisprudência Essencial</h2>
+      <span class="tag">STF e STJ</span>
+    </div>
+
+    <!-- Tema 506 STF -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-blue">STF · Tema 506 RG · 2024</span>
+          <h3>Descriminalização do Porte de Maconha p/ Uso</h3>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="blockquote">"Não comete <strong>infração penal</strong> quem adquirir, guardar, transportar ou trouxer consigo para consumo pessoal a substância cannabis sativa, sem prejuízo do reconhecimento da <strong>ilicitude extrapenal</strong> da conduta [...]"</div>
+        <div class="detail-row">
+          <span class="detail-icon">🏛️</span>
+          <div><span class="detail-label">Tese Firmada:</span><span class="detail-text">O STF decidiu pela <strong>descriminalização</strong> (abolitio criminis) exclusivamente para a maconha (cannabis). Deixou de ser crime e infração sui generis. Tornou-se um ilícito administrativo/civil (extrapenal). A presunção de usuário é até 40g ou 6 plantas-fêmeas (presunção relativa).</span></div>
+        </div>
+        <div class="simulado-box">
+          <div class="simulado-label">📝 Como a banca vai formular</div>
+          <div class="simulado-q">"Segundo o STF, o art. 28 da Lei de Drogas passou por um processo de despenalização para todas as drogas e descriminalização para o porte de maconha para uso próprio, esvaziando a competência penal."</div>
+          <div class="detail-row" style="padding:0; border:none; margin-top:5px;">
+            <span style="color:var(--green); font-weight:700;">✓ Gabarito:</span>&nbsp;<span class="detail-text">CERTO. Historicamente o STF entendia ser despenalização para tudo, mas em 2024 declarou a <strong>descriminalização</strong> especificamente para a maconha (Tema 506).</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Súmula 715 STF -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-blue">STF · Súmula 715</span>
+          <h3>Limite de Penas vs. Benefícios da Execução</h3>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="blockquote">"A pena unificada para atender ao limite de cumprimento, determinado pelo art. 75 do Código Penal, <strong>não é considerada</strong> para a concessão de outros benefícios, como o livramento condicional ou regime mais favorável de execução."</div>
+        <div class="detail-row">
+          <span class="detail-icon">🏛️</span>
+          <div><span class="detail-label">Entendimento:</span><span class="detail-text">O teto de cumprimento (agora <strong>40 anos</strong>, pós-Pacote Anticrime) serve apenas para o indivíduo não apodrecer na cadeia. Para calcular o tempo de progressão ou livramento condicional, a base de cálculo é a <strong>pena total da condenação</strong> (ex: 150 anos).</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Perigo Abstrato de Perigosidade Real -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-blue">STJ · Entendimento de Turmas</span>
+          <h3>Crimes de Perigo Abstrato vs Concreto</h3>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="blockquote">O STJ consolidou o entendimento de que os crimes de <strong>embriaguez ao volante (art. 306, CTB)</strong> e <strong>posse/porte de arma e munição</strong> (ainda que quantidade ínfima, em regra) são crimes de <strong>perigo abstrato</strong>.</div>
+        <div class="detail-row">
+          <span class="detail-icon">🎯</span>
+          <div><span class="detail-label">Atenção para Doutrina Avançada (Cebraspe/PCPA):</span><span class="detail-text">Cuidado com o conceito de "Perigo Abstrato de Perigosidade Real" (ou perigo abstrato-concreto). Exige-se a superação do risco-base. No art. 306 do CTB, além de beber, exige-se potencialidade lesiva (ex: condução anormal), dispensando vítima certa, mas punindo a conduta arriscada. Para o STJ (6ª Turma), embriaguez pura basta para consumar (perigo abstrato).</span></div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /tab-juris -->
+
+  <!-- ═══ TAB 4: APOSTAS ═════════════════════════ -->
+  <div class="tab-panel" id="tab-apostas">
+    <div class="sec-header">
+      <h2>Apostas 2026</h2>
+      <span class="tag">Foco: PC e PF</span>
+    </div>
+
+    <!-- APOSTA 1 -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-green">CERTEZA</span>
+          <h3>Colisão de Deveres (Omissivos Impróprios)</h3>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="detail-row">
+          <span class="detail-icon">🎯</span>
+          <div><span class="detail-label">O que será cobrado:</span><span class="detail-text">A banca apresentará o caso clássico: médico com apenas 1 respirador na UTI e 2 pacientes gravíssimos (vida vs vida). Ele nega tirar o respirador do paciente 'A' para dar ao paciente 'B', e 'B' morre. Há crime?</span></div>
+        </div>
+        <div class="detail-row">
+          <span class="detail-icon">📈</span>
+          <div><span class="detail-label">Por que é tendência:</span><span class="detail-text">Tema cobrado na PC-RJ e em simulados focados em Delegado Cebraspe/Vunesp. Explora os limites da omissão penalmente relevante.</span></div>
+        </div>
+        <div class="stmt-box">
+          "Em caso de colisão de deveres entre salvar uma vida por ação ou por omissão, no caso de bens de mesma hierarquia, goza de preferência o dever de omissão. O médico não responderá pelo resultado morte." → <strong style="color:var(--green)">CERTO</strong>. A inexigibilidade fática afasta a imputação ao garante.
+        </div>
+      </div>
+    </div>
+
+    <!-- APOSTA 2 -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-green">CERTEZA</span>
+          <h3>Actio Libera in Causa aplicada à Conduta</h3>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="detail-row">
+          <span class="detail-icon">🎯</span>
+          <div><span class="detail-label">O que será cobrado:</span><span class="detail-text">Tradicionalmente a *actio libera in causa* (ação livre na causa) é analisada na <strong>culpabilidade</strong> (para embriaguez). A aposta é a cobrança de sua aplicação para justificar a existência da própria <strong>conduta/fato típico</strong> em estados de inconsciência dolosamente preordenados (ex: embriaguez letárgica, sonambulismo forçado).</span></div>
+        </div>
+        <div class="stmt-box">
+          "Embora estados de inconsciência profunda como a embriaguez letárgica excluam a vontade e a própria conduta, se o agente deliberadamente se colocou nesse estado para praticar o ilícito, responderá pelo crime por aplicação da teoria da actio libera in causa no âmbito do fato típico." → <strong style="color:var(--green)">CERTO</strong>. Transporta-se o momento de análise para o ato anterior livre.
+        </div>
+      </div>
+    </div>
+  </div><!-- /tab-apostas -->
+
+  <!-- ═══ TAB 5: DISCURSIVAS ═════════════════════ -->
+  <div class="tab-panel" id="tab-discursivas">
+    <div class="sec-header">
+      <h2>Esqueletos para Discursivas</h2>
+      <span class="tag">Argumentação de Alto Nível</span>
+    </div>
+
+    <!-- Discursiva 1 -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-purple">Peça / Questão</span>
+          <h3>Classificação: Crime Formal, Material e Mera Conduta</h3>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="detail-row">
+          <span class="detail-icon">✍️</span>
+          <div><span class="detail-label">Enunciado Padrão:</span><span class="detail-text">Diferencie, fundamentadamente, crimes materiais, formais e de mera conduta em relação ao resultado naturalístico e ao momento de consumação. Cite exemplos para cada.</span></div>
+        </div>
+        <div style="margin-top: 10px; padding: 12px; background: var(--surface2); border-radius: var(--r-sm);">
+          <strong>💡 Esqueleto de Resposta (Pontos de Correção):</strong>
+          <ul class="skeleton-list">
+              <li><strong>Crime Material (Causal):</strong> O tipo penal descreve conduta + resultado naturalístico. O resultado é <em>indispensável</em> para a consumação. Ex: Homicídio (art. 121, exige morte).</li>
+              <li><strong>Crime Formal (Consumação Antecipada):</strong> O tipo descreve conduta + resultado naturalístico, mas o resultado é <em>dispensável</em> para a consumação. Consuma-se com a simples conduta, sendo o resultado mero exaurimento. Ex: Extorsão mediante sequestro (art. 159, consuma ao privar a liberdade, receber o resgate é exaurimento).</li>
+              <li><strong>Crime de Mera Conduta (Simples atividade):</strong> O tipo descreve <em>apenas a conduta</em>, sem previsão legal de resultado naturalístico. Impossível gerar alteração no mundo físico exigida pelo tipo. Ex: Violação de domicílio (art. 150) ou Ato obsceno (art. 233).</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Discursiva 2 -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-purple">Questão Aberta</span>
+          <h3>Causas de Exclusão da Conduta</h3>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="detail-row">
+          <span class="detail-icon">✍️</span>
+          <div><span class="detail-label">Enunciado Padrão:</span><span class="detail-text">Discorra sobre a conduta na teoria finalista, apontando seus elementos e listando os casos que excluem a conduta humana para o Direito Penal. Qual a diferença entre movimento reflexo e ações em curto-circuito?</span></div>
+        </div>
+        <div style="margin-top: 10px; padding: 12px; background: var(--surface2); border-radius: var(--r-sm);">
+          <strong>💡 Esqueleto de Resposta (Pontos de Correção):</strong>
+          <ul class="skeleton-list">
+              <li><strong>Conceito Finalista:</strong> Conduta é o comportamento humano, voluntário, psiquicamente dirigido a um fim. O dolo e a culpa integram a conduta (fato típico).</li>
+              <li><strong>Causas de exclusão (Ausência de Vontade):</strong> Sem vontade, não há ação. São elas: 1) Caso fortuito/força maior; 2) Coação Física Irresistível (*vis absoluta*); 3) Estados de inconsciência (sonambulismo, hipnose, embriaguez letárgica não preordenada); 4) Movimentos reflexos.</li>
+              <li><strong>Diferenciação Crítica:</strong> 
+                <br>- <em>Movimentos reflexos</em> são reações automáticas puramente fisiológicas (independem do cérebro superior), excluindo a vontade e a conduta.
+                <br>- <em>Ações em curto-circuito</em> são atos impulsivos decorrentes de explosão emocional. A vontade é repentina e falha, mas <strong>existe</strong>. Logo, há conduta e o crime subsiste (embora possa incidir atenuante ou privilegiadora).</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div><!-- /tab-discursivas -->
+
+</main>
+
+<footer>
+  Biblioteca de Estudos <span>Delta</span> · Direito Penal - Teoria do Crime
+</footer>
+
+<script>
+// ─── THEME TOGGLE (Claro / Escuro) ────────────
+function toggleTheme() {
+    const body = document.body;
+    const btn = document.getElementById('themeToggle');
+    
+    // Toggle class
+    body.classList.toggle('dark-theme');
+    
+    // Save to local storage and update icon
+    if (body.classList.contains('dark-theme')) {
+        localStorage.setItem('delta-theme', 'dark');
+        btn.textContent = '🌙';
+    } else {
+        localStorage.setItem('delta-theme', 'light');
+        btn.textContent = '☀️';
+    }
+}
+
+// Check saved theme on load
+document.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = localStorage.getItem('delta-theme');
+    const btn = document.getElementById('themeToggle');
+    
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-theme');
+        btn.textContent = '🌙';
+    } else {
+        // Default is light (no class needed)
+        btn.textContent = '☀️';
+    }
+});
+
+// ─── TABS ─────────────────────────────────────
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ─── ACCORDION ────────────────────────────────
+function toggle(head) {
+  const body = head.nextElementSibling;
+  const chevron = head.querySelector('.chevron');
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  if (chevron) chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
+}
+
+// ─── SEARCH ───────────────────────────────────
+function handleSearch() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  const clear = document.getElementById('searchClear');
+  clear.style.display = q ? 'block' : 'none';
+  if (!q) {
+    document.querySelectorAll('.searchable').forEach(c => c.style.display = '');
+    return;
+  }
+  
+  document.querySelectorAll('.searchable').forEach(card => {
+    const text = card.innerText.toLowerCase();
+    card.style.display = text.includes(q) ? '' : 'none';
+  });
+}
+
+function clearSearch() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchClear').style.display = 'none';
+  document.querySelectorAll('.searchable').forEach(c => c.style.display = '');
+}
+
+// ─── AUTO-OPEN FIRST ITEM ON EACH TAB ─────────
+document.querySelectorAll('.tab-panel').forEach(panel => {
+  const first = panel.querySelector('.card-head');
+  if (first) {
+    const body = first.nextElementSibling;
+    const chevron = first.querySelector('.chevron');
+    if (body) body.classList.add('open');
+    if (chevron) chevron.style.transform = 'rotate(180deg)';
+  }
+});
+</script>
+</body>
+</html>

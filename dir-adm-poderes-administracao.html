@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Delta · Poderes da Administração · Delegado</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --brand: #ff6b00;
+    --brand-dim: #cc5500;
+    --brand-glow: rgba(255,107,0,0.18);
+    --bg: #0b0f1a;
+    --surface: #131929;
+    --surface2: #1a2235;
+    --surface3: #1f2a3c;
+    --border: rgba(255,255,255,0.08);
+    --border-hot: rgba(255,107,0,0.35);
+    --text: #e8eaf0;
+    --text-muted: #8a93a8;
+    --text-dim: #5a6478;
+    --yellow: #fbbf24;
+    --red: #f87171;
+    --blue: #60a5fa;
+    --green: #4ade80;
+    --purple: #c084fc;
+    --r: 8px;
+    --r-sm: 5px;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Inter',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    line-height:1.65;
+    font-size:15px;
+  }
+  /* BG texture */
+  body::before{
+    content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(ellipse 80% 50% at 10% 10%, rgba(255,107,0,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 90% 80%, rgba(255,107,0,0.04) 0%, transparent 60%);
+  }
+
+  /* ── HEADER ─────────────────────────────── */
+  header{
+    position:sticky;top:0;z-index:100;
+    background:rgba(11,15,26,0.92);
+    backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--border-hot);
+    padding:0 24px;
+  }
+  .header-inner{
+    max-width:1100px;margin:0 auto;
+    display:flex;align-items:center;justify-content:space-between;
+    height:60px;gap:16px;
+  }
+  .brand{
+    font-size:13px;font-weight:800;letter-spacing:.12em;
+    color:var(--brand);text-transform:uppercase;white-space:nowrap;
+  }
+  .title-block{flex:1;min-width:0;}
+  .title-block h1{
+    font-size:14px;font-weight:700;
+    color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .title-block .badge{
+    display:inline-block;margin-top:2px;
+    font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;
+    color:var(--brand);background:var(--brand-glow);
+    border:1px solid rgba(255,107,0,0.3);
+    padding:1px 7px;border-radius:20px;
+  }
+  .vespera-btn{
+    flex-shrink:0;
+    font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--brand);background:transparent;
+    border:1px solid var(--border-hot);
+    padding:6px 14px;border-radius:20px;cursor:pointer;
+    transition:all .2s;white-space:nowrap;
+  }
+  .vespera-btn:hover{background:var(--brand-glow);}
+  .vespera-btn.active{background:var(--brand);color:#000;}
+
+  /* ── MAIN ────────────────────────────────── */
+  main{max-width:1100px;margin:0 auto;padding:28px 20px 80px;}
+
+  /* ── TABS ────────────────────────────────── */
+  .tabs-nav{
+    display:flex;gap:4px;
+    border-bottom:1px solid var(--border);
+    margin-bottom:28px;
+    overflow-x:auto;
+    scrollbar-width:none;
+  }
+  .tabs-nav::-webkit-scrollbar{display:none;}
+  .tab-btn{
+    flex-shrink:0;
+    padding:10px 18px;
+    font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--text-muted);background:transparent;border:none;cursor:pointer;
+    border-bottom:2px solid transparent;
+    transition:all .2s;
+  }
+  .tab-btn:hover{color:var(--text);}
+  .tab-btn.active{color:var(--brand);border-bottom-color:var(--brand);}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;animation:fadeIn .25s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+  /* ── SEARCH ──────────────────────────────── */
+  .search-wrap{margin-bottom:22px;position:relative;}
+  .search-input{
+    width:100%;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--r);
+    padding:10px 14px 10px 40px;
+    color:var(--text);
+    font-family:'Inter',sans-serif;font-size:14px;
+    outline:none;transition:border-color .2s;
+  }
+  .search-input:focus{border-color:var(--border-hot);}
+  .search-icon{
+    position:absolute;left:13px;top:50%;transform:translateY(-50%);
+    color:var(--text-dim);font-size:15px;pointer-events:none;
+  }
+  .search-clear{
+    position:absolute;right:12px;top:50%;transform:translateY(-50%);
+    color:var(--text-dim);background:none;border:none;cursor:pointer;
+    font-size:16px;padding:4px;display:none;
+  }
+
+  /* ── SECTION HEADING ─────────────────────── */
+  .sec-header{
+    display:flex;align-items:center;gap:10px;
+    margin-bottom:18px;
+  }
+  .sec-header h2{
+    font-size:16px;font-weight:800;letter-spacing:-.01em;color:var(--text);
+  }
+  .sec-header .tag{
+    font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--brand);background:var(--brand-glow);
+    border:1px solid rgba(255,107,0,.3);
+    padding:2px 8px;border-radius:20px;
+  }
+
+  /* ── LITERAL CARD ────────────────────────── */
+  .literal-card{
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--r);
+    margin-bottom:14px;overflow:hidden;
+    transition:border-color .2s;
+  }
+  .literal-card:hover{border-color:var(--border-hot);}
+  .literal-head{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 18px;cursor:pointer;gap:12px;
+    user-select:none;
+  }
+  .literal-head-left{display:flex;align-items:center;gap:12px;}
+  .art-badge{
+    font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--brand);background:var(--brand-glow);
+    border:1px solid rgba(255,107,0,.3);
+    padding:3px 9px;border-radius:20px;flex-shrink:0;
+  }
+  .literal-head h3{font-size:14px;font-weight:700;color:var(--text);}
+  .freq-badge{
+    font-size:10px;font-weight:600;
+    padding:2px 8px;border-radius:20px;flex-shrink:0;
+  }
+  .freq-alta{color:#fbbf24;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.25);}
+  .freq-media{color:#94a3b8;background:rgba(148,163,184,.1);border:1px solid rgba(148,163,184,.2);}
+  .chevron{color:var(--text-dim);transition:transform .25s;font-size:12px;}
+  .literal-body{
+    padding:0 18px;max-height:0;overflow:hidden;
+    transition:max-height .35s ease, padding .35s ease;
+  }
+  .literal-body.open{max-height:600px;padding:0 18px 18px;}
+  .blockquote{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12.5px;line-height:1.7;
+    color:#cbd5e1;
+    background:rgba(255,255,255,.03);
+    border-left:3px solid var(--brand);
+    border-radius:0 var(--r-sm) var(--r-sm) 0;
+    padding:12px 16px;
+    margin-bottom:14px;
+  }
+  .detail-row{
+    display:flex;gap:10px;align-items:flex-start;
+    padding:8px 0;border-top:1px solid var(--border);
+    font-size:13px;
+  }
+  .detail-row:first-of-type{border-top:none;}
+  .detail-icon{font-size:14px;flex-shrink:0;margin-top:2px;}
+  .detail-label{font-weight:700;color:var(--text-muted);margin-right:4px;}
+  .detail-text{color:var(--text);flex:1;}
+  mark.y{background:rgba(251,191,36,.22);color:#fbbf24;border-radius:2px;padding:0 2px;}
+  mark.r{background:rgba(248,113,113,.18);color:#f87171;border-radius:2px;padding:0 2px;}
+  mark.b{background:rgba(96,165,250,.18);color:#60a5fa;border-radius:2px;padding:0 2px;}
+  mark.g{background:rgba(74,222,128,.15);color:#4ade80;border-radius:2px;padding:0 2px;}
+  mark.p{background:rgba(192,132,252,.15);color:#c084fc;border-radius:2px;padding:0 2px;}
+
+  /* MNEMONIC */
+  .mnemonic{
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;font-weight:600;
+    color:#fbbf24;
+    background:rgba(251,191,36,.1);
+    border:1px solid rgba(251,191,36,.25);
+    border-radius:var(--r-sm);
+    padding:6px 12px;
+    margin-top:10px;
+  }
+
+  /* ── TRAP CARD ───────────────────────────── */
+  .trap-card{
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--r);
+    margin-bottom:12px;overflow:hidden;
+    transition:border-color .2s;
+  }
+  .trap-card:hover{border-color:rgba(248,113,113,.35);}
+  .trap-head{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 18px;cursor:pointer;gap:12px;user-select:none;
+  }
+  .trap-head-left{display:flex;align-items:center;gap:12px;flex:1;min-width:0;}
+  .fire-badge{font-size:13px;flex-shrink:0;}
+  .trap-head h3{
+    font-size:13px;font-weight:600;color:var(--text);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .trap-body{
+    padding:0 18px;max-height:0;overflow:hidden;
+    transition:max-height .35s ease, padding .35s ease;
+  }
+  .trap-body.open{max-height:800px;padding:0 18px 18px;}
+  .false-stmt{
+    font-size:13px;font-style:italic;
+    color:#f87171;
+    background:rgba(248,113,113,.08);
+    border:1px solid rgba(248,113,113,.2);
+    border-radius:var(--r-sm);
+    padding:10px 14px;
+    margin-bottom:14px;
+    line-height:1.6;
+  }
+  .false-stmt::before{content:'❝ ';font-style:normal;opacity:.6;}
+  .verdict-row{display:flex;gap:10px;padding:8px 0;border-top:1px solid var(--border);font-size:13px;align-items:flex-start;}
+  .verdict-row:first-of-type{border-top:none;}
+  .verdict-icon-wrong{color:#f87171;font-size:15px;flex-shrink:0;margin-top:1px;font-weight:800;}
+  .verdict-icon-right{color:#4ade80;font-size:15px;flex-shrink:0;margin-top:1px;font-weight:800;}
+  .verdict-label{font-weight:700;margin-right:4px;}
+
+  /* ── JURIS CARD ──────────────────────────── */
+  .juris-card{
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--r);
+    margin-bottom:14px;overflow:hidden;
+    transition:border-color .2s;
+  }
+  .juris-card:hover{border-color:rgba(96,165,250,.35);}
+  .juris-head{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 18px;cursor:pointer;gap:12px;user-select:none;
+  }
+  .juris-head-left{display:flex;align-items:center;gap:12px;flex:1;min-width:0;}
+  .court-badge{
+    font-size:10px;font-weight:700;letter-spacing:.07em;
+    color:#60a5fa;background:rgba(96,165,250,.12);border:1px solid rgba(96,165,250,.25);
+    padding:3px 8px;border-radius:20px;flex-shrink:0;
+  }
+  .juris-head h3{font-size:13px;font-weight:700;color:var(--text);}
+  .juris-body{
+    padding:0 18px;max-height:0;overflow:hidden;
+    transition:max-height .4s ease, padding .4s ease;
+  }
+  .juris-body.open{max-height:1000px;padding:0 18px 18px;}
+  .tese-box{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12.5px;line-height:1.7;color:#cbd5e1;
+    background:rgba(96,165,250,.06);
+    border-left:3px solid #60a5fa;
+    border-radius:0 var(--r-sm) var(--r-sm) 0;
+    padding:12px 16px;margin-bottom:14px;
+  }
+  .simulado-box{
+    background:var(--surface2);border:1px solid var(--border);
+    border-radius:var(--r-sm);padding:12px 14px;margin-top:12px;
+  }
+  .simulado-label{
+    font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--text-dim);margin-bottom:8px;
+  }
+  .simulado-q{
+    font-size:13px;color:var(--text-muted);
+    font-style:italic;line-height:1.6;margin-bottom:10px;
+  }
+  .simulado-row{display:flex;gap:8px;font-size:12.5px;padding:5px 0;}
+  .g-label{color:#4ade80;font-weight:700;}
+  .d-label{color:#f87171;font-weight:700;}
+
+  /* ── APOSTA CARD ─────────────────────────── */
+  .aposta-card{
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--r);
+    margin-bottom:14px;overflow:hidden;
+    transition:border-color .2s;
+  }
+  .aposta-card:hover{border-color:var(--border-hot);}
+  .aposta-head{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 18px;cursor:pointer;gap:12px;user-select:none;
+  }
+  .aposta-head-left{display:flex;align-items:center;gap:12px;flex:1;min-width:0;}
+  .aposta-num{
+    font-size:10px;font-weight:800;letter-spacing:.06em;
+    color:var(--brand);background:var(--brand-glow);
+    border:1px solid rgba(255,107,0,.3);
+    width:26px;height:26px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .aposta-head h3{font-size:13px;font-weight:700;color:var(--text);}
+  .level-badge{
+    font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    padding:2px 8px;border-radius:20px;flex-shrink:0;
+  }
+  .level-certeza{color:#4ade80;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.25);}
+  .level-alta{color:#fbbf24;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.25);}
+  .level-media{color:#94a3b8;background:rgba(148,163,184,.1);border:1px solid rgba(148,163,184,.2);}
+  .aposta-body{
+    padding:0 18px;max-height:0;overflow:hidden;
+    transition:max-height .35s ease, padding .35s ease;
+  }
+  .aposta-body.open{max-height:900px;padding:0 18px 18px;}
+  .aposta-row{display:flex;gap:10px;padding:8px 0;border-top:1px solid var(--border);font-size:13px;align-items:flex-start;}
+  .aposta-row:first-of-type{border-top:none;}
+  .aposta-row-label{font-weight:700;color:var(--text-muted);min-width:130px;flex-shrink:0;font-size:12px;}
+  .aposta-row-text{color:var(--text);flex:1;line-height:1.6;}
+  .stmt-box{
+    font-size:12.5px;font-style:italic;
+    color:#fbbf24;
+    background:rgba(251,191,36,.07);
+    border:1px solid rgba(251,191,36,.2);
+    border-radius:var(--r-sm);
+    padding:10px 13px;margin-top:8px;
+    line-height:1.6;
+  }
+  .fonte-tag{
+    font-size:11px;color:var(--brand);
+    background:var(--brand-glow);
+    border:1px solid rgba(255,107,0,.2);
+    padding:2px 8px;border-radius:20px;
+    display:inline-block;margin-top:10px;
+  }
+
+  /* ── MODO VÉSPERA ────────────────────────── */
+  .vespera-panel{
+    display:none;
+    background:var(--surface);
+    border:1px solid var(--border-hot);
+    border-radius:var(--r);
+    padding:22px;
+    margin-bottom:28px;
+  }
+  .vespera-panel.show{display:block;animation:fadeIn .3s ease;}
+  .vespera-panel h2{
+    font-size:15px;font-weight:800;color:var(--brand);
+    margin-bottom:16px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .vespera-list{list-style:none;}
+  .vespera-list li{
+    font-size:13px;padding:8px 0;border-bottom:1px solid var(--border);
+    display:flex;align-items:flex-start;gap:10px;line-height:1.55;
+  }
+  .vespera-list li:last-child{border-bottom:none;}
+  .vespera-dot{
+    width:6px;height:6px;border-radius:50%;
+    background:var(--brand);flex-shrink:0;margin-top:5px;
+  }
+
+  /* ── PROGRESS / SCORE ─────────────────────── */
+  .progress-bar{
+    height:3px;background:var(--surface3);
+    border-radius:4px;overflow:hidden;margin-top:10px;
+  }
+  .progress-fill{height:100%;background:var(--brand);border-radius:4px;transition:width .4s ease;}
+
+  /* ── FOOTER ──────────────────────────────── */
+  footer{
+    text-align:center;padding:28px;
+    font-size:11px;color:var(--text-dim);
+    border-top:1px solid var(--border);
+  }
+  footer span{color:var(--brand);}
+
+  /* ── RESPONSIVE ──────────────────────────── */
+  @media(max-width:600px){
+    .header-inner{padding:0 4px;}
+    main{padding:20px 12px 60px;}
+    .tab-btn{padding:9px 12px;font-size:11px;}
+    .literal-head h3{font-size:13px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══════════════════════════════ -->
+<header>
+  <div class="header-inner">
+    <div class="brand">⚖️ Delta</div>
+    <div class="title-block">
+      <h1>Poderes da Administração</h1>
+      <span class="badge">Delegado PC · PF · Cebraspe</span>
+    </div>
+    <button class="vespera-btn" id="vesperaToggle" onclick="toggleVespera()">⚡ Modo Véspera</button>
+  </div>
+</header>
+
+<!-- ═══ MAIN ══════════════════════════════════ -->
+<main>
+
+  <!-- VÉSPERA PANEL -->
+  <div class="vespera-panel" id="vesperaPanel">
+    <h2>⚡ Véspera — O Que Não Pode Faltar</h2>
+    <ul class="vespera-list">
+      <li><span class="vespera-dot"></span><strong>Delegação do poder de polícia:</strong> STF (Tema 532) admite <mark class="g">fiscalização + consentimento + sanção</mark> para PJ de direito privado da Adm. Indireta com capital <mark class="b">majoritariamente público</mark>, prestadora de <mark class="b">serviço público exclusivo do Estado</mark>, em <mark class="b">regime não concorrencial</mark>. STJ admite apenas fiscalização e consentimento. Fase <mark class="r">absolutamente indelegável</mark>: ordem de polícia (função legislativa).</li>
+      <li><span class="vespera-dot"></span><strong>Abuso de poder:</strong> Excesso = vício de <mark class="b">competência</mark> (<mark class="g">sanável</mark>). Desvio = vício de <mark class="r">finalidade</mark> (<mark class="r">insanável</mark>). Pode ser comissivo <em>ou omissivo</em>.</li>
+      <li><span class="vespera-dot"></span><strong>Poder disciplinar:</strong> <mark class="r">não</mark> é sempre discricionário — é <mark class="b">vinculado quanto ao dever de punir</mark>, discricionário apenas na graduação da pena. Súmula 650/STJ: art. 132 da Lei 8.112/90 = demissão obrigatória.</li>
+      <li><span class="vespera-dot"></span><strong>Hierarquia:</strong> só interna (mesma PJ). Entre Adm. Direta e Indireta: existe <mark class="p">vinculação/tutela</mark>, não hierarquia. Não há hierarquia nas funções jurisdicional e legislativa, nem sobre órgãos consultivos.</li>
+      <li><span class="vespera-dot"></span><strong>Regulamento executivo x autônomo:</strong> executivo (art. 84, IV) = fiel execução da lei, <mark class="r">não inova</mark>, <mark class="r">indelegável</mark>. Autônomo (art. 84, VI) = <mark class="g">inova</mark>, <mark class="g">delegável</mark> a Ministro, PGR ou AGU.</li>
+      <li><span class="vespera-dot"></span><strong>Vedações à delegação (CENORA):</strong> <mark class="y">CE</mark>-competência exclusiva · <mark class="y">NO</mark>-normativos · <mark class="y">RA</mark>-recurso administrativo. Delegação não exige hierarquia (art. 12 Lei 9784/99). Avocação: só dentro da linha hierárquica, sempre <mark class="b">temporária</mark> e <mark class="b">excepcional</mark>.</li>
+      <li><span class="vespera-dot"></span><strong>Ciclos do poder de polícia:</strong> (1) Ordem → (2) Consentimento (licença = vinculado; autorização = discricionário) → (3) Fiscalização → (4) Sanção. Ordem e fiscalização <em>sempre existem</em>; consentimento nem sempre.</li>
+      <li><span class="vespera-dot"></span><strong>Autoexecutoriedade:</strong> aplicação da multa = <mark class="g">autoexecutória</mark>. Cobrança (se não paga) = <mark class="r">execução fiscal</mark> (não autoexecutória).</li>
+      <li><span class="vespera-dot"></span><strong>Guardas Municipais:</strong> integram o SUSP (ADPF 995/STF/2023) mas <mark class="r">não podem</mark> realizar atividades ostensivas ou investigativas típicas de PM e PC — restringem-se à proteção de bens, serviços e instalações municipais (STJ 2022-2024).</li>
+    </ul>
+  </div>
+
+  <!-- SEARCH -->
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" class="search-input" id="searchInput" placeholder="Buscar em todos os blocos..." oninput="handleSearch()" />
+    <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
+  </div>
+
+  <!-- TABS NAV -->
+  <nav class="tabs-nav" role="tablist">
+    <button class="tab-btn active" onclick="showTab('literais',this)">📌 Literais</button>
+    <button class="tab-btn" onclick="showTab('pegadinhas',this)">🔥 Pegadinhas</button>
+    <button class="tab-btn" onclick="showTab('juris',this)">🏛️ Jurisprudência</button>
+    <button class="tab-btn" onclick="showTab('apostas',this)">🎯 Apostas 2026</button>
+  </nav>
+
+  <!-- ═══ TAB: LITERAIS ═══════════════════════ -->
+  <div class="tab-panel active" id="tab-literais">
+    <div class="sec-header">
+      <h2>Textos Literais Mais Cobrados</h2>
+      <span class="tag">5 dispositivos</span>
+    </div>
+
+    <!-- Art. 78 CTN -->
+    <div class="literal-card searchable">
+      <div class="literal-head" onclick="toggle(this)">
+        <div class="literal-head-left">
+          <span class="art-badge">Art. 78 CTN</span>
+          <h3>Definição de Poder de Polícia</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="freq-badge freq-alta">Altíssima</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="literal-body">
+        <div class="blockquote">"Considera-se poder de polícia atividade da administração pública que, <strong>limitando ou disciplinando direito, interesse ou liberdade</strong>, regula a prática de ato ou abstenção de fato, em razão de interesse público concernente à <strong>segurança, à higiene, à ordem, aos costumes</strong>, à disciplina da produção e do mercado, ao exercício de atividades econômicas dependentes de concessão ou autorização do Poder Público, à <strong>tranquilidade pública</strong> ou ao respeito à propriedade e aos direitos individuais ou coletivos."</div>
+        <div class="detail-row">
+          <span class="detail-icon">🔄</span>
+          <div><span class="detail-label">Palavra Trocada:</span><span class="detail-text">A banca substitui <mark class="r">"limitando ou disciplinando"</mark> por <mark class="r">"suprimindo"</mark> — poder de polícia <mark class="g">restringe</mark>, nunca suprime definitivamente.</span></div>
+        </div>
+        <div class="detail-row">
+          <span class="detail-icon">⚠️</span>
+          <div><span class="detail-label">Erro Frequente:</span><span class="detail-text">Afirmar que o poder de polícia incide <mark class="r">apenas sobre segurança pública</mark> — o CTN lista higiene, ordem, costumes, produção, mercado, atividades econômicas etc.</span></div>
+        </div>
+        <div class="detail-row">
+          <span class="detail-icon">📊</span>
+          <div><span class="detail-label">Frequência:</span><span class="detail-text">Base de qualquer questão sobre poder de polícia; cobrada PC-PE/2023, PC-MS/2021, PF/2018 (discursiva).</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Art. 84 IV e VI -->
+    <div class="literal-card searchable">
+      <div class="literal-head" onclick="toggle(this)">
+        <div class="literal-head-left">
+          <span class="art-badge">Art. 84, IV e VI — CF</span>
+          <h3>Regulamentos Executivo e Autônomo</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="freq-badge freq-alta">Altíssima</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="literal-body">
+        <div class="blockquote"><strong>Inc. IV:</strong> "sancionar, promulgar e fazer publicar as leis, bem como expedir decretos e regulamentos para sua <mark class="b">fiel execução</mark>;"<br/><br/><strong>Inc. VI:</strong> "dispor, mediante decreto, sobre: a) organização e funcionamento da administração federal, quando <mark class="r">não implicar aumento de despesa nem criação ou extinção de órgãos públicos</mark>; b) extinção de funções ou cargos públicos, quando vagos."</div>
+        <div class="detail-row">
+          <span class="detail-icon">🔄</span>
+          <div><span class="detail-label">Delegabilidade:</span><span class="detail-text">Regulamento executivo (inc. IV) = <mark class="r">indelegável</mark>. Regulamento autônomo (inc. VI) = <mark class="g">delegável</mark> a Ministro de Estado, PGR ou AGU.</span></div>
+        </div>
+        <div class="detail-row">
+          <span class="detail-icon">⚠️</span>
+          <div><span class="detail-label">Inovação:</span><span class="detail-text">Inc. IV = <mark class="r">não inova</mark> o ordenamento (ato normativo secundário). Inc. VI = <mark class="g">inova</mark> (ato normativo primário, controle de constitucionalidade direto).</span></div>
+        </div>
+        <div class="detail-row">
+          <span class="detail-icon">📋</span>
+          <div><span class="detail-label">Por simetria:</span><span class="detail-text">Competência estende-se a Governadores e Prefeitos por simetria constitucional.</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Art. 13 Lei 9784/99 -->
+    <div class="literal-card searchable">
+      <div class="literal-head" onclick="toggle(this)">
+        <div class="literal-head-left">
+          <span class="art-badge">Art. 13 — Lei 9.784/99</span>
+          <h3>Vedações à Delegação — CENORA</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="freq-badge freq-alta">Alta</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="literal-body">
+        <div class="blockquote">"Não podem ser objeto de delegação:<br/>I - a <strong>edição de atos de caráter normativo</strong>;<br/>II - a <strong>decisão de recursos administrativos</strong>;<br/>III - as <strong>matérias de competência exclusiva</strong> do órgão ou autoridade."</div>
+        <div class="mnemonic">🧠 CENORA = <strong>CE</strong>-competência exclusiva &nbsp;·&nbsp; <strong>NO</strong>-normativos &nbsp;·&nbsp; <strong>RA</strong>-recurso adm.</div>
+        <div class="detail-row" style="margin-top:12px">
+          <span class="detail-icon">🔄</span>
+          <div><span class="detail-label">Palavra Trocada:</span><span class="detail-text"><mark class="r">"A decisão de recursos administrativos pode ser delegada, desde que publicada em meio oficial"</mark> — FALSO; é vedação absoluta.</span></div>
+        </div>
+        <div class="detail-row">
+          <span class="detail-icon">⚠️</span>
+          <div><span class="detail-label">Art. 12 — Atenção:</span><span class="detail-text">A delegação <mark class="g">não exige hierarquia</mark> (art. 12 Lei 9784/99) — pode ocorrer para órgãos não subordinados por razões técnicas, sociais, econômicas, jurídicas ou territoriais.</span></div>
+        </div>
+        <div class="detail-row">
+          <span class="detail-icon">📊</span>
+          <div><span class="detail-label">Frequência:</span><span class="detail-text">Cobrado Delegado PR/2021 (itens sobre delegação e avocação) e PC-DF/2026.</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Art. 15 Lei 9784/99 -->
+    <div class="literal-card searchable">
+      <div class="literal-head" onclick="toggle(this)">
+        <div class="literal-head-left">
+          <span class="art-badge">Art. 15 — Lei 9.784/99</span>
+          <h3>Avocação Temporária</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="freq-badge freq-alta">Alta</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="literal-body">
+        <div class="blockquote">"Será permitida, em <strong>caráter excepcional</strong> e por <strong>motivos relevantes devidamente justificados</strong>, a <strong>avocação temporária</strong> de competência atribuída a órgão hierarquicamente inferior."</div>
+        <div class="detail-row">
+          <span class="detail-icon">🔑</span>
+          <div><span class="detail-label">Características triplas:</span><span class="detail-text"><mark class="b">Excepcional</mark> + <mark class="b">Temporária</mark> + <mark class="b">Motivos justificados</mark> — todas obrigatórias.</span></div>
+        </div>
+        <div class="detail-row">
+          <span class="detail-icon">⚠️</span>
+          <div><span class="detail-label">Erro Frequente:</span><span class="detail-text">Afirmar que a avocação pode ocorrer entre órgãos de PJs distintas — avocação <mark class="r">pressupõe hierarquia</mark>, inexistente entre Adm. Direta e Indireta.</span></div>
+        </div>
+        <div class="detail-row">
+          <span class="detail-icon">🔄</span>
+          <div><span class="detail-label">Delegação x Avocação:</span><span class="detail-text">Delegação: NÃO exige hierarquia. Avocação: <mark class="r">exige hierarquia</mark> — apenas dentro da linha hierárquica.</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Art. 1º Lei 9873/99 -->
+    <div class="literal-card searchable">
+      <div class="literal-head" onclick="toggle(this)">
+        <div class="literal-head-left">
+          <span class="art-badge">Art. 1º — Lei 9.873/99</span>
+          <h3>Prescrição do Poder de Polícia</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="freq-badge freq-media">Média-Alta</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="literal-body">
+        <div class="blockquote">"Prescreve em <strong>cinco anos</strong> a ação punitiva da Administração Pública Federal, direta e indireta, no exercício do poder de polícia, objetivando apurar infração à legislação em vigor, contados da data da prática do ato ou, no caso de infração permanente ou continuada, <strong>do dia em que tiver cessado</strong>."</div>
+        <div class="detail-row">
+          <span class="detail-icon">⚠️</span>
+          <div><span class="detail-label">Prescrição intercorrente:</span><span class="detail-text">§1º: incide em procedimento administrativo paralisado por mais de <mark class="b">3 anos</mark> — prazo distinto do quinquenal de punição.</span></div>
+        </div>
+        <div class="detail-row">
+          <span class="detail-icon">🔄</span>
+          <div><span class="detail-label">E/M sem lei própria:</span><span class="detail-text">Lei 9.873/99 aplica-se apenas à <mark class="b">Administração Federal</mark>. Para Estados e Municípios sem lei específica: prazo quinquenal do Decreto 20.910/32.</span></div>
+        </div>
+        <div class="detail-row">
+          <span class="detail-icon">🏛️</span>
+          <div><span class="detail-label">TCU:</span><span class="detail-text">STF (MS 36.990/DF, 2023): sanções administrativas do TCU são prescritíveis, aplicando-se os prazos da Lei 9.873/99.</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /literais -->
+
+  <!-- ═══ TAB: PEGADINHAS ══════════════════════ -->
+  <div class="tab-panel" id="tab-pegadinhas">
+    <div class="sec-header">
+      <h2>Pegadinhas Clássicas</h2>
+      <span class="tag">8 traps · ordem de incidência</span>
+    </div>
+
+    <!-- TRAP 1 -->
+    <div class="trap-card searchable">
+      <div class="trap-head" onclick="toggle(this)">
+        <div class="trap-head-left">
+          <span class="fire-badge">🔥🔥🔥</span>
+          <h3>Delegação do poder de polícia a qualquer PJ privada</h3>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="trap-body">
+        <div class="false-stmt">"O poder de polícia, inclusive na fase sancionatória, não pode ser delegado a entidades de direito privado integrantes da Administração Indireta, por ser atividade exclusiva do Estado."</div>
+        <div class="verdict-row">
+          <span class="verdict-icon-wrong">✗</span>
+          <div><span class="verdict-label" style="color:#f87171">O ERRO:</span> Ignora o <mark class="b">Tema 532 do STF (RE 633782/2020)</mark>, que admitiu a delegação até da <mark class="g">fase sancionatória</mark> para PJ de direito privado da Adm. Indireta com <mark class="y">capital majoritariamente público</mark>, que preste <mark class="y">exclusivamente serviço público do Estado</mark> e em <mark class="y">regime não concorrencial</mark>.</div>
+        </div>
+        <div class="verdict-row">
+          <span class="verdict-icon-right">✓</span>
+          <div><span class="verdict-label" style="color:#4ade80">O CORRETO:</span> STF: consentimento + fiscalização + <mark class="g">sanção</mark> delegáveis. STJ: apenas fiscalização e consentimento. Fase <mark class="r">absolutamente indelegável</mark>: <mark class="r">ordem de polícia</mark> (função legislativa). Atenção ao enunciado para saber qual tribunal é cobrado.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRAP 2 -->
+    <div class="trap-card searchable">
+      <div class="trap-head" onclick="toggle(this)">
+        <div class="trap-head-left">
+          <span class="fire-badge">🔥🔥🔥</span>
+          <h3>Excesso de poder = vício insanável; desvio = sanável (invertido)</h3>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="trap-body">
+        <div class="false-stmt">"O excesso de poder gera vício insanável no ato administrativo, enquanto o desvio de poder gera vício sanável."</div>
+        <div class="verdict-row">
+          <span class="verdict-icon-wrong">✗</span>
+          <div><span class="verdict-label" style="color:#f87171">O ERRO:</span> Está <mark class="r">invertido</mark>. Excesso de poder = vício de <mark class="b">competência</mark> = <mark class="g">sanável</mark> (convalidável). Desvio de poder = vício de <mark class="r">finalidade</mark> = <mark class="r">insanável</mark>.</div>
+        </div>
+        <div class="verdict-row">
+          <span class="verdict-icon-right">✓</span>
+          <div><span class="verdict-label" style="color:#4ade80">O CORRETO:</span><br/>
+          → Excesso de poder = <mark class="b">vício de competência</mark> → <mark class="g">sanável</mark><br/>
+          → Desvio de poder = <mark class="r">vício de finalidade</mark> → <mark class="r">insanável</mark><br/>
+          Ambos ensejam nulidade do ato; o abuso pode ser comissivo <em>ou omissivo</em>.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRAP 3 -->
+    <div class="trap-card searchable">
+      <div class="trap-head" onclick="toggle(this)">
+        <div class="trap-head-left">
+          <span class="fire-badge">🔥🔥🔥</span>
+          <h3>Poder disciplinar é SEMPRE discricionário</h3>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="trap-body">
+        <div class="false-stmt">"O poder disciplinar é exercido de forma eminentemente discricionária, cabendo ao administrador a escolha da sanção mais adequada em todos os casos."</div>
+        <div class="verdict-row">
+          <span class="verdict-icon-wrong">✗</span>
+          <div><span class="verdict-label" style="color:#f87171">O ERRO:</span> <mark class="r">Parcialmente falsa</mark>. Verificada a infração, o dever de punir é <mark class="b">vinculado</mark> — não há discrição para perdoar. A discricionariedade existe apenas na <mark class="p">graduação da pena</mark> ou escolha entre sanções cabíveis, quando a lei não define uma sanção específica.</div>
+        </div>
+        <div class="verdict-row">
+          <span class="verdict-icon-right">✓</span>
+          <div><span class="verdict-label" style="color:#4ade80">O CORRETO:</span> <mark class="b">Súmula 650/STJ</mark>: quando configuradas as hipóteses do art. 132 da Lei 8.112/90, a autoridade <mark class="r">não tem discricionariedade</mark> — a demissão é obrigatória.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRAP 4 -->
+    <div class="trap-card searchable">
+      <div class="trap-head" onclick="toggle(this)">
+        <div class="trap-head-left">
+          <span class="fire-badge">🔥🔥🔥</span>
+          <h3>Hierarquia entre Administração Direta e Indireta</h3>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="trap-body">
+        <div class="false-stmt">"O poder hierárquico da Administração Direta se estende às entidades da Administração Indireta, permitindo ao Ministério supervisionar e rever seus atos."</div>
+        <div class="verdict-row">
+          <span class="verdict-icon-wrong">✗</span>
+          <div><span class="verdict-label" style="color:#f87171">O ERRO:</span> <mark class="r">Não há hierarquia</mark> entre Adm. Direta e Indireta. O poder hierárquico é <mark class="b">interno</mark> (dentro da mesma PJ). O que existe é <mark class="p">vinculação/tutela/controle ministerial finalístico</mark>.</div>
+        </div>
+        <div class="verdict-row">
+          <span class="verdict-icon-right">✓</span>
+          <div><span class="verdict-label" style="color:#4ade80">O CORRETO:</span> Poder hierárquico = estruturação interna. Adm. Indireta tem <mark class="g">autonomia</mark>. Também <mark class="r">não há</mark> hierarquia nas funções jurisdicional e legislativa, nem sobre órgãos consultivos.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRAP 5 -->
+    <div class="trap-card searchable">
+      <div class="trap-head" onclick="toggle(this)">
+        <div class="trap-head-left">
+          <span class="fire-badge">🔥🔥</span>
+          <h3>Cobrança de multa tem autoexecutoriedade</h3>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="trap-body">
+        <div class="false-stmt">"A aplicação e a cobrança de multa decorrente do poder de polícia são dotadas de autoexecutoriedade."</div>
+        <div class="verdict-row">
+          <span class="verdict-icon-wrong">✗</span>
+          <div><span class="verdict-label" style="color:#f87171">O ERRO:</span> A <mark class="g">aplicação</mark> da multa tem autoexecutoriedade. A <mark class="r">cobrança</mark> (inadimplemento), não — deve ser realizada via <mark class="b">execução fiscal</mark>.</div>
+        </div>
+        <div class="verdict-row">
+          <span class="verdict-icon-right">✓</span>
+          <div><span class="verdict-label" style="color:#4ade80">O CORRETO:</span><br/>→ Aplicação da multa = <mark class="g">autoexecutória</mark><br/>→ Cobrança da multa não paga = <mark class="r">execução fiscal</mark> (precisa do Judiciário)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRAP 6 -->
+    <div class="trap-card searchable">
+      <div class="trap-head" onclick="toggle(this)">
+        <div class="trap-head-left">
+          <span class="fire-badge">🔥🔥</span>
+          <h3>Delegação de competência exige hierarquia</h3>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="trap-body">
+        <div class="false-stmt">"A delegação de competência somente pode ocorrer entre órgãos com relação de subordinação hierárquica."</div>
+        <div class="verdict-row">
+          <span class="verdict-icon-wrong">✗</span>
+          <div><span class="verdict-label" style="color:#f87171">O ERRO:</span> Art. 12 da Lei 9.784/99 expressamente admite delegação <mark class="g">ainda que os órgãos não sejam hierarquicamente subordinados</mark>, por razões técnicas, sociais, econômicas, jurídicas ou territoriais.</div>
+        </div>
+        <div class="verdict-row">
+          <span class="verdict-icon-right">✓</span>
+          <div><span class="verdict-label" style="color:#4ade80">O CORRETO:</span> Delegação → <mark class="g">não exige</mark> hierarquia. Avocação → <mark class="r">exige</mark> hierarquia (só dentro da linha hierárquica, sempre temporária e excepcional). Delegação pode ser de órgão superior a inferior <em>ou entre iguais</em>.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRAP 7 -->
+    <div class="trap-card searchable">
+      <div class="trap-head" onclick="toggle(this)">
+        <div class="trap-head-left">
+          <span class="fire-badge">🔥🔥</span>
+          <h3>Poder disciplinar atinge qualquer particular</h3>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="trap-body">
+        <div class="false-stmt">"O poder disciplinar da Administração Pública alcança todos os particulares que violem normas administrativas."</div>
+        <div class="verdict-row">
+          <span class="verdict-icon-wrong">✗</span>
+          <div><span class="verdict-label" style="color:#f87171">O ERRO:</span> Poder disciplinar <mark class="r">pressupõe vínculo especial</mark> (funcional ou contratual) com a Administração. Particulares sem vínculo são punidos pelo <mark class="b">poder de polícia</mark> (supremacia geral).</div>
+        </div>
+        <div class="verdict-row">
+          <span class="verdict-icon-right">✓</span>
+          <div><span class="verdict-label" style="color:#4ade80">O CORRETO:</span><br/>→ Sanção a <mark class="b">servidor público</mark> (vínculo específico) = <mark class="b">poder disciplinar</mark><br/>→ Multa a <mark class="r">particular sem vínculo</mark> = <mark class="r">poder de polícia</mark> (supremacia geral)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRAP 8 -->
+    <div class="trap-card searchable">
+      <div class="trap-head" onclick="toggle(this)">
+        <div class="trap-head-left">
+          <span class="fire-badge">🔥</span>
+          <h3>Conceitos jurídicos indeterminados eliminam discricionariedade</h3>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="trap-body">
+        <div class="false-stmt">"A utilização de conceitos jurídicos indeterminados na lei não gera discricionariedade administrativa, pois o administrador deve interpretá-los objetivamente."</div>
+        <div class="verdict-row">
+          <span class="verdict-icon-wrong">✗</span>
+          <div><span class="verdict-label" style="color:#f87171">O ERRO:</span> Quando a delimitação exige <mark class="b">apreciação subjetiva/valoração</mark>, há discricionariedade. Ex.: "passeata tumultuosa", "espetáculo pornográfico".</div>
+        </div>
+        <div class="verdict-row">
+          <span class="verdict-icon-right">✓</span>
+          <div><span class="verdict-label" style="color:#4ade80">O CORRETO:</span> Conceitos indeterminados com necessidade de valoração <mark class="g">geram discricionariedade</mark>. Controle judicial: <mark class="b">princípio da razoabilidade e proporcionalidade</mark> (limite constitucional). O Judiciário <mark class="r">não substitui o mérito</mark> — declara a ilegalidade do ato irrazoável.</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /pegadinhas -->
+
+  <!-- ═══ TAB: JURISPRUDÊNCIA ══════════════════ -->
+  <div class="tab-panel" id="tab-juris">
+    <div class="sec-header">
+      <h2>Jurisprudência STF e STJ</h2>
+      <span class="tag">5 julgados essenciais</span>
+    </div>
+
+    <!-- STF RE 633782 -->
+    <div class="juris-card searchable">
+      <div class="juris-head" onclick="toggle(this)">
+        <div class="juris-head-left">
+          <span class="court-badge">STF · RE 633782 · 2020</span>
+          <h3>Delegação do Poder de Polícia — Tema 532 RG</h3>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="juris-body">
+        <div class="tese-box">"É constitucional a delegação do poder de polícia, por meio de lei, a <strong>pessoas jurídicas de direito privado</strong> integrantes da Administração Pública indireta de <strong>capital social majoritariamente público</strong> que prestem <strong>exclusivamente serviço público de atuação própria do Estado</strong> e em <strong>regime não concorrencial</strong>."</div>
+        <div class="detail-row">
+          <span class="detail-icon">🏛️</span>
+          <div><span class="detail-label">Impacto:</span><span class="detail-text">STF superou entendimento do STJ — admitiu inclusive a <mark class="g">fase sancionatória</mark>. A única fase absolutamente indelegável é a <mark class="r">ordem de polícia</mark> (função legislativa). Para o STJ, apenas fiscalização e consentimento.</span></div>
+        </div>
+        <div class="detail-row">
+          <span class="detail-icon">⚠️</span>
+          <div><span class="detail-label">CCEE (STJ 2023):</span><span class="detail-text">O precedente <mark class="r">não se aplica</mark> à CCEE — associação privada que não integra a Adm. Pública, sem capital majoritariamente público (STJ REsp 1.913.122/DF).</span></div>
+        </div>
+        <div class="simulado-box">
+          <div class="simulado-label">📝 Como a banca vai formular</div>
+          <div class="simulado-q">"De acordo com o STF, é constitucional a delegação do poder de polícia, inclusive para aplicação de sanções, a pessoas jurídicas de direito privado que integrem a Administração Indireta, <mark class="r">independentemente da natureza do capital social</mark>."</div>
+          <div class="simulado-row"><span class="g-label">✓ Gabarito:</span>&nbsp;ERRADO — o STF exige capital <strong>majoritariamente público</strong> + regime não concorrencial.</div>
+          <div class="simulado-row"><span class="d-label">✗ Distrator:</span>&nbsp;o candidato lembra que o STF admitiu a delegação e marca CERTO, ignorando os requisitos da tese.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Súmula 650 STJ -->
+    <div class="juris-card searchable">
+      <div class="juris-head" onclick="toggle(this)">
+        <div class="juris-head-left">
+          <span class="court-badge">STJ · Súmula 650 · 2021</span>
+          <h3>Discricionariedade no Poder Disciplinar — Art. 132 Lei 8.112/90</h3>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="juris-body">
+        <div class="tese-box">"A autoridade administrativa <strong>não dispõe de discricionariedade</strong> para aplicar ao servidor pena diversa de demissão quando <strong>caracterizadas as hipóteses previstas no art. 132 da Lei nº 8.112/90</strong>."</div>
+        <div class="detail-row">
+          <span class="detail-icon">🏛️</span>
+          <div><span class="detail-label">Impacto:</span><span class="detail-text">Desmonta a afirmação de que poder disciplinar é "sempre discricionário". Nas hipóteses do art. 132, o ato é <mark class="b">vinculado</mark> — a demissão é obrigatória, sem margem de escolha.</span></div>
+        </div>
+        <div class="simulado-box">
+          <div class="simulado-label">📝 Como a banca vai formular</div>
+          <div class="simulado-q">"A autoridade administrativa dispõe de discricionariedade para, analisando as circunstâncias do caso concreto, aplicar pena menos gravosa ao servidor que praticou conduta tipificada no art. 132 da Lei 8.112/90, atendendo ao princípio da proporcionalidade."</div>
+          <div class="simulado-row"><span class="g-label">✓ Gabarito:</span>&nbsp;ERRADO — Súmula 650/STJ veda a discricionariedade nesse caso.</div>
+          <div class="simulado-row"><span class="d-label">✗ Distrator:</span>&nbsp;invocar proporcionalidade. A Súmula fecha a margem de escolha expressamente.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Súmula 510 STF -->
+    <div class="juris-card searchable">
+      <div class="juris-head" onclick="toggle(this)">
+        <div class="juris-head-left">
+          <span class="court-badge">STF · Súmula 510</span>
+          <h3>MS contra Ato de Autoridade Delegada</h3>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="juris-body">
+        <div class="tese-box">"Praticado o ato por autoridade, no exercício de competência delegada, <strong>contra ela cabe o mandado de segurança</strong> ou a medida judicial."</div>
+        <div class="detail-row">
+          <span class="detail-icon">🏛️</span>
+          <div><span class="detail-label">Impacto:</span><span class="detail-text">MS deve ser impetrado contra quem <mark class="b">praticou o ato</mark> (autoridade delegada). O foro da autoridade <mark class="r">delegante não se transmite</mark> à autoridade delegada (MS 24.732 MC/DF — STF).</span></div>
+        </div>
+        <div class="simulado-box">
+          <div class="simulado-label">📝 Como a banca vai formular</div>
+          <div class="simulado-q">"Praticado ato administrativo por servidor no exercício de competência delegada, o mandado de segurança deverá ser impetrado contra a autoridade delegante, que é quem detém a competência originária."</div>
+          <div class="simulado-row"><span class="g-label">✓ Gabarito:</span>&nbsp;ERRADO — MS é contra quem praticou o ato (delegada).</div>
+          <div class="simulado-row"><span class="d-label">✗ Distrator:</span>&nbsp;confundir competência originária com legitimidade passiva no MS.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STJ RMS 20481 -->
+    <div class="juris-card searchable">
+      <div class="juris-head" onclick="toggle(this)">
+        <div class="juris-head-left">
+          <span class="court-badge">STJ · RMS 20481</span>
+          <h3>Controle Judicial do Mérito Administrativo</h3>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="juris-body">
+        <div class="tese-box">"A atuação do Poder Judiciário circunscreve-se ao campo da <strong>regularidade do procedimento</strong> e à <strong>legalidade do ato</strong>, sendo-lhe defesa qualquer incursão no <strong>mérito administrativo</strong>, a fim de aferir o grau de conveniência e oportunidade."</div>
+        <div class="detail-row">
+          <span class="detail-icon">⚖️</span>
+          <div><span class="detail-label">Doutrina moderna:</span><span class="detail-text">Não aceita análise do mérito pelo Judiciário, mas permite <mark class="g">verificação da validade à luz da legalidade e dos princípios constitucionais</mark> (razoabilidade e proporcionalidade). O Judiciário <mark class="r">não substitui</mark> o mérito — declara a ilegalidade.</span></div>
+        </div>
+        <div class="simulado-box">
+          <div class="simulado-label">📝 Como a banca vai formular</div>
+          <div class="simulado-q">"O Poder Judiciário pode examinar os atos administrativos discricionários em todos os seus aspectos, substituindo o juízo de conveniência e oportunidade da Administração quando verificar que a escolha foi irrazoável."</div>
+          <div class="simulado-row"><span class="g-label">✓ Gabarito:</span>&nbsp;ERRADO — declarar ilegalidade ≠ substituir o mérito.</div>
+          <div class="simulado-row"><span class="d-label">✗ Distrator:</span>&nbsp;confundir controle de razoabilidade com substituição do mérito administrativo.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STF ADPF 995 -->
+    <div class="juris-card searchable">
+      <div class="juris-head" onclick="toggle(this)">
+        <div class="juris-head-left">
+          <span class="court-badge">STF · ADPF 995/DF · 2023</span>
+          <h3>Guardas Municipais e SUSP — Limites Constitucionais</h3>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="juris-body">
+        <div class="tese-box">"As guardas municipais são reconhecidamente <strong>órgãos de segurança pública</strong> e integram o <strong>Sistema Único de Segurança Pública (SUSP)</strong>. [...] Desse modo, a Guarda Municipal é órgão de segurança pública, integrante do SUSP." — STF ADPF 995/DF (2023) <br/><br/>⚠️ CONTRAPONTO STJ: "A guarda municipal [...] não pode exercer atribuições das polícias civis e militares; a sua atuação deve se limitar à <strong>proteção de bens, serviços e instalações do município</strong>." — STJ REsp 1977119-SP (2022)</div>
+        <div class="detail-row">
+          <span class="detail-icon">🎯</span>
+          <div><span class="detail-label">Ponto crítico:</span><span class="detail-text">Integrar o SUSP (STF) <mark class="r">não amplia</mark> as atribuições constitucionais (STJ). Guardas municipais <mark class="r">não podem</mark>: patrulhar pontos de tráfico, realizar buscas pessoais genéricas, investigar crimes não relacionados aos bens municipais.</span></div>
+        </div>
+        <div class="simulado-box">
+          <div class="simulado-label">📝 Como a banca vai formular</div>
+          <div class="simulado-q">"As guardas municipais, por integrarem o SUSP conforme reconhecido pelo STF, possuem competência para realizar policiamento ostensivo e investigar crimes de tráfico em seu território."</div>
+          <div class="simulado-row"><span class="g-label">✓ Gabarito:</span>&nbsp;ERRADO — integração ao SUSP ≠ ampliação das atribuições.</div>
+          <div class="simulado-row"><span class="d-label">✗ Distrator:</span>&nbsp;lembrar do ADPF 995 e marcar CERTO, esquecendo o limitador do STJ.</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /juris -->
+
+  <!-- ═══ TAB: APOSTAS 2026 ══════════════════════ -->
+  <div class="tab-panel" id="tab-apostas">
+    <div class="sec-header">
+      <h2>Apostas 2026</h2>
+      <span class="tag">PC-DF · PF · PC-PE · Cebraspe</span>
+    </div>
+
+    <!-- APOSTA 1 -->
+    <div class="aposta-card searchable">
+      <div class="aposta-head" onclick="toggle(this)">
+        <div class="aposta-head-left">
+          <span class="aposta-num">1</span>
+          <h3>Delegação do Poder de Polícia — STF x STJ</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="level-badge level-certeza">CERTEZA</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="aposta-body">
+        <div class="aposta-row">
+          <span class="aposta-row-label">O que é cobrado</span>
+          <span class="aposta-row-text">Distinção entre STF (Tema 532 — admite sanção) e STJ (apenas fiscalização e consentimento), com foco nos <mark class="b">requisitos da tese do STF</mark> e casos em que a delegação NÃO é admitida (ex.: CCEE).</span>
+        </div>
+        <div class="aposta-row">
+          <span class="aposta-row-label">Por que é tendência</span>
+          <span class="aposta-row-text">Tema 532 consolidado em 2020; provas recentes (PC-DF/2026, PF/2025) exploram os <mark class="y">limites da tese</mark>. O caso CCEE (STJ 2023) adicionou nova camada de distinção.</span>
+        </div>
+        <div class="aposta-row">
+          <span class="aposta-row-label">Assertiva típica</span>
+          <span class="aposta-row-text">
+            <div class="stmt-box">"É constitucional a delegação do poder de polícia, inclusive para aplicação de sanções, a pessoas jurídicas de direito privado que integrem a Administração Indireta, independentemente da natureza do capital social." → <mark class="r">ERRADO</mark> — STF exige capital <strong>majoritariamente público</strong> + regime não concorrencial.</div>
+          </span>
+        </div>
+        <div class="aposta-row">
+          <span class="aposta-row-label">Fonte</span>
+          <span class="aposta-row-text"><span class="fonte-tag">Dizer o Direito — RE 633782</span> <span class="fonte-tag">STJ REsp 1.913.122/DF</span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- APOSTA 2 -->
+    <div class="aposta-card searchable">
+      <div class="aposta-head" onclick="toggle(this)">
+        <div class="aposta-head-left">
+          <span class="aposta-num">2</span>
+          <h3>Ciclos do Poder de Polícia — Fase Absolutamente Indelegável</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="level-badge level-certeza">CERTEZA</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="aposta-body">
+        <div class="aposta-row">
+          <span class="aposta-row-label">O que é cobrado</span>
+          <span class="aposta-row-text">4 fases: <mark class="b">(1) Ordem</mark> → <mark class="b">(2) Consentimento</mark> → <mark class="b">(3) Fiscalização</mark> → <mark class="b">(4) Sanção</mark>. Identificar qual é absolutamente indelegável (<mark class="r">ordem de polícia</mark> = função legislativa). Consentimento: licença (vinculado) x autorização (discricionário).</span>
+        </div>
+        <div class="aposta-row">
+          <span class="aposta-row-label">Por que é tendência</span>
+          <span class="aposta-row-text">Padrão Cebraspe em todas as provas de Delegado pós-2020; a formulação "qual fase é absolutamente indelegável" virou questão clássica.</span>
+        </div>
+        <div class="aposta-row">
+          <span class="aposta-row-label">Assertiva típica</span>
+          <span class="aposta-row-text">
+            <div class="stmt-box">"A fase de consentimento de polícia é a única que não pode ser delegada a entidades da Adm. Indireta." → <mark class="r">ERRADO</mark> — a indelegável é a <strong>ordem de polícia</strong> (função legislativa).</div>
+          </span>
+        </div>
+        <div class="aposta-row">
+          <span class="aposta-row-label">Fonte</span>
+          <span class="aposta-row-text"><span class="fonte-tag">Portal STF Tema 532</span> <span class="fonte-tag">Estratégia Concursos — PC-PE/2023</span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- APOSTA 3 -->
+    <div class="aposta-card searchable">
+      <div class="aposta-head" onclick="toggle(this)">
+        <div class="aposta-head-left">
+          <span class="aposta-num">3</span>
+          <h3>Regulamento Executivo x Autônomo — Delegação e Inovação</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="level-badge level-certeza">CERTEZA</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="aposta-body">
+        <div class="aposta-row">
+          <span class="aposta-row-label">O que é cobrado</span>
+          <span class="aposta-row-text">Distinção art. 84 IV x VI: qual inova o ordenamento; qual admite delegação; para quem pode ser delegado o regulamento autônomo (Ministro de Estado, PGR ou AGU — parágrafo único art. 84).</span>
+        </div>
+        <div class="aposta-row">
+          <span class="aposta-row-label">Por que é tendência</span>
+          <span class="aposta-row-text">Cobrado em PC-PE/2023 Cebraspe em formato de associação de itens; recorrente em discursivas de Delegado. Questão sobre delegabilidade do autônomo é a maior pegadinha do tema.</span>
+        </div>
+        <div class="aposta-row">
+          <span class="aposta-row-label">Assertiva típica</span>
+          <span class="aposta-row-text">
+            <div class="stmt-box">"O regulamento executivo (art. 84, IV, CF) pode ser editado por Ministro de Estado mediante delegação do Presidente da República." → <mark class="r">ERRADO</mark> — o inc. IV é <strong>indelegável</strong>; só o inc. VI admite delegação.</div>
+          </span>
+        </div>
+        <div class="aposta-row">
+          <span class="aposta-row-label">Fonte</span>
+          <span class="aposta-row-text"><span class="fonte-tag">Blog Mege — ENAM 2024</span> <span class="fonte-tag">Estratégia Concursos — Decretos Autônomos</span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- APOSTA 4 -->
+    <div class="aposta-card searchable">
+      <div class="aposta-head" onclick="toggle(this)">
+        <div class="aposta-head-left">
+          <span class="aposta-num">4</span>
+          <h3>Poder Disciplinar x Poder de Polícia — Vínculo Especial</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="level-badge level-alta">ALTA</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="aposta-body">
+        <div class="aposta-row">
+          <span class="aposta-row-label">O que é cobrado</span>
+          <span class="aposta-row-text">Critério central de distinção: <mark class="b">poder disciplinar</mark> exige <mark class="b">vínculo especial</mark> (funcional ou contratual); <mark class="r">poder de polícia</mark> opera sob <mark class="r">supremacia geral</mark> sobre qualquer particular.</span>
+        </div>
+        <div class="aposta-row">
+          <span class="aposta-row-label">Por que é tendência</span>
+          <span class="aposta-row-text">Questão <strong>discursiva clássica</strong> de Delegado Federal (PF/2018 cobrou exatamente: Polícia Judiciária x Polícia Administrativa). Formato oral em provas de Delegado Civil.</span>
+        </div>
+        <div class="aposta-row">
+          <span class="aposta-row-label">Para discursiva/oral</span>
+          <span class="aposta-row-text">
+            <div class="stmt-box">"Diferencie poder disciplinar e poder de polícia, com fundamentos e exemplos concretos."<br/><br/>→ Poder disciplinar: pressupõe vínculo especial (servidor público, contratado). Ex: demissão de servidor. Poder de polícia: supremacia geral sobre qualquer particular, independe de vínculo. Ex: multa de trânsito. A distinção é a chave: <strong>supremacia geral x supremacia especial</strong>.</div>
+          </span>
+        </div>
+        <div class="aposta-row">
+          <span class="aposta-row-label">Fonte</span>
+          <span class="aposta-row-text"><span class="fonte-tag">PF/2018 — questão discursiva</span> <span class="fonte-tag">Estratégia — Delegado BA/2022</span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- APOSTA 5 -->
+    <div class="aposta-card searchable">
+      <div class="aposta-head" onclick="toggle(this)">
+        <div class="aposta-head-left">
+          <span class="aposta-num">5</span>
+          <h3>Guardas Municipais: SUSP x Limites Constitucionais</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="level-badge level-alta">ALTA</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="aposta-body">
+        <div class="aposta-row">
+          <span class="aposta-row-label">O que é cobrado</span>
+          <span class="aposta-row-text">Tensão entre ADPF 995/STF (2023 — integração ao SUSP) e STJ (2022–2024 — limitação de atribuições). A integração ao SUSP <mark class="r">não amplia</mark> as atribuições constitucionais.</span>
+        </div>
+        <div class="aposta-row">
+          <span class="aposta-row-label">Por que é tendência</span>
+          <span class="aposta-row-text">ADPF 995 é de 2023 — tema novo, ainda não assimilado por muitos candidatos. Contradição aparente entre STF e STJ é favorita do Cebraspe para testar raciocínio jurídico.</span>
+        </div>
+        <div class="aposta-row">
+          <span class="aposta-row-label">Assertiva típica</span>
+          <span class="aposta-row-text">
+            <div class="stmt-box">"Em razão do reconhecimento das guardas municipais como integrantes do SUSP pelo STF, passou a ser constitucional o exercício por elas de funções investigativas e ostensivas típicas das polícias civil e militar." → <mark class="r">ERRADO</mark>.</div>
+          </span>
+        </div>
+        <div class="aposta-row">
+          <span class="aposta-row-label">Fonte</span>
+          <span class="aposta-row-text"><span class="fonte-tag">Dizer o Direito — Info 1105 STF</span> <span class="fonte-tag">STJ Info 808 — AgRg HC 833.985</span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- APOSTA 6 -->
+    <div class="aposta-card searchable">
+      <div class="aposta-head" onclick="toggle(this)">
+        <div class="aposta-head-left">
+          <span class="aposta-num">6</span>
+          <h3>Abuso de Poder por Omissão e Controle Judicial</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="level-badge level-media">MÉDIA</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="aposta-body">
+        <div class="aposta-row">
+          <span class="aposta-row-label">O que é cobrado</span>
+          <span class="aposta-row-text">O abuso de poder pode decorrer de <mark class="g">condutas omissivas</mark> (quando o agente deixa de agir como a lei impõe), não apenas comissivas. Tanto em excesso quanto desvio.</span>
+        </div>
+        <div class="aposta-row">
+          <span class="aposta-row-label">Por que é tendência</span>
+          <span class="aposta-row-text">Questão cobrada literalmente no <mark class="b">Delegado MS/2021 Cebraspe</mark> com esse enunciado como CERTO. O padrão Cebraspe repete formulações testadas.</span>
+        </div>
+        <div class="aposta-row">
+          <span class="aposta-row-label">Assertiva típica</span>
+          <span class="aposta-row-text">
+            <div class="stmt-box">"O abuso de poder somente pode decorrer de condutas comissivas dos agentes públicos, uma vez que a omissão não configura exercício de poder administrativo." → <mark class="r">ERRADO</mark> — abuso por omissão existe e configura ilicitude (PC-MS/2021).</div>
+          </span>
+        </div>
+        <div class="aposta-row">
+          <span class="aposta-row-label">Fonte</span>
+          <span class="aposta-row-text"><span class="fonte-tag">Questão Delegado MS/2021 Cebraspe</span> <span class="fonte-tag">QConcursos padrão 2024-25</span></span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /apostas -->
+
+</main>
+
+<footer>
+  Biblioteca de Estudos <span>Delta</span> · Poderes da Administração · Delegado de Polícia
+</footer>
+
+<script>
+// ─── TABS ─────────────────────────────────────
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ─── ACCORDION ────────────────────────────────
+function toggle(head) {
+  const body = head.nextElementSibling;
+  const chevron = head.querySelector('.chevron');
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  if (chevron) chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
+}
+
+// ─── MODO VÉSPERA ─────────────────────────────
+function toggleVespera() {
+  const panel = document.getElementById('vesperaPanel');
+  const btn = document.getElementById('vesperaToggle');
+  const show = !panel.classList.contains('show');
+  panel.classList.toggle('show', show);
+  btn.classList.toggle('active', show);
+  btn.textContent = show ? '✕ Fechar Véspera' : '⚡ Modo Véspera';
+  if (show) panel.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+// ─── SEARCH ───────────────────────────────────
+function handleSearch() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  const clear = document.getElementById('searchClear');
+  clear.style.display = q ? 'block' : 'none';
+  if (!q) {
+    document.querySelectorAll('.searchable').forEach(c => c.style.display = '');
+    return;
+  }
+  // Activate all tabs content for searching
+  document.querySelectorAll('.searchable').forEach(card => {
+    const text = card.innerText.toLowerCase();
+    card.style.display = text.includes(q) ? '' : 'none';
+  });
+}
+function clearSearch() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchClear').style.display = 'none';
+  document.querySelectorAll('.searchable').forEach(c => c.style.display = '');
+}
+
+// ─── AUTO-OPEN FIRST ITEM ON EACH TAB ─────────
+document.querySelectorAll('.tab-panel').forEach(panel => {
+  const first = panel.querySelector('.literal-head, .trap-head, .juris-head, .aposta-head');
+  if (first) {
+    const body = first.nextElementSibling;
+    const chevron = first.querySelector('.chevron');
+    if (body) body.classList.add('open');
+    if (chevron) chevron.style.transform = 'rotate(180deg)';
+  }
+});
+</script>
+</body>
+</html>
