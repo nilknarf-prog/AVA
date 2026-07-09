@@ -1,0 +1,149 @@
+/* ============================================================
+   DELTA · DESIGN TOKENS  (fonte única de verdade)
+   Linkado APÓS o <style> inline de cada página → sobrescreve
+   via ordem de cascata, unificando tema e tipografia sem
+   remover blocos divergentes legados.
+   Fontes: Spectral (display), Public Sans (corpo), IBM Plex Mono (dados)
+   ============================================================ */
+
+:root{
+  /* — Tipografia — */
+  --font-display:'Spectral', Georgia, 'Times New Roman', serif;
+  --font-body:'Public Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono:'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  /* — Marca Delta — */
+  --brand:#ff6b00;
+  --brand-dim:#cc5500;
+  --brand-soft:rgba(255,107,0,.10);
+  --brand-glow:rgba(255,107,0,.10);
+
+  /* — Neutros (tema claro) — */
+  --bg:#f4f6fa;
+  --surface:#ffffff;
+  --surface-hover:#f6f8fb;
+  --surface2:#f1f5f9;
+  --surface3:#e6ebf2;
+  --border:#dbe1ea;
+  --border-hot:#ff6b00;
+  --text:#0f172a;
+  --text-muted:#475569;
+  --text-dim:#64748b;      /* escurecido do #94a3b8 legado → passa AA */
+  --slate:#64748b;
+
+  /* — Semânticas (tema claro) — */
+  --green:#10b981;  --green-bg:rgba(16,185,129,.12);  --green-border:rgba(16,185,129,.25);
+  --amber:#d97706;
+  --yellow:#d97706; --yellow-bg:rgba(217,119,6,.12);  --yellow-border:rgba(217,119,6,.25);
+  --red:#dc2626;    --red-bg:rgba(220,38,38,.10);     --red-border:rgba(220,38,38,.25);
+  --blue:#2563eb;   --blue-bg:rgba(37,99,235,.10);    --blue-border:rgba(37,99,235,.25);
+  --purple:#7c3aed; --purple-bg:rgba(124,58,237,.10); --purple-border:rgba(124,58,237,.25);
+
+  /* — Forma — */
+  --r:8px;
+  --r-sm:5px;
+  --shadow:0 1px 2px rgba(15,23,42,.04), 0 4px 12px -4px rgba(15,23,42,.08);
+}
+
+/* — Tema escuro CANÔNICO (navy dos painéis; substitui o zinc do hub) — */
+body.dark-theme{
+  --brand:#ff6b00;
+  --brand-dim:#e65c00;
+  --brand-soft:rgba(255,107,0,.16);
+  --brand-glow:rgba(255,107,0,.18);
+
+  --bg:#0b0f1a;
+  --surface:#131929;
+  --surface-hover:#1a2235;
+  --surface2:#1a2235;
+  --surface3:#1f2a3c;
+  --border:rgba(255,255,255,.09);
+  --border-hot:rgba(255,107,0,.4);
+  --text:#e8eaf0;
+  --text-muted:#9aa5bb;
+  --text-dim:#7d889e;      /* clareado → passa AA sobre navy */
+  --slate:#8592a6;
+
+  --green:#4ade80;  --green-bg:rgba(74,222,128,.12);   --green-border:rgba(74,222,128,.25);
+  --amber:#fbbf24;
+  --yellow:#fbbf24; --yellow-bg:rgba(251,191,36,.12);  --yellow-border:rgba(251,191,36,.25);
+  --red:#f87171;    --red-bg:rgba(248,113,113,.12);    --red-border:rgba(248,113,113,.25);
+  --blue:#60a5fa;   --blue-bg:rgba(96,165,250,.12);    --blue-border:rgba(96,165,250,.25);
+  --purple:#c084fc; --purple-bg:rgba(192,132,252,.12); --purple-border:rgba(192,132,252,.25);
+
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -12px rgba(0,0,0,.6);
+}
+
+/* ── Atribuição de tipografia (sobrescreve 'Inter' inline) ── */
+body{ font-family:var(--font-body); }
+
+h1, h2, h3, h4,
+.hero h1, .materia-title, .tracker-title, .modal-header h2{
+  font-family:var(--font-display);
+  letter-spacing:-.01em;
+  font-weight:700;
+}
+
+.brand, .brand-mark, .brand-side, .materia-tag, .materia-sub,
+.hero-meta, .assunto-status, .badge, .stat-lbl, .dash-label,
+.box-title, .hist-title, .hist-stats, footer{
+  font-family:var(--font-mono);
+}
+
+/* Campos de formulário e botões: herdar corpo, não 'Inter' */
+input, select, textarea, button{ font-family:var(--font-body); }
+
+/* ── Correção de tema do header do HUB no dark (não tinha override) ── */
+body.dark-theme header{ background:rgba(11,15,26,.92); }
+
+/* ── Acessibilidade transversal ── */
+:focus-visible{ outline:2px solid var(--brand); outline-offset:2px; border-radius:3px; }
+
+/* ── Link "voltar ao índice" (Fase 4) ── */
+.back-link{
+  display:inline-flex; align-items:center; gap:6px;
+  font-family:var(--font-mono); font-size:11px; letter-spacing:.04em;
+  color:var(--text-dim); text-decoration:none; transition:color .2s;
+}
+.back-link:hover{ color:var(--brand); }
+
+/* ── Impressão: revisão em papel ── */
+@media print{
+  header, .theme-toggle-btn, .tabs-nav, .search-wrap, .back-link, footer{ display:none !important; }
+  body{ background:#fff !important; color:#000 !important; font-size:12pt; }
+  body::before{ display:none !important; }
+  .tab-panel{ display:block !important; page-break-inside:avoid; }
+  .info-card, .card, details{ break-inside:avoid; box-shadow:none !important; border-color:#ccc !important; }
+  a{ color:#000 !important; text-decoration:none; }
+}
+
+/* ── Motion & micro-interações (Fase 6) ── */
+@keyframes delta-rise{
+  from{ opacity:0; transform:translateY(9px); }
+  to{ opacity:1; transform:translateY(0); }
+}
+
+/* Entrada suave do conteúdo ao carregar a página */
+main{ animation: delta-rise .45s cubic-bezier(.22,.61,.36,1) both; }
+
+/* Cards: leve elevação no hover (painéis e hub) */
+.info-card, .card, .materia{
+  transition: border-color .2s ease, box-shadow .25s ease,
+              transform .25s cubic-bezier(.22,.61,.36,1);
+}
+.info-card:hover, .card:hover{ transform: translateY(-2px); box-shadow: var(--shadow); }
+
+/* Controles */
+.tab-btn{ transition: color .2s ease, border-color .2s ease; }
+.theme-toggle-btn{ transition: background .2s ease, color .2s ease, transform .2s ease; }
+.theme-toggle-btn:hover{ transform: rotate(-8deg) scale(1.05); }
+.back-link{ transition: color .2s ease, transform .2s ease; }
+.back-link:hover{ transform: translateX(-2px); }
+
+/* Suaviza chevron do acordeão */
+.chevron{ transition: transform .25s cubic-bezier(.22,.61,.36,1); }
+
+/* ── Motion: respeita preferência reduzida (Fase 6 usa transitions dos tokens) ── */
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{ animation-duration:.001ms !important; transition-duration:.001ms !important; }
+}

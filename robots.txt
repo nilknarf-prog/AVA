@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ava-franklin91-s-projects.vercel.app/sitemap.xml

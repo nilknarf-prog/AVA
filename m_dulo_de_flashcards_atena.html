@@ -3,15 +3,40 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Atena: Módulo de Flashcards SRS</title>
+  <title>Atena · Flashcards SRS · Delta</title>
+  <meta name="description" content="Atena — módulo de flashcards com repetição espaçada (SRS) para concurso de Delegado (PC/PF). Revise questões Cebraspe/FGV por matéria e fixe prazos, súmulas e conceitos."/>
+  <meta name="author" content="Delta"/>
+  <meta name="theme-color" content="#ff6b00"/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:locale" content="pt_BR"/>
+  <meta property="og:site_name" content="Delta · AVA Delegado"/>
+  <meta property="og:title" content="Atena · Flashcards SRS — Delta"/>
+  <meta property="og:description" content="Flashcards com repetição espaçada (SRS) para o concurso de Delegado de Polícia."/>
+  <meta name="twitter:card" content="summary"/>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>"/>
   
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
       theme: {
-        extend: {},
+        extend: {
+          colors: {
+            // Mapping specific slate colors to match index.html's zinc/Delta dark theme
+            slate: {
+              50: '#f8fafc',
+              100: '#f1f5f9',
+              200: '#e2e8f0',
+              300: '#cbd5e1',
+              400: '#94a3b8',
+              500: '#64748b',
+              600: '#475569',
+              700: '#27272a', // Zinc 800
+              800: '#18181b', // Zinc 900
+              900: '#09090b', // Zinc 950
+            }
+          }
+        },
       },
     }
   </script>
@@ -205,7 +230,7 @@ function App() {
 
   // Init Theme and Load
   useEffect(() => {
-    const savedTheme = localStorage.getItem('atena_theme');
+    const savedTheme = localStorage.getItem('delta-theme');
     if (savedTheme === 'dark') {
       setIsDarkMode(true);
       document.documentElement.classList.add('dark');
@@ -232,10 +257,10 @@ function App() {
       const newTheme = !prev;
       if (newTheme) {
         document.documentElement.classList.add('dark');
-        localStorage.setItem('atena_theme', 'dark');
+        localStorage.setItem('delta-theme', 'dark');
       } else {
         document.documentElement.classList.remove('dark');
-        localStorage.setItem('atena_theme', 'light');
+        localStorage.setItem('delta-theme', 'light');
       }
       return newTheme;
     });
@@ -298,26 +323,40 @@ function App() {
       setIsFlipped(false);
       setCardIndex(prev => prev + 1);
     } else {
-      finishSession(newSrs);
+      openSaveModal(newSrs);
     }
   };
 
-  const finishSession = (newSrs) => {
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [modalData, setModalData] = useState({ tempo: 0, obs: '', date: '' });
+  const [tempSrs, setTempSrs] = useState({});
+
+  const openSaveModal = (newSrs) => {
+    const tempoTotal = Math.round(currentDeck.length * 1.5);
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+    
+    setModalData({ tempo: tempoTotal, obs: '', date: dateStr });
+    setTempSrs(newSrs);
+    setShowSaveModal(true);
+  };
+
+  const confirmSaveSession = () => {
     try {
       const logsStr = localStorage.getItem('delta_estudos') || '[]';
       const logs = JSON.parse(logsStr);
-      const now = new Date();
-      const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-      const tempoTotal = Math.round(currentDeck.length * 1.5);
       
+      let actualCorrect = correctCount;
+      if (isFlipped) actualCorrect = correctCount; // Handle state timing edge cases
+
       logs.push({
-        date: dateStr,
+        date: modalData.date,
         mat: 'RLM/REV',
         assunto: `Flashcards: ${deckName}`,
-        tempo: tempoTotal,
+        tempo: parseInt(modalData.tempo) || 0,
         qts: currentDeck.length,
-        acertos: isFlipped ? correctCount : correctCount + 1, 
-        obs: 'Registro Automático: Método SRS Atena'
+        acertos: actualCorrect, 
+        obs: modalData.obs || 'Registro: Método SRS Atena'
       });
       
       localStorage.setItem('delta_estudos', JSON.stringify(logs));
@@ -325,7 +364,8 @@ function App() {
       console.error("Erro ao integrar tracker", e);
     }
 
-    calculateTodayCards(newSrs);
+    setShowSaveModal(false);
+    calculateTodayCards(tempSrs);
     setCurrentScreen('report');
   };
 
@@ -350,7 +390,7 @@ function App() {
             <button 
               onClick={() => startDeck(todayCards, "Revisões do Dia")}
               disabled={todayCards.length === 0}
-              className={`px-8 py-3 rounded-xl font-bold flex items-center gap-2 transition-colors shrink-0 shadow-md ${todayCards.length > 0 ? 'bg-[#ff6b00] hover:bg-[#e65c00] text-white' : 'bg-gray-300 dark:bg-slate-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'}`}
+              className={`px-8 py-3 rounded-xl font-bold flex items-center gap-2 transition-colors shrink-0 shadow-md ${todayCards.length > 0 ? 'bg-[#ff6b00] hover:bg-[#e65c00] text-white' : 'bg-gray-300 dark:bg-zinc-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'}`}
             >
               <Play size={20} />
               Revisar Agora
@@ -362,13 +402,13 @@ function App() {
         <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-4">Baralhos por Matéria (Estudo Direto)</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {bancosDeQuestoes.map(deck => (
-            <div key={deck.id} className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all group flex flex-col justify-between">
+            <div key={deck.id} className="bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all group flex flex-col justify-between">
               <div>
                 <span className="text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400 font-bold">{deck.sigla} • Carreira Policial</span>
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mt-1">{deck.titulo}</h3>
                 <p className="text-gray-600 dark:text-gray-300 mt-2 text-sm leading-relaxed">{deck.descricao}</p>
               </div>
-              <div className="mt-6 flex justify-between items-center border-t border-gray-100 dark:border-slate-700 pt-4">
+              <div className="mt-6 flex justify-between items-center border-t border-gray-100 dark:border-zinc-700 pt-4">
                 <span className="text-gray-500 dark:text-gray-400 text-sm font-semibold flex items-center gap-1.5"><BookOpen size={16}/> {deck.cards.length} Cartões</span>
                 <button 
                   onClick={() => startDeck(deck.cards, deck.titulo)}
@@ -406,9 +446,9 @@ function App() {
         <div className="w-full min-h-[400px] perspective-1000">
           <div className={`relative w-full h-full transition-all duration-500 transform-style-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
             
-            <div className={`absolute w-full h-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-3xl p-8 shadow-lg flex flex-col backface-hidden ${isFlipped ? 'invisible' : 'visible'}`}>
+            <div className={`absolute w-full h-full bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-3xl p-8 shadow-lg flex flex-col backface-hidden ${isFlipped ? 'invisible' : 'visible'}`}>
               <div className="mb-6 flex justify-between items-center">
-                <span className="bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300 text-xs px-2.5 py-1 rounded-md font-semibold tracking-wide uppercase">{card.assunto}</span>
+                <span className="bg-gray-100 dark:bg-zinc-700 text-gray-600 dark:text-gray-300 text-xs px-2.5 py-1 rounded-md font-semibold tracking-wide uppercase">{card.assunto}</span>
               </div>
               <div className="flex-1 flex items-center justify-center text-center">
                 <h2 className="text-2xl font-semibold text-gray-900 dark:text-white leading-relaxed">{card.frente}</h2>
@@ -468,7 +508,7 @@ function App() {
         <p className="text-gray-500 dark:text-gray-400 text-center mb-8">Essa sessão foi salva automaticamente no Tracker do Menu Principal.</p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-          <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm text-center">
+          <div className="bg-white dark:bg-zinc-800 p-6 rounded-2xl border border-gray-100 dark:border-zinc-700 shadow-sm text-center">
             <CheckCircle className="mx-auto text-green-500 dark:text-green-400 mb-2" size={32} />
             <p className="text-gray-500 dark:text-gray-400 text-sm font-semibold uppercase tracking-wider">Desempenho</p>
             <p className="text-4xl font-black text-gray-900 dark:text-white mt-1">{accuracy}%</p>
@@ -478,7 +518,7 @@ function App() {
           <div className="bg-[#fff4ed] dark:bg-[#1a0a00] p-6 rounded-2xl border border-[#ffe6d4] dark:border-[#4d1f00] shadow-sm text-center flex flex-col justify-center items-center">
             <FileText className="text-[#ff6b00] dark:text-[#ff8533] mb-2" size={32} />
             <p className="text-[#803200] dark:text-[#ffad77] text-sm font-semibold uppercase tracking-wider">Sessão Salva</p>
-            <p className="text-lg font-bold text-[#ff6b00] dark:text-[#ff8533] mt-1">+ {Math.round(currentDeck.length * 1.5)} minutos registrados</p>
+            <p className="text-lg font-bold text-[#ff6b00] dark:text-[#ff8533] mt-1">+ {modalData.tempo} minutos registrados</p>
           </div>
         </div>
 
@@ -489,7 +529,7 @@ function App() {
             </h3>
             <div className="space-y-4">
               {incorrectCards.map((card, idx) => (
-                <div key={idx} className="bg-white dark:bg-slate-800 border-l-4 border-l-red-500 border-t border-r border-b border-gray-200 dark:border-slate-700 rounded-r-xl p-5 shadow-sm">
+                <div key={idx} className="bg-white dark:bg-zinc-800 border-l-4 border-l-red-500 border-t border-r border-b border-gray-200 dark:border-zinc-700 rounded-r-xl p-5 shadow-sm">
                   <p className="text-sm text-gray-500 dark:text-gray-400 mb-2 font-semibold">{card.assunto}</p>
                   <p className="text-gray-900 dark:text-gray-100 font-medium mb-3">{card.frente}</p>
                   <div className="bg-red-50/50 dark:bg-red-950/20 p-4 rounded-lg">
@@ -504,7 +544,7 @@ function App() {
         <div className="flex gap-4 justify-center">
           <button 
             onClick={() => setCurrentScreen('decks')}
-            className="px-6 py-3 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-gray-300 font-bold rounded-xl hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors flex items-center gap-2"
+            className="px-6 py-3 bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 text-gray-700 dark:text-gray-300 font-bold rounded-xl hover:bg-gray-50 dark:hover:bg-zinc-700 transition-colors flex items-center gap-2"
           >
             <Layers size={20} /> Voltar aos Baralhos
           </button>
@@ -524,10 +564,10 @@ function App() {
         .rotate-y-180 { transform: rotateY(180deg); }
       `}</style>
 
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-200 font-sans">
+      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900 transition-colors duration-200 font-sans">
         
         {/* HEADER */}
-        <header className="sticky top-0 z-50 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 shadow-sm px-4 py-3 transition-colors duration-200">
+        <header className="sticky top-0 z-50 bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800 shadow-sm px-4 py-3 transition-colors duration-200">
           <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
             
             <div className="flex items-center gap-3">
@@ -542,7 +582,7 @@ function App() {
             <nav className="flex items-center gap-3">
               <button 
                 onClick={toggleTheme} 
-                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-600 dark:text-gray-300 transition-colors"
+                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-600 dark:text-gray-300 transition-colors"
                 title="Alternar Tema"
               >
                 {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
@@ -571,6 +611,78 @@ function App() {
           {currentScreen === 'flashcards' && renderFlashcard()}
           {currentScreen === 'report' && renderReport()}
 
+          {/* Modal de Registro de Estudo */}
+          {showSaveModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+              <div className="bg-white dark:bg-zinc-800 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden border border-gray-200 dark:border-zinc-700">
+                <div className="p-6 border-b border-gray-100 dark:border-zinc-700 flex justify-between items-center">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">Registro de Estudo</h3>
+                </div>
+                <div className="p-6 space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Data</label>
+                      <input 
+                        type="date" 
+                        value={modalData.date}
+                        onChange={(e) => setModalData({...modalData, date: e.target.value})}
+                        className="w-full bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-lg px-3 py-2 text-gray-900 dark:text-white outline-none focus:border-[#ff6b00]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Tempo (Min)</label>
+                      <input 
+                        type="number" 
+                        value={modalData.tempo}
+                        onChange={(e) => setModalData({...modalData, tempo: e.target.value})}
+                        className="w-full bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-lg px-3 py-2 text-gray-900 dark:text-white outline-none focus:border-[#ff6b00]"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Tópico</label>
+                    <input 
+                      type="text" 
+                      value={`Flashcards: ${deckName}`}
+                      readOnly
+                      className="w-full bg-gray-100 dark:bg-zinc-900/50 border border-gray-200 dark:border-zinc-700 rounded-lg px-3 py-2 text-gray-600 dark:text-gray-400 cursor-not-allowed"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Questões</label>
+                      <div className="w-full bg-gray-100 dark:bg-zinc-900/50 border border-gray-200 dark:border-zinc-700 rounded-lg px-3 py-2 text-gray-600 dark:text-gray-400 text-center font-bold">
+                        {currentDeck.length}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-green-600 dark:text-green-500 uppercase tracking-wider mb-1">Acertos</label>
+                      <div className="w-full bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-900/50 rounded-lg px-3 py-2 text-green-700 dark:text-green-400 text-center font-bold">
+                        {correctCount}
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Comentários</label>
+                    <textarea 
+                      value={modalData.obs}
+                      onChange={(e) => setModalData({...modalData, obs: e.target.value})}
+                      placeholder="Alguma observação sobre essa revisão?"
+                      className="w-full bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-lg px-3 py-2 text-gray-900 dark:text-white outline-none focus:border-[#ff6b00] h-20 resize-none"
+                    ></textarea>
+                  </div>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-zinc-900 border-t border-gray-100 dark:border-zinc-700 flex justify-end gap-3">
+                  <button 
+                    onClick={confirmSaveSession}
+                    className="px-6 py-2 bg-[#ff6b00] hover:bg-[#e65c00] text-white font-bold rounded-xl transition-colors"
+                  >
+                    Salvar Registro
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </main>
       </div>
     </>

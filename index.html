@@ -4,9 +4,19 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Biblioteca de Estudos Delta</title>
+<meta name="description" content="Ambiente Virtual de Aprendizagem Delta: biblioteca de estudos para concurso de Delegado (PC/PF) — painéis de Penal, Constitucional, Administrativo, Civil e Medicina Legal, dashboard de progresso e flashcards SRS."/>
+<meta name="author" content="Delta"/>
+<meta name="theme-color" content="#ff6b00"/>
+<meta property="og:type" content="website"/>
+<meta property="og:locale" content="pt_BR"/>
+<meta property="og:site_name" content="Delta · AVA Delegado"/>
+<meta property="og:title" content="Biblioteca de Estudos Delta — AVA Delegado"/>
+<meta property="og:description" content="Painéis de estudo, dashboard de progresso e flashcards SRS para o concurso de Delegado de Polícia (PC/PF)."/>
+<meta name="twitter:card" content="summary"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚖️</text></svg>"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,600;0,700;1,600&family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <style>
   :root {
     --brand: #ff6b00;
@@ -308,87 +318,95 @@
   .stat-val{font-size:22px; font-weight:800; color:var(--brand); line-height:1;}
   .stat-lbl{font-size:11px; font-weight:600; color:var(--text-dim); text-transform:uppercase; margin-top:4px;}
   
-  .tracker-body{ display:flex; gap: 30px; }
-  .tracker-form{ flex:1; display:flex; flex-direction:column; gap:12px; }
-  .form-row{ display:flex; gap:12px; }
-  .form-group{ flex:1; display:flex; flex-direction:column; gap:4px; }
-  .form-group label{ font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; }
-  .form-group input, .form-group select{
-    padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--r-sm);
-    background: var(--bg); color: var(--text); font-family:'Inter', sans-serif; font-size:13px;
-  }
-  .form-group input:focus, .form-group select:focus{ border-color:var(--brand); outline:none; }
-  .btn-save{
-    background: var(--brand); color: #fff; border:none; padding:10px; border-radius:var(--r-sm);
-    font-weight:700; font-size:13px; cursor:pointer; margin-top:8px; transition:opacity .2s;
-  }
-  .btn-save:hover{ opacity:.9; }
-  .btn-util{
-    background: transparent; border: 1px solid var(--border); color: var(--text-dim);
-    padding:6px 10px; border-radius:var(--r-sm); font-size:11px; font-weight:600; cursor:pointer;
-  }
-  .btn-util:hover{ background: var(--surface-hover); color: var(--text); }
-
-  .tracker-cal{ width: 280px; }
-  .streak-box{
-    display:flex; align-items:center; justify-content:space-between;
-    background: var(--surface-hover); padding: 10px 14px; border-radius: var(--r-sm);
-    margin-bottom: 12px; border: 1px solid var(--border);
-  }
-  .streak-val{ font-size: 16px; font-weight: 800; color: var(--green); }
-  .cal-grid{
-    display: grid; grid-template-columns: repeat(7, 1fr); gap:4px;
-  }
-  .cal-day{
-    aspect-ratio: 1; border-radius: 3px; background: var(--surface-hover);
-    display:flex; align-items:center; justify-content:center;
-    font-size:10px; color:var(--text-dim); font-weight:600;
-  }
-  .cal-day.active{ background: var(--green); color: #fff; border-color:var(--green); }
-  .cal-day.today{ border: 1px solid var(--brand); }
+  /* ── DASHBOARD ESTUDEI ──────────────────────────────── */
+  .dash-top { display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; margin-bottom:24px; }
+  .dash-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:16px; box-shadow:0 2px 8px rgba(0,0,0,0.02); }
+  .dash-label { font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px; }
+  .dash-value { font-size:28px; font-weight:800; color:var(--text); line-height:1; }
+  .dash-sub { font-size:12px; color:var(--green); font-weight:600; margin-top:8px; }
   
-  .nudge-banner {
-    display: none; background: rgba(255,107,0,0.1); border: 1px solid var(--brand);
-    color: var(--brand); padding: 10px 14px; border-radius: var(--r-sm);
-    font-size: 13px; font-weight: 600; margin-bottom: 20px; text-align:center;
-  }
-
-  /* ── HISTORY ──────────────────────────────── */
-  .history-section { margin-top: 24px; border-top: 1px solid var(--border); padding-top: 24px; }
-  .history-title { font-size:14px; font-weight:700; color:var(--text); margin-bottom: 12px; }
-  .history-list { display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto; padding-right: 4px; }
-  .history-item { 
-    display: flex; align-items: center; justify-content: space-between; 
-    padding: 12px 14px; background: var(--bg); border: 1px solid var(--border); 
-    border-radius: var(--r-sm); transition: border-color .2s;
-  }
-  .history-item:hover { border-color: var(--brand); }
-  .history-item-left { display: flex; flex-direction: column; gap: 4px; }
-  .history-item-top { display: flex; gap: 8px; align-items: center; }
-  .history-tag { font-size: 10px; font-weight: 700; background: var(--brand-soft); color: var(--brand); padding: 2px 6px; border-radius: 4px; }
-  .history-date { font-size: 11px; color: var(--text-muted); font-family: 'IBM Plex Mono', monospace; }
-  .history-assunto { font-size: 13.5px; font-weight: 600; color: var(--text); }
-  .history-item-bottom { font-size: 12px; color: var(--text-dim); }
-  .history-item-right { display: flex; gap: 16px; align-items: center; text-align: right; }
-  .history-stats-mini { display: flex; flex-direction: column; gap: 2px; font-size: 11.5px; font-family: 'IBM Plex Mono', monospace; color: var(--text-muted); }
-  .btn-del { 
-    background: transparent; border: none; color: #ef4444; font-size: 18px; 
-    cursor: pointer; opacity: 0.4; transition: opacity .2s; padding: 4px; 
-  }
-  .btn-del:hover { opacity: 1; }
-
+  .dash-main { display:flex; gap:24px; }
+  .dash-left { flex:2; display:flex; flex-direction:column; gap:16px; }
+  .dash-right { flex:1; display:flex; flex-direction:column; gap:16px; }
+  
+  .streak-banner { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:16px; font-size:13px; font-weight:500; color:var(--text); }
+  
+  .dash-box { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:16px; display:flex; flex-direction:column; }
+  .box-title { font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:12px; letter-spacing:0.5px; }
+  
+  .dash-table { width:100%; border-collapse:collapse; font-size:13px; }
+  .dash-table th { text-align:left; padding:8px; border-bottom:1px solid var(--border); color:var(--text-dim); font-weight:600; font-size:11px; text-transform:uppercase; }
+  .dash-table td { padding:10px 8px; border-bottom:1px solid var(--border); font-weight:500; }
+  .dash-table tr:last-child td { border-bottom:none; }
+  .col-mat { color:var(--brand); font-weight:600; }
+  .col-time { color:var(--text); }
+  .col-ok { color:var(--green); }
+  .col-err { color:#ef4444; }
+  .badge-pct { background:var(--green); color:#fff; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:700; }
+  .badge-pct.low { background:#ef4444; }
+  
+  .btn-novo { width:100%; background:var(--brand); color:#fff; font-weight:700; border:none; padding:14px; border-radius:var(--r); cursor:pointer; font-size:14px; box-shadow:0 4px 12px rgba(255,107,0,0.2); transition:transform .2s; }
+  .btn-novo:hover { transform:translateY(-2px); }
+  
+  .btn-util { background:transparent; border:1px solid var(--border); color:var(--text); padding:8px 12px; border-radius:var(--r-sm); font-size:12px; font-weight:600; cursor:pointer; transition:background .2s; }
+  .btn-util:hover { background:var(--surface-hover); }
+  
+  .history-list { display:flex; flex-direction:column; gap:16px; overflow-y:auto; max-height:400px; padding-right:8px; }
+  .hist-item { display:flex; gap:12px; position:relative; }
+  .hist-line { position:absolute; left:5px; top:20px; bottom:-16px; width:2px; background:var(--border); }
+  .hist-item:last-child .hist-line { display:none; }
+  .hist-dot { width:12px; height:12px; background:var(--brand); border-radius:50%; margin-top:4px; position:relative; z-index:2; flex-shrink:0; }
+  .hist-content { flex:1; }
+  .hist-title { font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:2px; display:flex; justify-content:space-between; }
+  .hist-desc { font-size:13px; font-weight:500; color:var(--text); }
+  .hist-stats { font-size:11px; color:var(--text-dim); margin-top:2px; font-family:'IBM Plex Mono', monospace; }
+  
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(2px); z-index:999; display:none; align-items:center; justify-content:center; }
+  .modal-content { background:var(--surface); border:1px solid var(--border); border-radius:12px; width:100%; max-width:500px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,0.3); }
+  .modal-header { padding:20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+  .modal-header h2 { font-size:18px; font-weight:700; color:var(--text); margin:0; }
+  .btn-close { background:none; border:none; color:var(--text-dim); font-size:24px; cursor:pointer; }
+  .modal-body { padding:20px; display:flex; flex-direction:column; gap:16px; }
+  .modal-row { display:flex; gap:16px; }
+  .modal-group { flex:1; display:flex; flex-direction:column; gap:6px; }
+  .modal-group label { font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; }
+  .modal-group input, .modal-group select { background:var(--bg); border:1px solid var(--border); color:var(--text); padding:10px; border-radius:var(--r-sm); font-size:14px; font-family:'Inter', sans-serif; outline:none; }
+  .modal-group input:focus, .modal-group select:focus { border-color:var(--brand); }
+  .box-gray { background:var(--bg); padding:16px; border-radius:var(--r-sm); border:1px solid var(--border); }
+  .modal-footer { padding:20px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:12px; background:var(--surface-hover); }
+  .btn-save { background:var(--brand); color:#fff; border:none; padding:10px 20px; border-radius:var(--r-sm); font-weight:700; cursor:pointer; }
+  
   /* SCROLLBAR CUSTOM FOR HISTORY */
   .history-list::-webkit-scrollbar { width: 6px; }
   .history-list::-webkit-scrollbar-track { background: var(--bg); border-radius: 10px; }
   .history-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
   .history-list::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
 
+  /* ── DATAVIZ ─────────────────────────────── */
+  .viz-box{ background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:16px; }
+  .viz-h{ font-family:var(--font-mono); font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted); margin-bottom:14px; }
+  .donut-wrap{ display:flex; align-items:center; gap:16px; }
+  .donut{ width:88px; height:88px; flex-shrink:0; }
+  .donut-track{ fill:none; stroke:var(--surface2); stroke-width:11; }
+  .donut-val{ fill:none; stroke:var(--brand); stroke-width:11; stroke-linecap:round; transition:stroke-dashoffset .8s ease; }
+  .donut-center{ font-family:var(--font-display); font-size:20px; font-weight:700; fill:var(--text); }
+  .bars{ display:flex; flex-direction:column; gap:9px; }
+  .bar-row{ display:grid; grid-template-columns:74px 1fr auto; align-items:center; gap:10px; }
+  .bar-lab{ font-family:var(--font-mono); font-size:11px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bar-track{ height:8px; background:var(--surface2); border-radius:20px; overflow:hidden; }
+  .bar-fill{ height:100%; background:var(--brand); border-radius:20px; transition:width .8s ease; }
+  .bar-num{ font-family:var(--font-mono); font-size:11px; color:var(--text-dim); font-variant-numeric:tabular-nums; }
+  .heat{ display:grid; grid-template-columns:repeat(14,1fr); gap:3px; }
+  .heat-cell{ aspect-ratio:1; border-radius:2px; background:var(--surface2); }
+  .heat-cell.on{ background:var(--brand); }
+
   @media(max-width:768px){
-    .tracker-body{ flex-direction: column; }
-    .tracker-cal{ width: 100%; }
-    .tracker-stats{ grid-template-columns: repeat(2, 1fr); }
+    .dash-top { grid-template-columns: 1fr; }
+    .dash-main { flex-direction: column; }
+    .modal-row { flex-direction: column; }
   }
 </style>
+<link rel="stylesheet" href="./assets/tokens.css"/>
 </head>
 <body>
 
@@ -435,45 +453,106 @@
   <!-- NUDGE BANNER -->
   <div id="nudgeBanner" class="nudge-banner">⚠️ Você ainda não registrou estudo hoje. Mantenha a ofensiva!</div>
 
-  <!-- TRACKER SECTION -->
-  <section class="tracker-section">
-    <div class="tracker-header">
-      <div class="tracker-title">Acompanhamento Diário</div>
-      <div style="display:flex; gap:8px;">
-        <button class="btn-util" onclick="exportData()">Exportar</button>
-        <button class="btn-util" onclick="importData()">Importar</button>
-      </div>
-    </div>
+  <!-- DASHBOARD SECTION -->
+  <section class="dashboard-section" style="margin-bottom:40px;">
     
-    <div class="tracker-stats">
-      <div class="stat-card">
-        <div class="stat-val" id="stHours">0h</div>
-        <div class="stat-lbl">Horas Est.</div>
+    <div class="dash-top">
+      <div class="dash-card">
+        <div class="dash-label">Tempo de Estudo</div>
+        <div class="dash-value" id="stHours">0h</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-val" id="stSess">0</div>
-        <div class="stat-lbl">Sessões</div>
+      <div class="dash-card">
+        <div class="dash-label">Desempenho Geral</div>
+        <div class="donut-wrap">
+          <div id="vizDonut" aria-hidden="false"></div>
+          <div>
+            <div class="dash-sub" id="stAcertosErros" style="color:var(--text-muted); margin-top:0;">0 Acertos / 0 Erros</div>
+            <div class="dash-sub" id="stPct" style="display:none;">0%</div>
+          </div>
+        </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-val" id="stQ">0</div>
-        <div class="stat-lbl">Questões</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-val" id="stPct">0%</div>
-        <div class="stat-lbl">Acertos</div>
+      <div class="dash-card">
+        <div class="dash-label">Total de Sessões</div>
+        <div class="dash-value" id="stSess">0</div>
       </div>
     </div>
 
-    <div class="tracker-body">
-      <div class="tracker-form">
-        <div class="form-row">
-          <div class="form-group">
+    <div class="dash-main">
+      <div class="dash-left">
+        <div class="streak-banner" id="streakBanner">
+           Você está há 0 dias sem estudar! Seu recorde é de 0 dias sem falhas. 📅
+        </div>
+        
+        <div class="dash-box mt-4">
+           <div class="box-title">Painel de Disciplinas</div>
+           <div style="overflow-x:auto;">
+             <table class="dash-table" id="painelTable">
+               <thead>
+                 <tr>
+                   <th>Disciplinas</th>
+                   <th>Tempo</th>
+                   <th>✔️</th>
+                   <th>❌</th>
+                   <th>%</th>
+                 </tr>
+               </thead>
+               <tbody></tbody>
+             </table>
+           </div>
+        </div>
+
+        <div class="viz-box" style="margin-top:16px;">
+          <div class="viz-h">Tempo por matéria</div>
+          <div class="bars" id="vizBars"></div>
+        </div>
+      </div>
+
+      <div class="dash-right">
+         <button class="btn-novo" onclick="openRegistroModal()">+ Registrar Estudo</button>
+         
+         <div class="dash-box mt-4">
+           <div class="box-title">Backup de Dados</div>
+           <div style="display:flex; gap:8px;">
+             <button class="btn-util" style="flex:1;" onclick="exportData()">Exportar JSON</button>
+             <button class="btn-util" style="flex:1;" onclick="importData()">Importar JSON</button>
+           </div>
+         </div>
+         
+         <div class="viz-box" style="margin-top:16px;">
+           <div class="viz-h">Ofensiva · últimos 42 dias</div>
+           <div class="heat" id="vizHeat"></div>
+         </div>
+
+         <div class="dash-box mt-4" style="flex:1;">
+           <div class="box-title">Últimas Atividades</div>
+           <div class="history-list" id="historyList"></div>
+         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MODAL -->
+  <div id="registroModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Registro de Estudo</h2>
+        <button onclick="closeRegistroModal()" class="btn-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-row">
+          <div class="modal-group">
             <label>Data</label>
-            <input type="date" id="tfDate" />
+            <input type="date" id="modalData">
           </div>
-          <div class="form-group">
-            <label>Matéria</label>
-            <select id="tfMat">
+          <div class="modal-group">
+            <label>Tempo (min)</label>
+            <input type="number" id="modalTempo" placeholder="Ex: 60">
+          </div>
+        </div>
+        <div class="modal-row">
+          <div class="modal-group">
+            <label>Categoria / Matéria</label>
+            <select id="modalMat">
               <option value="DP">Direito Penal (DP)</option>
               <option value="DC">Dir. Constitucional (DC)</option>
               <option value="DCV">Direito Civil (DCV)</option>
@@ -484,54 +563,35 @@
               <option value="DH">Direitos Humanos (DH)</option>
               <option value="DE">Dir. Empresarial (DE)</option>
               <option value="CR">Criminologia (CR)</option>
+              <option value="RLM/REV">Revisão/Flashcards</option>
             </select>
           </div>
         </div>
-        <div class="form-group">
-          <label>Assunto</label>
-          <input type="text" id="tfAssunto" placeholder="Ex: Teoria do Crime" />
+        <div class="modal-group">
+          <label>Tópico / Assunto</label>
+          <input type="text" id="modalAssunto" placeholder="Ex: Teoria do Crime">
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Tempo (min)</label>
-            <input type="number" id="tfTempo" placeholder="60" min="0" />
+        <div class="modal-row box-gray">
+          <div class="modal-group">
+            <label style="color:var(--green);">Questões (Acertos)</label>
+            <input type="number" id="modalAcertos" placeholder="0">
           </div>
-          <div class="form-group">
-            <label>Questões</label>
-            <input type="number" id="tfQts" placeholder="0" min="0" />
-          </div>
-          <div class="form-group">
-            <label>Acertos</label>
-            <input type="number" id="tfAcertos" placeholder="0" min="0" />
+          <div class="modal-group">
+            <label style="color:#ef4444;">Questões (Erros)</label>
+            <input type="number" id="modalErros" placeholder="0">
           </div>
         </div>
-        <div class="form-group">
-          <label>Observação</label>
-          <input type="text" id="tfObs" placeholder="(Opcional)" />
+        <div class="modal-group">
+          <label>Comentários (Opcional)</label>
+          <input type="text" id="modalObs" placeholder="Anotações da sessão...">
         </div>
-        <button id="btnSave" class="btn-save" onclick="saveSession()">+ SALVAR SESSÃO</button>
       </div>
-
-      <div class="tracker-cal">
-        <div class="streak-box">
-          <span style="font-size:13px; font-weight:700; color:var(--text-muted);">OFENSIVA</span>
-          <span class="streak-val" id="streakVal">0 dias 🔥</span>
-        </div>
-        <div style="font-size:10px; color:var(--text-dim); margin-bottom:8px; font-weight:600; text-align:center;">ÚLTIMOS 28 DIAS</div>
-        <div class="cal-grid" id="calGrid">
-          <!-- JS fills this -->
-        </div>
+      <div class="modal-footer">
+        <button onclick="closeRegistroModal()" class="btn-util">Cancelar</button>
+        <button onclick="saveModalSession()" class="btn-save">Salvar Registro</button>
       </div>
     </div>
-
-    <!-- HISTORY SECTION -->
-    <div class="history-section">
-      <div class="history-title">Histórico de Sessões</div>
-      <div class="history-list" id="historyList">
-        <!-- JS fills this -->
-      </div>
-    </div>
-  </section>
+  </div>
 
   <!-- DIVIDER -->
   <div class="section-label">Matérias do Edital</div>
@@ -808,14 +868,14 @@
   let logs = [];
 
   function initTracker() {
-    const savedTheme = localStorage.getItem('delta_theme');
+    const savedTheme = localStorage.getItem('delta-theme');
     if (savedTheme === 'dark') {
       document.body.classList.add('dark-theme');
     }
     
     document.getElementById('themeToggle').addEventListener('click', () => {
       document.body.classList.toggle('dark-theme');
-      localStorage.setItem('delta_theme', document.body.classList.contains('dark-theme') ? 'dark' : 'light');
+      localStorage.setItem('delta-theme', document.body.classList.contains('dark-theme') ? 'dark' : 'light');
     });
 
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -831,7 +891,6 @@
     const mm = String(now.getMonth() + 1).padStart(2, '0');
     const dd = String(now.getDate()).padStart(2, '0');
     const todayStr = `${yyyy}-${mm}-${dd}`;
-    document.getElementById('tfDate').value = todayStr;
 
     renderTracker(todayStr);
   }
@@ -845,23 +904,33 @@
     let totalQts = 0;
     let totalAcertos = 0;
     const daysStudied = new Set();
+    const painelMap = {};
 
     logs.forEach(l => {
-      totalMins += parseInt(l.tempo || 0);
-      totalQts += parseInt(l.qts || 0);
-      totalAcertos += parseInt(l.acertos || 0);
-      if (parseInt(l.tempo || 0) > 0 || parseInt(l.qts || 0) > 0) {
-        daysStudied.add(l.date);
-      }
+      const tm = parseInt(l.tempo || 0);
+      const q = parseInt(l.qts || 0);
+      const a = parseInt(l.acertos || 0);
+      
+      totalMins += tm;
+      totalQts += q;
+      totalAcertos += a;
+      
+      if (tm > 0 || q > 0) daysStudied.add(l.date);
+      
+      if(!painelMap[l.mat]) painelMap[l.mat] = { tempo:0, acertos:0, erros:0 };
+      painelMap[l.mat].tempo += tm;
+      painelMap[l.mat].acertos += a;
+      painelMap[l.mat].erros += (q - a);
     });
 
     const totalHours = (totalMins / 60).toFixed(1);
+    const totalErros = totalQts - totalAcertos;
     const pct = totalQts > 0 ? Math.round((totalAcertos / totalQts) * 100) : 0;
 
     document.getElementById('stHours').innerText = `${totalHours}h`;
     document.getElementById('stSess').innerText = logs.length;
-    document.getElementById('stQ').innerText = totalQts;
     document.getElementById('stPct').innerText = `${pct}%`;
+    document.getElementById('stAcertosErros').innerText = `${totalAcertos} Acertos / ${totalErros} Erros`;
 
     if (!daysStudied.has(todayStr)) {
       document.getElementById('nudgeBanner').style.display = 'block';
@@ -869,9 +938,83 @@
       document.getElementById('nudgeBanner').style.display = 'none';
     }
 
-    renderCalendar(daysStudied, todayStr);
     calcStreak(daysStudied, todayStr);
+    renderPainel(painelMap);
     renderHistory();
+    drawDonut(pct);
+    drawBars(painelMap);
+    drawHeat(daysStudied, todayStr);
+  }
+
+  const VIZ_MAT = {
+    'DP':'D. Penal','DC':'D. Const.','DCV':'D. Civil','DA':'D. Adm.','DPP':'Proc. Penal',
+    'ML':'Med. Legal','LPE':'LPE','DH':'D. Humanos','DE':'D. Empres.','CR':'Criminol.','RLM/REV':'Revisão'
+  };
+  function drawDonut(pct){
+    const w=document.getElementById('vizDonut'); if(!w) return;
+    const r=42, C=2*Math.PI*r, off=C*(1-(pct||0)/100);
+    w.innerHTML='<svg class="donut" viewBox="0 0 100 100" role="img" aria-label="Aproveitamento '+pct+' por cento">'
+      +'<circle class="donut-track" cx="50" cy="50" r="'+r+'"></circle>'
+      +'<circle class="donut-val" cx="50" cy="50" r="'+r+'" transform="rotate(-90 50 50)" stroke-dasharray="'+C+'" stroke-dashoffset="'+off+'"></circle>'
+      +'<text class="donut-center" x="50" y="52" text-anchor="middle" dominant-baseline="middle">'+pct+'%</text></svg>';
+  }
+  function drawBars(map){
+    const el=document.getElementById('vizBars'); if(!el) return;
+    const rows=Object.entries(map).filter(function(e){return e[1].tempo>0;}).sort(function(a,b){return b[1].tempo-a[1].tempo;});
+    if(!rows.length){ el.innerHTML='<div style="font-size:12px;color:var(--text-dim)">Sem tempo registrado ainda.</div>'; return; }
+    const max=Math.max.apply(null, rows.map(function(e){return e[1].tempo;}));
+    el.innerHTML=rows.map(function(e){
+      const mat=e[0], t=e[1].tempo, h=Math.floor(t/60), m=t%60,
+        lab=h>0?(h+'h'+(m>0?' '+m+'m':'')):(m+'m'),
+        wd=Math.max(4, Math.round(t/max*100));
+      return '<div class="bar-row"><span class="bar-lab">'+(VIZ_MAT[mat]||mat)+'</span>'
+        +'<div class="bar-track"><div class="bar-fill" style="width:'+wd+'%"></div></div>'
+        +'<span class="bar-num">'+lab+'</span></div>';
+    }).join('');
+  }
+  function drawHeat(daysStudied, todayStr){
+    const el=document.getElementById('vizHeat'); if(!el) return;
+    const base=new Date(todayStr+'T00:00:00'), out=[];
+    for(let i=41;i>=0;i--){
+      const d=new Date(base); d.setDate(d.getDate()-i);
+      const s=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+      out.push('<div class="heat-cell'+(daysStudied.has(s)?' on':'')+'" title="'+s+'"></div>');
+    }
+    el.innerHTML=out.join('');
+  }
+
+  function renderPainel(map) {
+    const tbody = document.querySelector('#painelTable tbody');
+    if(!tbody) return;
+    tbody.innerHTML = '';
+    
+    const matNames = {
+      'DP': 'Direito Penal', 'DC': 'Dir. Constitucional', 'DCV': 'Direito Civil',
+      'DA': 'Dir. Administrativo', 'DPP': 'Processo Penal', 'ML': 'Medicina Legal',
+      'LPE': 'Leg. Penal Especial', 'DH': 'Direitos Humanos', 'DE': 'Dir. Empresarial',
+      'CR': 'Criminologia', 'RLM/REV': 'Revisão / Flashcards'
+    };
+    
+    for(const [mat, data] of Object.entries(map)) {
+      const name = matNames[mat] || mat;
+      const hours = Math.floor(data.tempo / 60);
+      const mins = data.tempo % 60;
+      const timeStr = hours > 0 ? `${hours}h ${mins}min` : `${mins}min`;
+      
+      const totalQ = data.acertos + data.erros;
+      const pct = totalQ > 0 ? Math.round((data.acertos/totalQ)*100) : 0;
+      const pctClass = pct >= 70 ? 'badge-pct' : 'badge-pct low';
+      
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="col-mat">${name}</td>
+        <td class="col-time">${timeStr}</td>
+        <td class="col-ok">${data.acertos}</td>
+        <td class="col-err">${data.erros}</td>
+        <td><span class="${pctClass}">${pct}%</span></td>
+      `;
+      tbody.appendChild(tr);
+    }
   }
 
   function renderHistory() {
@@ -883,39 +1026,130 @@
       return;
     }
     
-    // Sort logs descending (newest first)
     const sortedLogs = [...logs].map((l, i) => ({...l, originalIndex: i})).sort((a,b) => new Date(b.date) - new Date(a.date));
     
-    sortedLogs.forEach(l => {
+    sortedLogs.slice(0, 15).forEach(l => {
       const div = document.createElement('div');
-      div.className = 'history-item';
+      div.className = 'hist-item';
       
       let statsHTML = '';
-      if (l.tempo > 0) statsHTML += `<div>⏳ ${l.tempo} min</div>`;
-      if (l.qts > 0) {
-        const pct = Math.round((l.acertos / l.qts) * 100) || 0;
-        statsHTML += `<div>🎯 ${l.acertos}/${l.qts} (${pct}%)</div>`;
-      }
+      if (l.tempo > 0) statsHTML += `⏳ ${l.tempo}min `;
+      if (l.qts > 0) statsHTML += `🎯 ${l.acertos}/${l.qts} `;
       
       const dateParts = l.date.split('-');
       const formattedDate = dateParts.length === 3 ? `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}` : l.date;
 
       div.innerHTML = `
-        <div class="history-item-left">
-          <div class="history-item-top">
-            <span class="history-tag">${l.mat}</span>
-            <span class="history-date">${formattedDate}</span>
+        <div class="hist-line"></div>
+        <div class="hist-dot"></div>
+        <div class="hist-content">
+          <div class="hist-title">
+            <span>${l.mat}</span>
+            <span style="font-family:'IBM Plex Mono', monospace;">${formattedDate} <button class="btn-del" onclick="deleteSession(${l.originalIndex})" style="border:none;background:none;color:var(--text-dim);cursor:pointer;margin-left:8px;" title="Excluir">&times;</button></span>
           </div>
-          <div class="history-assunto">${l.assunto}</div>
-          ${l.obs ? `<div class="history-item-bottom">📝 ${l.obs}</div>` : ''}
-        </div>
-        <div class="history-item-right">
-          <div class="history-stats-mini">${statsHTML}</div>
-          <button class="btn-del" onclick="deleteSession(${l.originalIndex})" title="Excluir">&times;</button>
+          <div class="hist-desc">${l.assunto}</div>
+          <div class="hist-stats">${statsHTML} ${l.obs ? `| 📝 ${l.obs}` : ''}</div>
         </div>
       `;
       container.appendChild(div);
     });
+  }
+
+  function calcStreak(daysStudied, todayStr) {
+    let currentStreak = 0;
+    let maxStreak = 0;
+    let tempStreak = 0;
+    
+    const sortedDates = Array.from(daysStudied).sort();
+    let prevDate = null;
+    sortedDates.forEach(dStr => {
+      if(!prevDate) {
+        tempStreak = 1;
+      } else {
+        const pd = new Date(prevDate+'T00:00:00');
+        const curr = new Date(dStr+'T00:00:00');
+        pd.setDate(pd.getDate()+1);
+        if (pd.getTime() === curr.getTime()) {
+          tempStreak++;
+        } else {
+          tempStreak = 1;
+        }
+      }
+      if(tempStreak > maxStreak) maxStreak = tempStreak;
+      prevDate = dStr;
+    });
+
+    let d = new Date(todayStr + 'T00:00:00');
+    if (daysStudied.has(todayStr)) {
+      currentStreak++;
+      d.setDate(d.getDate() - 1);
+    } else {
+      d.setDate(d.getDate() - 1);
+    }
+    while(true) {
+      const dStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      if (daysStudied.has(dStr)) {
+        currentStreak++;
+        d.setDate(d.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+    
+    let text = `Você está há ${currentStreak} dias estudando sem falhar! 🔥`;
+    if(currentStreak === 0) text = `Você não estudou hoje ainda. Seu recorde é de ${maxStreak} dias sem falhas. 📅`;
+    else text += ` Seu recorde histórico é ${maxStreak} dias.`;
+    
+    document.getElementById('streakBanner').innerText = text;
+  }
+
+  // MODAL FUNCTIONS
+  function openRegistroModal() {
+    const now = new Date();
+    document.getElementById('modalData').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+    document.getElementById('registroModal').style.display = 'flex';
+  }
+  function closeRegistroModal() {
+    document.getElementById('registroModal').style.display = 'none';
+  }
+  
+  function saveModalSession() {
+    const dt = document.getElementById('modalData').value;
+    const mat = document.getElementById('modalMat').value;
+    const assunto = document.getElementById('modalAssunto').value;
+    const tempo = document.getElementById('modalTempo').value;
+    const acertos = document.getElementById('modalAcertos').value || 0;
+    const erros = document.getElementById('modalErros').value || 0;
+    const obs = document.getElementById('modalObs').value;
+
+    if (!dt || !assunto) {
+      alert('Data e Assunto são obrigatórios!');
+      return;
+    }
+
+    const qts = parseInt(acertos) + parseInt(erros);
+
+    logs.push({
+      date: dt,
+      mat: mat,
+      assunto: assunto,
+      tempo: tempo ? parseInt(tempo) : 0,
+      qts: qts,
+      acertos: parseInt(acertos),
+      obs: obs
+    });
+
+    saveLocal();
+    closeRegistroModal();
+    
+    document.getElementById('modalAssunto').value = '';
+    document.getElementById('modalTempo').value = '';
+    document.getElementById('modalAcertos').value = '';
+    document.getElementById('modalErros').value = '';
+    document.getElementById('modalObs').value = '';
+    
+    const now = new Date();
+    renderTracker(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`);
   }
 
   function deleteSession(index) {
@@ -923,114 +1157,8 @@
       logs.splice(index, 1);
       saveLocal();
       const now = new Date();
-      const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-      renderTracker(todayStr);
+      renderTracker(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`);
     }
-  }
-
-  function renderCalendar(daysStudied, todayStr) {
-    const cal = document.getElementById('calGrid');
-    cal.innerHTML = '';
-    
-    const todayObj = new Date(todayStr + 'T00:00:00');
-    
-    const start = new Date(todayObj);
-    start.setDate(start.getDate() - 27);
-    
-    for (let i = 0; i <= 27; i++) {
-      const d = new Date(start);
-      d.setDate(d.getDate() + i);
-      const dy = d.getFullYear();
-      const dm = String(d.getMonth() + 1).padStart(2, '0');
-      const dd = String(d.getDate()).padStart(2, '0');
-      const dStr = `${dy}-${dm}-${dd}`;
-      
-      const div = document.createElement('div');
-      div.className = 'cal-day';
-      div.innerText = dd;
-      div.title = dStr;
-      
-      if (dStr === todayStr) div.classList.add('today');
-      if (daysStudied.has(dStr)) div.classList.add('active');
-      
-      cal.appendChild(div);
-    }
-  }
-
-  function calcStreak(daysStudied, todayStr) {
-    let streak = 0;
-    const d = new Date(todayStr + 'T00:00:00');
-    
-    if (daysStudied.has(todayStr)) {
-      streak++;
-      d.setDate(d.getDate() - 1);
-    } else {
-      d.setDate(d.getDate() - 1);
-    }
-
-    while(true) {
-      const dy = d.getFullYear();
-      const dm = String(d.getMonth() + 1).padStart(2, '0');
-      const dd = String(d.getDate()).padStart(2, '0');
-      const dStr = `${dy}-${dm}-${dd}`;
-      
-      if (daysStudied.has(dStr)) {
-        streak++;
-        d.setDate(d.getDate() - 1);
-      } else {
-        break;
-      }
-    }
-    
-    document.getElementById('streakVal').innerText = `${streak} dias 🔥`;
-  }
-
-  function saveSession() {
-    const dt = document.getElementById('tfDate').value;
-    const mat = document.getElementById('tfMat').value;
-    const assunto = document.getElementById('tfAssunto').value;
-    const tempo = document.getElementById('tfTempo').value;
-    const qts = document.getElementById('tfQts').value;
-    const acertos = document.getElementById('tfAcertos').value;
-    const obs = document.getElementById('tfObs').value;
-
-    if (!dt || !assunto) {
-      alert('Data e Assunto são obrigatórios!');
-      return;
-    }
-
-    logs.push({
-      date: dt,
-      mat: mat,
-      assunto: assunto,
-      tempo: tempo ? parseInt(tempo) : 0,
-      qts: qts ? parseInt(qts) : 0,
-      acertos: acertos ? parseInt(acertos) : 0,
-      obs: obs
-    });
-
-    saveLocal();
-    document.getElementById('tfAssunto').value = '';
-    document.getElementById('tfTempo').value = '';
-    document.getElementById('tfQts').value = '';
-    document.getElementById('tfAcertos').value = '';
-    document.getElementById('tfObs').value = '';
-    
-    const now = new Date();
-    const yyyy = now.getFullYear();
-    const mm = String(now.getMonth() + 1).padStart(2, '0');
-    const dd = String(now.getDate()).padStart(2, '0');
-    renderTracker(`${yyyy}-${mm}-${dd}`);
-
-    // Visual feedback
-    const btn = document.getElementById('btnSave');
-    const oldText = btn.innerText;
-    btn.innerText = '✔️ SALVO!';
-    btn.style.background = 'var(--green)';
-    setTimeout(() => {
-      btn.innerText = oldText;
-      btn.style.background = '';
-    }, 1500);
   }
 
   function exportData() {
@@ -1044,19 +1172,22 @@
   }
 
   function importData() {
-    const p = prompt("Cole aqui o JSON de backup:");
-    if (p) {
-      try {
-        const parsed = JSON.parse(p);
-        if (Array.isArray(parsed)) {
-          logs = parsed;
-          saveLocal();
-          location.reload();
-        }
-      } catch (e) {
-        alert("JSON inválido");
-      }
-    }
+    const inp = document.createElement('input');
+    inp.type = 'file';
+    inp.accept = 'application/json,.json';
+    inp.onchange = function(e){
+      const f = e.target.files[0]; if(!f) return;
+      const rd = new FileReader();
+      rd.onload = function(ev){
+        try {
+          const parsed = JSON.parse(ev.target.result);
+          if (Array.isArray(parsed)) { logs = parsed; saveLocal(); location.reload(); }
+          else alert('JSON inválido: esperado uma lista de sessões.');
+        } catch (err) { alert('JSON inválido — não foi possível ler o arquivo.'); }
+      };
+      rd.readAsText(f);
+    };
+    inp.click();
   }
 
   document.addEventListener('DOMContentLoaded', initTracker);
