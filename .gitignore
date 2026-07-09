@@ -8,6 +8,7 @@ G7 Jurídico/
 node_modules/
 npm-debug.log*
 yarn-error.log*
+*.tsbuildinfo
 
 # ==== Ambiente / segredos ====
 .env

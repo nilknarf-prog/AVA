@@ -117,7 +117,7 @@ A geração de materiais de revisão e resumo NÃO deve ser feita em arquivos .m
   - Cada tópico abordado vira um `<div class="info-card searchable">` dentro da aba correspondente.
   - Após gerar o HTML, você deve atualizar o arquivo `index.html` inserindo o link da nova aula sob a respectiva tag `<details class="materia">`.
 
-- **Módulo de Flashcards Atena:** A criação de flashcards deve alimentar o ecossistema Atena. Os flashcards não ficam apenas em texto. Você deve atualizar o banco de dados no arquivo React/TSX (`m_dulo_de_flashcards_atena.tsx`), adicionando novos objetos ao array `bancoDeQuestoes` ou `resumoEstrategico`. Siga o formato de ID numérico ou string correspondente, com `banca`, `ano`, `assunto`, `frente` (pergunta) e `verso` (resposta). Destaque palavras importantes no verso (NÃO, EXCEÇÃO, VEDADA, SÚMULA) pois o componente `HighlightText` as destacará visualmente.
+- **Módulo de Flashcards Atena (build Vite):** A criação de flashcards deve alimentar o ecossistema Atena. O módulo é um app **React de produção** compilado por Vite; a **fonte única** é `flashcards-src/src/data.ts` (array `bancosDeQuestoes` de `Deck` → `cards`). Para adicionar cartões: edite `data.ts` (cada `Card` tem `id`, `assunto`, `frente` (pergunta), `verso` (resposta)), depois rode `cd flashcards-src && npm run build` — isso regenera o deploy em `atena/` (servido em `/atena/`; NÃO editar `atena/` à mão, é build). Destaque palavras-chave no verso (NÃO, EXCEÇÃO, VEDADA, SÚMULA, SIM, SEMPRE, NUNCA) pois o componente `HighlightText` as destacará visualmente. O SRS persiste em `atena_srs` e loga sessões em `delta_estudos` (tema unificado `delta-theme`). A URL antiga `m_dulo_de_flashcards_atena.html` é só um redirect para `/atena/`.
 
 ---
 
