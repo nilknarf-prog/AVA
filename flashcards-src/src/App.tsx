@@ -227,13 +227,41 @@ export default function App() {
               <h3 className="text-xl font-bold text-gray-900 dark:text-white mt-1">{deck.titulo}</h3>
               <p className="text-gray-600 dark:text-gray-300 mt-2 text-sm leading-relaxed">{deck.descricao}</p>
             </div>
+
+            <div className="mt-4">
+              <details className="group/assunto">
+                <summary className="text-sm font-semibold text-gray-500 dark:text-gray-400 cursor-pointer flex items-center gap-2 hover:text-[#ff6b00] transition-colors list-none">
+                  <span className="transform group-open/assunto:rotate-90 transition-transform text-[10px]">▶</span> Ver Assuntos
+                </summary>
+                <div className="mt-3 flex flex-col gap-2 pl-3 border-l-2 border-[#ffe6d4] dark:border-[#4d1f00]">
+                  {Object.entries(
+                    deck.cards.reduce((acc, card) => {
+                      if (!acc[card.assunto]) acc[card.assunto] = [];
+                      acc[card.assunto].push(card);
+                      return acc;
+                    }, {} as Record<string, Card[]>)
+                  ).map(([assunto, cards]) => (
+                    <div key={assunto} className="flex justify-between items-center bg-gray-50 dark:bg-zinc-800/80 p-2 rounded-lg text-sm border border-gray-100 dark:border-zinc-700">
+                      <span className="text-gray-700 dark:text-gray-300 font-medium truncate pr-2" title={assunto}>{assunto}</span>
+                      <button 
+                        onClick={() => startDeck(cards, `${deck.sigla}: ${assunto}`)}
+                        className="shrink-0 bg-white dark:bg-zinc-700 text-[#ff6b00] border border-gray-200 dark:border-zinc-600 hover:bg-[#ff6b00] hover:text-white hover:border-[#ff6b00] px-3 py-1 rounded-md text-xs font-bold transition-colors shadow-sm"
+                      >
+                        Estudar ({cards.length})
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </details>
+            </div>
+
             <div className="mt-6 flex justify-between items-center border-t border-gray-100 dark:border-zinc-700 pt-4">
               <span className="text-gray-500 dark:text-gray-400 text-sm font-semibold flex items-center gap-1.5"><BookOpen size={16} /> {deck.cards.length} Cartões</span>
               <button
                 onClick={() => startDeck(deck.cards, deck.titulo)}
                 className="text-[#ff6b00] dark:text-[#ff8533] font-bold flex items-center gap-1 group-hover:gap-2 transition-all"
               >
-                Estudar <ArrowLeft size={16} className="rotate-180" />
+                Estudar Tudo <ArrowLeft size={16} className="rotate-180" />
               </button>
             </div>
           </div>
