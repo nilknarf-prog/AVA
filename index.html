@@ -539,9 +539,28 @@
         <button onclick="closeRegistroModal()" class="btn-close">&times;</button>
       </div>
       <div class="modal-body">
+        <input type="hidden" id="modalEditIndex">
         <div class="modal-row">
           <div class="modal-group">
             <label>Data</label>
+            <input type="date" id="modalData">
+          </div>
+          <div class="modal-group">
+            <label>Tempo (min)</label>
+            <input type="number" id="modalTempo" placeholder="Ex: 60">
+          </div>
+        </div>
+        <div class="modal-row">
+          <div class="modal-group">
+            <label>Categoria</label>
+            <input list="categorias-list" id="modalCategoria" placeholder="Ex: Teoria, Revisão, Simulados...">
+            <datalist id="categorias-list">
+              <option value="Teoria">
+              <option value="Questões">
+              <option value="Revisão">
+            </datalist>
+          </div>
+          <div class="modal-group">
             <input type="date" id="modalData">
           </div>
           <div class="modal-group">
@@ -859,10 +878,10 @@
   const STORAGE_KEY = 'delta_estudos';
   
   const SEED_DATA = [
-    { date: '2026-06-30', mat: 'DA', assunto: 'Onboarding', tempo: 0, qts: 0, acertos: 0, obs: 'Marco inicial' },
-    { date: '2026-07-07', mat: 'DP', assunto: 'Teoria do Crime', tempo: 70, qts: 0, acertos: 0, obs: 'Estudo de ontem' },
-    { date: '2026-07-08', mat: 'DC', assunto: 'Diagnóstico Semana 01', tempo: 62, qts: 56, acertos: 48, obs: '85.7%' },
-    { date: '2026-07-08', mat: 'DCV', assunto: 'Revisão Missão 1', tempo: 45, qts: 0, acertos: 0, obs: 'Revisão aprofundada' }
+    { date: '2026-06-30', mat: 'DA', assunto: 'Onboarding', categoria: 'Teoria', tempo: 0, qts: 0, acertos: 0, obs: 'Marco inicial' },
+    { date: '2026-07-07', mat: 'DP', assunto: 'Teoria do Crime', categoria: 'Teoria', tempo: 70, qts: 0, acertos: 0, obs: 'Estudo de ontem' },
+    { date: '2026-07-08', mat: 'DC', assunto: 'Diagnóstico Semana 01', categoria: 'Questões', tempo: 62, qts: 56, acertos: 48, obs: '85.7%' },
+    { date: '2026-07-08', mat: 'DCV', assunto: 'Revisão Missão 1', categoria: 'Revisão', tempo: 45, qts: 0, acertos: 0, obs: 'Revisão aprofundada' }
   ];
 
   let logs = [];
@@ -944,6 +963,24 @@
     drawDonut(pct);
     drawBars(painelMap);
     drawHeat(daysStudied, todayStr);
+    updateCategoriasList();
+  }
+
+  function updateCategoriasList() {
+    const list = document.getElementById('categorias-list');
+    if(!list) return;
+    const defaultCategories = new Set(['Teoria', 'Questões', 'Revisão']);
+    logs.forEach(l => {
+      if(l.categoria && l.categoria.trim() !== '') {
+        defaultCategories.add(l.categoria.trim());
+      }
+    });
+    list.innerHTML = '';
+    defaultCategories.forEach(cat => {
+      const opt = document.createElement('option');
+      opt.value = cat;
+      list.appendChild(opt);
+    });
   }
 
   const VIZ_MAT = {
@@ -1044,8 +1081,11 @@
         <div class="hist-dot"></div>
         <div class="hist-content">
           <div class="hist-title">
-            <span>${l.mat}</span>
-            <span style="font-family:'IBM Plex Mono', monospace;">${formattedDate} <button class="btn-del" onclick="deleteSession(${l.originalIndex})" style="border:none;background:none;color:var(--text-dim);cursor:pointer;margin-left:8px;" title="Excluir">&times;</button></span>
+            <span>${l.mat} <span style="background:var(--brand-soft);color:var(--brand);padding:2px 6px;border-radius:4px;font-size:9px;margin-left:4px;">${l.categoria || 'Teoria'}</span></span>
+            <span style="font-family:'IBM Plex Mono', monospace;">${formattedDate} 
+              <button class="btn-del" onclick="openRegistroModal(${l.originalIndex})" style="border:none;background:none;color:var(--text-dim);cursor:pointer;margin-left:8px;font-size:12px;" title="Editar">✏️</button>
+              <button class="btn-del" onclick="deleteSession(${l.originalIndex})" style="border:none;background:none;color:var(--text-dim);cursor:pointer;margin-left:4px;font-size:14px;" title="Excluir">&times;</button>
+            </span>
           </div>
           <div class="hist-desc">${l.assunto}</div>
           <div class="hist-stats">${statsHTML} ${l.obs ? `| 📝 ${l.obs}` : ''}</div>
@@ -1104,9 +1144,34 @@
   }
 
   // MODAL FUNCTIONS
-  function openRegistroModal() {
-    const now = new Date();
-    document.getElementById('modalData').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  function openRegistroModal(index = null) {
+    const modalTitle = document.querySelector('.modal-header h2');
+    
+    if (index !== null && index >= 0 && index < logs.length) {
+      modalTitle.innerText = "Editar Registro";
+      const log = logs[index];
+      document.getElementById('modalEditIndex').value = index;
+      document.getElementById('modalData').value = log.date || '';
+      document.getElementById('modalTempo').value = log.tempo || '';
+      document.getElementById('modalMat').value = log.mat || 'DP';
+      document.getElementById('modalAssunto').value = log.assunto || '';
+      document.getElementById('modalAcertos').value = log.acertos || '';
+      document.getElementById('modalErros').value = (log.qts - log.acertos) || '';
+      document.getElementById('modalObs').value = log.obs || '';
+      document.getElementById('modalCategoria').value = log.categoria || 'Teoria';
+    } else {
+      modalTitle.innerText = "Registro de Estudo";
+      document.getElementById('modalEditIndex').value = '';
+      const now = new Date();
+      document.getElementById('modalData').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+      document.getElementById('modalTempo').value = '';
+      document.getElementById('modalMat').value = 'DP';
+      document.getElementById('modalAssunto').value = '';
+      document.getElementById('modalAcertos').value = '';
+      document.getElementById('modalErros').value = '';
+      document.getElementById('modalObs').value = '';
+      document.getElementById('modalCategoria').value = '';
+    }
     document.getElementById('registroModal').style.display = 'flex';
   }
   function closeRegistroModal() {
@@ -1121,6 +1186,8 @@
     const acertos = document.getElementById('modalAcertos').value || 0;
     const erros = document.getElementById('modalErros').value || 0;
     const obs = document.getElementById('modalObs').value;
+    const categoria = document.getElementById('modalCategoria').value || 'Teoria';
+    const editIndex = document.getElementById('modalEditIndex').value;
 
     if (!dt || !assunto) {
       alert('Data e Assunto são obrigatórios!');
@@ -1128,25 +1195,29 @@
     }
 
     const qts = parseInt(acertos) + parseInt(erros);
-
-    logs.push({
+    
+    const newLog = {
       date: dt,
       mat: mat,
       assunto: assunto,
+      categoria: categoria,
       tempo: tempo ? parseInt(tempo) : 0,
       qts: qts,
       acertos: parseInt(acertos),
       obs: obs
-    });
+    };
+
+    if (editIndex !== '') {
+      const idx = parseInt(editIndex);
+      if (idx >= 0 && idx < logs.length) {
+        logs[idx] = newLog;
+      }
+    } else {
+      logs.push(newLog);
+    }
 
     saveLocal();
     closeRegistroModal();
-    
-    document.getElementById('modalAssunto').value = '';
-    document.getElementById('modalTempo').value = '';
-    document.getElementById('modalAcertos').value = '';
-    document.getElementById('modalErros').value = '';
-    document.getElementById('modalObs').value = '';
     
     const now = new Date();
     renderTracker(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`);

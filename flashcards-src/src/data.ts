@@ -132,6 +132,7 @@ export const bancosDeQuestoes: Deck[] = [
       { id: 'ml2', assunto: 'Peritos', frente: 'Na ausência de perito oficial, o exame de corpo de delito pode ser feito por apenas 1 (uma) pessoa idônea com diploma superior?', verso: 'NÃO. Na falta de perito oficial (onde 1 basta), exige-se a nomeação de 2 (DUAS) pessoas idôneas com curso superior (Art. 159, §1º, CPP).' },
       { id: 'ml3', assunto: 'Documentos Médico-Legais', frente: "O 'Parecer' é o exame direto e minucioso realizado pelo perito no corpo da vítima, reduzido a termo?", verso: 'NÃO. Isso é o RELATÓRIO/LAUDO. O Parecer é apenas uma OPINIÃO TÉCNICA sobre um exame/laudo já realizado por outro profissional.' },
       { id: 'ml4', assunto: 'Infortunística', frente: 'O acidente de percurso (trajeto de casa para o trabalho) é equiparado a acidente de trabalho, garantindo direitos previdenciários?', verso: 'SIM. É o chamado acidente atípico (ou por equiparação), mesmo ocorrendo fora das dependências e do horário de trabalho.' },
+      { id: 'ml5', assunto: 'Traumatologia', frente: 'Qual a diferença conceitual entre Trauma e Lesão na Medicina Legal?', verso: 'TRAUMA é a CAUSA (a energia ou objeto que atinge o corpo, ex: projétil, soco). LESÃO é o EFEITO (o dano ou alteração estrutural no corpo, ex: fratura, equimose).' },
     ],
   },
 ];
