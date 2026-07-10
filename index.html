@@ -405,15 +405,88 @@
     .dash-main { flex-direction: column; }
     .modal-row { flex-direction: column; }
   }
+
+  /* ── SIDEBAR MENU ────────────────────────────── */
+  .sidebar-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:900; opacity:0; pointer-events:none; transition:opacity .3s; }
+  .sidebar-overlay.active { opacity:1; pointer-events:auto; }
+  .sidebar { position:fixed; left:-280px; top:0; bottom:0; width:280px; background:var(--surface); z-index:901; transition:left .3s; border-right:1px solid var(--border); box-shadow:4px 0 24px rgba(0,0,0,0.1); display:flex; flex-direction:column; }
+  .sidebar.active { left:0; }
+  .sidebar-header { padding:24px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+  .sidebar-header h2 { font-size:16px; font-weight:800; color:var(--text); margin:0; }
+  .sidebar-nav { padding:24px 16px; flex:1; display:flex; flex-direction:column; gap:8px; }
+  .nav-btn { background:none; border:none; width:100%; text-align:left; padding:12px 16px; font-size:14px; font-weight:600; color:var(--text-muted); border-radius:8px; cursor:pointer; transition:all .2s; }
+  .nav-btn:hover { background:var(--surface-hover); color:var(--text); }
+  .nav-btn.active { background:var(--brand-soft); color:var(--brand); }
+  .btn-menu { background:none; border:none; color:var(--text); font-size:24px; cursor:pointer; margin-right:12px; }
+
+  /* ── STOPWATCH FAB ────────────────────────────── */
+  .fab-container { position:fixed; bottom:24px; right:24px; z-index:800; display:flex; flex-direction:column; align-items:flex-end; gap:12px; }
+  .stopwatch-widget { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:16px; box-shadow:0 8px 32px rgba(0,0,0,0.15); display:none; flex-direction:column; align-items:center; gap:12px; transform-origin:bottom right; animation:popIn .3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+  @keyframes popIn { 0% { opacity:0; transform:scale(0.8); } 100% { opacity:1; transform:scale(1); } }
+  .sw-time { font-family:'IBM Plex Mono', monospace; font-size:32px; font-weight:700; color:var(--brand); line-height:1; }
+  .sw-controls { display:flex; gap:8px; }
+  .sw-btn { width:40px; height:40px; border-radius:50%; border:none; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px; transition:transform .2s; }
+  .sw-btn:hover { transform:scale(1.1); }
+  .btn-play { background:var(--green); color:white; }
+  .btn-pause { background:var(--amber); color:white; }
+  .btn-stop { background:#ef4444; color:white; }
+  .fab-btn { width:56px; height:56px; border-radius:50%; background:var(--green); color:white; border:none; box-shadow:0 4px 12px rgba(16,185,129,0.3); font-size:24px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:transform .2s; }
+  .fab-btn:hover { transform:scale(1.05); }
+
+  /* ── HISTORY VIEW ────────────────────────────── */
+  #view-history { display:none; }
+  .hist-day-group { margin-bottom: 32px; }
+  .hist-day-header { display:flex; align-items:center; gap:16px; margin-bottom:16px; }
+  .hist-day-title { font-size:12px; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; white-space:nowrap; }
+  .hist-day-line { flex:1; height:1px; background:var(--border); }
+  .hist-day-total { font-family:'IBM Plex Mono', monospace; font-size:12px; font-weight:600; color:var(--text-dim); display:flex; align-items:center; gap:4px; }
+  .hist-cards { display:flex; flex-direction:column; gap:8px; }
+  .hist-card { background:var(--surface); border:1px solid var(--border); border-radius:8px; display:flex; align-items:center; padding:12px 16px; position:relative; overflow:hidden; gap:16px; transition:border-color .2s; }
+  .hist-card:hover { border-color:var(--text-dim); }
+  .hist-card-stripe { position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--brand); }
+  .hc-main { flex:2; display:flex; flex-direction:column; min-width:0; }
+  .hc-mat { font-size:13px; font-weight:700; color:var(--text); text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .hc-assunto { font-size:12px; color:var(--text-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .hc-time { font-family:'IBM Plex Mono', monospace; font-size:13px; font-weight:600; color:var(--text-muted); flex:1; text-align:center; }
+  .hc-stats { display:flex; align-items:center; gap:12px; flex:1.5; justify-content:center; font-family:'IBM Plex Mono', monospace; font-size:12px; font-weight:600; }
+  .hc-stats-val { display:flex; gap:8px; }
+  .hc-pct { background:var(--green); color:white; padding:2px 6px; border-radius:4px; font-size:11px; }
+  .hc-cat { font-size:10px; font-weight:800; text-transform:uppercase; padding:4px 8px; border-radius:4px; color:white; letter-spacing:0.5px; }
+  .hc-actions { display:flex; gap:8px; flex:0.5; justify-content:flex-end; }
+  .hc-btn { background:none; border:none; color:var(--text-dim); cursor:pointer; transition:color .2s; font-size:14px; }
+  .hc-btn:hover { color:var(--text); }
+  
+  @media(max-width: 768px) {
+    .hist-card { flex-wrap:wrap; padding:12px; }
+    .hc-time { text-align:left; width:100%; flex:none; margin:8px 0; }
+    .hc-stats { justify-content:flex-start; flex:none; width:100%; }
+    .hc-actions { position:absolute; right:12px; top:12px; }
+    .hc-cat { position:absolute; right:12px; bottom:12px; }
+  }
 </style>
 <link rel="stylesheet" href="./assets/tokens.css"/>
 </head>
 <body>
 
+<!-- SIDEBAR -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h2>Menu Delta</h2>
+    <button class="btn-close" onclick="toggleSidebar()" style="background:none; border:none; font-size:24px; cursor:pointer;">&times;</button>
+  </div>
+  <div class="sidebar-nav">
+    <button class="nav-btn active" id="nav-dash" onclick="switchView('dashboard')">🏠 Dashboard Principal</button>
+    <button class="nav-btn" id="nav-hist" onclick="switchView('history')">📜 Histórico de Estudos</button>
+  </div>
+</div>
+
 <!-- ═══ HEADER ═══════════════════════════════ -->
 <header>
-  <div class="header-inner">
+  <div class="header-inner" style="justify-content: flex-start;">
+    <button class="btn-menu" onclick="toggleSidebar()">☰</button>
     <span class="brand-mark">⚖️ Delta</span>
+    <div style="flex:1;"></div>
     <button id="themeToggle" class="theme-toggle-btn" aria-label="Alternar tema">
       <svg class="moon-icon" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
@@ -435,6 +508,7 @@
 
 <!-- ═══ MAIN ══════════════════════════════════ -->
 <main>
+  <div id="view-dashboard">
 
   <!-- HERO -->
   <section class="hero">
@@ -546,12 +620,12 @@
             <input type="date" id="modalData">
           </div>
           <div class="modal-group">
-            <label>Tempo (min)</label>
-            <input type="number" id="modalTempo" placeholder="Ex: 60">
+            <label>Tempo (HH:MM:SS)</label>
+            <input type="text" id="modalTempo" placeholder="00:00:00" onblur="formatTimeInput(this)">
           </div>
         </div>
         <div class="modal-row">
-          <div class="modal-group">
+          <div class="modal-group" style="flex:1;">
             <label>Categoria</label>
             <input list="categorias-list" id="modalCategoria" placeholder="Ex: Teoria, Revisão, Simulados...">
             <datalist id="categorias-list">
@@ -559,13 +633,6 @@
               <option value="Questões">
               <option value="Revisão">
             </datalist>
-          </div>
-          <div class="modal-group">
-            <input type="date" id="modalData">
-          </div>
-          <div class="modal-group">
-            <label>Tempo (min)</label>
-            <input type="number" id="modalTempo" placeholder="Ex: 60">
           </div>
         </div>
         <div class="modal-row">
@@ -867,6 +934,16 @@
     </details>
 
   </div><!-- /materias -->
+  </div> <!-- /view-dashboard -->
+
+  <!-- HISTORY VIEW -->
+  <div id="view-history">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:32px;">
+      <h1 style="font-size:28px; font-weight:800; color:var(--text);">Histórico Completo</h1>
+      <button class="btn-novo" style="width:auto; padding:10px 20px;" onclick="openRegistroModal()">+ Adicionar Estudo</button>
+    </div>
+    <div id="historyFullContainer"></div>
+  </div>
 
 </main>
 
@@ -875,6 +952,170 @@
 </footer>
 
 <script>
+  // FORMATTING & UTILS
+  function formatTimeInput(el) {
+    let val = el.value.replace(/[^0-9]/g, '');
+    if(!val) return;
+    if(val.length <= 2) val = "00:00:" + val.padStart(2, '0');
+    else if(val.length <= 4) val = "00:" + val.slice(0,-2).padStart(2,'0') + ":" + val.slice(-2);
+    else val = val.slice(0,-4).padStart(2,'0') + ":" + val.slice(-4,-2) + ":" + val.slice(-2);
+    el.value = val;
+  }
+  function hhmmssToSec(str) {
+    if(!str || typeof str !== 'string') return 0;
+    const parts = str.split(':');
+    if(parts.length !== 3) return 0;
+    return parseInt(parts[0])*3600 + parseInt(parts[1])*60 + parseInt(parts[2]);
+  }
+  function secToHHMMSS(sec) {
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    const s = sec % 60;
+    return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  }
+
+  // STOPWATCH
+  let swInterval = null;
+  let swSeconds = 0;
+  let swRunning = false;
+  function toggleStopwatch() {
+    const w = document.getElementById('swWidget');
+    w.style.display = w.style.display === 'flex' ? 'none' : 'flex';
+  }
+  function swUpdateDisplay() {
+    document.getElementById('swDisplay').innerText = secToHHMMSS(swSeconds);
+  }
+  function swPlay() {
+    if(swRunning) return;
+    swRunning = true;
+    swInterval = setInterval(() => { swSeconds++; swUpdateDisplay(); }, 1000);
+  }
+  function swPause() {
+    swRunning = false;
+    clearInterval(swInterval);
+  }
+  function swStop() {
+    swPause();
+    if(swSeconds === 0) return;
+    if(confirm('Você quer realmente parar o cronômetro e registrar a sessão agora?')) {
+      openRegistroModal();
+      document.getElementById('modalTempo').value = secToHHMMSS(swSeconds);
+      swSeconds = 0;
+      swUpdateDisplay();
+      toggleStopwatch(); // hide
+    }
+  }
+
+  // NAVIGATION
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('active');
+    document.getElementById('sidebarOverlay').classList.toggle('active');
+  }
+  function switchView(view) {
+    document.getElementById('view-dashboard').style.display = view === 'dashboard' ? 'block' : 'none';
+    document.getElementById('view-history').style.display = view === 'history' ? 'block' : 'none';
+    document.getElementById('nav-dash').classList.toggle('active', view === 'dashboard');
+    document.getElementById('nav-hist').classList.toggle('active', view === 'history');
+    toggleSidebar();
+    if(view === 'history') renderHistoryFull();
+  }
+
+  function getCatColor(cat) {
+    const c = (cat||'').toUpperCase();
+    if(c.includes('REVISÃO') || c.includes('REVISAO')) return '#ef4444';
+    if(c.includes('QUESTÕES') || c.includes('QUESTOES')) return '#10b981';
+    return '#f59e0b';
+  }
+
+  function renderHistoryFull() {
+    const container = document.getElementById('historyFullContainer');
+    if(!container) return;
+    container.innerHTML = '';
+    
+    // Reverse reference
+    const logsRefs = logs.map((l, i) => ({...l, originalIndex: i}));
+    
+    const finalGroups = {};
+    logsRefs.forEach(l => {
+      if(!finalGroups[l.date]) finalGroups[l.date] = [];
+      finalGroups[l.date].push(l);
+    });
+
+    const sortedDates = Object.keys(finalGroups).sort((a,b) => new Date(b) - new Date(a));
+
+    if(sortedDates.length === 0) {
+      container.innerHTML = '<div style="color:var(--text-dim);">Nenhum estudo registrado.</div>';
+      return;
+    }
+
+    sortedDates.forEach(date => {
+      const dayLogs = finalGroups[date];
+      let daySecs = 0;
+      dayLogs.forEach(l => {
+        if(typeof l.tempo === 'string' && l.tempo.includes(':')) daySecs += hhmmssToSec(l.tempo);
+        else daySecs += (parseInt(l.tempo)||0) * 60;
+      });
+
+      const [y,m,d] = date.split('-');
+      const dateObj = new Date(y, m-1, d);
+      const dayName = dateObj.toLocaleDateString('pt-BR', { weekday:'short', day:'2-digit', month:'short' }).toUpperCase();
+      const h = Math.floor(daySecs/3600);
+      const min = Math.floor((daySecs%3600)/60);
+      const totalStr = h > 0 ? h + 'h' + min + 'min' : min + 'min';
+
+      const groupHTML = document.createElement('div');
+      groupHTML.className = 'hist-day-group';
+      
+      let cardsHTML = '';
+      // Reverse internal to show timeline (latest to oldest inside day if appended sequentially)
+      dayLogs.reverse().forEach(l => {
+        let timeStr = '';
+        if(typeof l.tempo === 'string' && l.tempo.includes(':')) timeStr = l.tempo;
+        else timeStr = secToHHMMSS((parseInt(l.tempo)||0)*60);
+
+        const qts = l.qts || 0;
+        const acertos = l.acertos || 0;
+        const erros = qts - acertos;
+        const pct = qts > 0 ? Math.round((acertos/qts)*100) : 0;
+        const cat = (l.categoria || 'TEORIA').toUpperCase();
+        const color = getCatColor(cat);
+
+        cardsHTML += `
+          <div class="hist-card">
+            <div class="hist-card-stripe" style="background:${color}"></div>
+            <div class="hc-main">
+              <div class="hc-mat">${VIZ_MAT[l.mat] || l.mat}</div>
+              <div class="hc-assunto">${l.assunto || 'Sem assunto'}</div>
+            </div>
+            <div class="hc-time">⏱️ ${timeStr}</div>
+            <div class="hc-stats">
+              <div class="hc-stats-val"><span style="color:var(--green);">${acertos}</span> <span style="color:var(--text-dim);">/</span> <span style="color:#ef4444;">${erros}</span></div>
+              <div class="hc-pct" style="background:${color}">${pct}%</div>
+            </div>
+            <div class="hc-cat" style="background:${color}">${cat}</div>
+            <div class="hc-actions">
+              ${l.obs ? `<button class="hc-btn" title="${l.obs}">💬</button>` : ''}
+              <button class="hc-btn" onclick="openRegistroModal(${l.originalIndex})" title="Editar">✏️</button>
+              <button class="hc-btn" onclick="deleteSession(${l.originalIndex})" title="Excluir">🗑️</button>
+            </div>
+          </div>
+        `;
+      });
+
+      groupHTML.innerHTML = `
+        <div class="hist-day-header">
+          <div class="hist-day-title">${dayName}</div>
+          <div class="hist-day-line"></div>
+          <div class="hist-day-total">⏱️ ${totalStr}</div>
+        </div>
+        <div class="hist-cards">
+          ${cardsHTML}
+        </div>
+      `;
+      container.appendChild(groupHTML);
+    });
+  }
+
   const STORAGE_KEY = 'delta_estudos';
   
   const SEED_DATA = [
@@ -926,7 +1167,12 @@
     const painelMap = {};
 
     logs.forEach(l => {
-      const tm = parseInt(l.tempo || 0);
+      let tm = 0;
+      if (typeof l.tempo === 'string' && l.tempo.includes(':')) {
+        tm = Math.round(hhmmssToSec(l.tempo) / 60);
+      } else {
+        tm = parseInt(l.tempo || 0);
+      }
       const q = parseInt(l.qts || 0);
       const a = parseInt(l.acertos || 0);
       
@@ -1152,7 +1398,11 @@
       const log = logs[index];
       document.getElementById('modalEditIndex').value = index;
       document.getElementById('modalData').value = log.date || '';
-      document.getElementById('modalTempo').value = log.tempo || '';
+      let timeVal = log.tempo || '';
+      if(typeof timeVal === 'number' || (typeof timeVal === 'string' && !timeVal.includes(':'))) {
+        timeVal = secToHHMMSS((parseInt(timeVal)||0)*60);
+      }
+      document.getElementById('modalTempo').value = timeVal;
       document.getElementById('modalMat').value = log.mat || 'DP';
       document.getElementById('modalAssunto').value = log.assunto || '';
       document.getElementById('modalAcertos').value = log.acertos || '';
@@ -1201,7 +1451,7 @@
       mat: mat,
       assunto: assunto,
       categoria: categoria,
-      tempo: tempo ? parseInt(tempo) : 0,
+      tempo: tempo || '00:00:00',
       qts: qts,
       acertos: parseInt(acertos),
       obs: obs
@@ -1221,6 +1471,9 @@
     
     const now = new Date();
     renderTracker(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`);
+    if (document.getElementById('view-history').style.display === 'block') {
+      renderHistoryFull();
+    }
   }
 
   function deleteSession(index) {
@@ -1263,5 +1516,17 @@
 
   document.addEventListener('DOMContentLoaded', initTracker);
 </script>
+  <!-- STOPWATCH FAB -->
+  <div class="fab-container">
+    <div class="stopwatch-widget" id="swWidget">
+      <div class="sw-time" id="swDisplay">00:00:00</div>
+      <div class="sw-controls">
+        <button class="sw-btn btn-play" onclick="swPlay()" title="Continuar">▶️</button>
+        <button class="sw-btn btn-pause" onclick="swPause()" title="Pausar">⏸️</button>
+        <button class="sw-btn btn-stop" onclick="swStop()" title="Finalizar">⏹️</button>
+      </div>
+    </div>
+    <button class="fab-btn" onclick="toggleStopwatch()" title="Cronômetro">⏱️</button>
+  </div>
 </body>
 </html>
