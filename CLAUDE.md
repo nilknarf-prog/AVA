@@ -97,15 +97,20 @@ Imprima sempre um mini-dashboard no início da conversa:
 
 ---
 
-## 5. Algoritmo de Flashcards (SM-2 Simplificado)
+## 5. Algoritmo de Flashcards (Motor FSRS v4.5/5 — Modelo DSR)
 
-Para cada flashcard, a estrutura é: `Frente | Verso | Matéria | Intervalo`.
-Quando você aplicar flashcards, avalie a resposta do aluno e aplique:
-- **Errou (Again):** Volta para amanhã (0 dias).
-- **Acertou com dificuldade (Hard):** Intervalo x 1.2.
-- **Acertou bem (Good):** 1d → 3d → Intervalo x 2.5.
-- **Fácil (Easy):** Intervalo x 3.5.
-Atualize as datas de revisão no arquivo `revisao-hoje.md` usando a data atual do sistema.
+O repositório utiliza o algoritmo **FSRS (Free Spaced Repetition Scheduler)** em substituição ao antigo SM-2.
+O agendamento é fundamentado nos três pilares da ciência cognitiva da memória:
+- **D (Difficulty — Dificuldade, 1 a 10):** Complexidade intrínseca do conceito, com regressão contínua à média (elimina o *Ease Hell*).
+- **S (Stability — Estabilidade, em dias):** Duração necessária para que a probabilidade de retenção decline para a meta desejada.
+- **R (Retrievability — Recuperabilidade, %):** Probabilidade instantânea de recall da informação no momento atual.
+
+A meta padrão de retenção é calibrada em **90% (*Desired Retention = 0.90*)**.
+Ao aplicar ou avaliar revisões no ecossistema Atena, utilize os 4 graus de classificação:
+1. **Errei (Again / Rating 1):** Falha total de memória. Reinicia estabilidade e agenda repetição imediata/curta.
+2. **Difícil (Hard / Rating 2):** Resposta correta com grande hesitação. Avança o intervalo com fator de prudência.
+3. **Bom (Good / Rating 3):** Resposta correta no tempo esperado. Multiplica o intervalo para garantir 90% de retenção.
+4. **Fácil (Easy / Rating 4):** Domínio pleno e imediato. Projeta expansão ampliada de estabilidade.
 
 ## 6. Geração de Materiais e Ambiente Virtual de Aprendizagem (AVA)
 

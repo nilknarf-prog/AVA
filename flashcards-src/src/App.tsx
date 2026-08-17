@@ -1,21 +1,22 @@
 import { useState, useEffect } from 'react';
 import {
-  Layers, AlertTriangle, ThumbsUp, ThumbsDown,
-  Flame, ArrowLeft, CheckCircle, XCircle, Play,
+  Layers, AlertTriangle, Flame, ArrowLeft, CheckCircle, XCircle, Play,
   CalendarClock, BookOpen, LogOut, FileText, Sun, Moon,
+  BrainCircuit, Sparkles, Gauge, Target
 } from 'lucide-react';
 import { bancosDeQuestoes, type Card } from './data';
-
-// --- SRS ---
-interface SrsEntry {
-  interval: number;
-  ease: number;
-  nextReview: string;
-}
-type SrsData = Record<string, SrsEntry>;
+import {
+  Rating,
+  type FSRSCard,
+  type FSRSData,
+  scheduleFSRSCard,
+  previewFSRSIntervals,
+  migrateLegacySRS,
+  calculateRetrievability,
+} from './fsrs';
 
 // --- HIGHLIGHT ---
-const KEYWORDS = ['Exceção', 'Súmula', 'Vedada', 'Proibida', 'Prazo', 'NÃO', 'INCONDICIONADA', 'GRAVE', 'SIM', 'SEMPRE', 'NUNCA', 'JAMAIS', 'APENAS'];
+const KEYWORDS = ['Exceção', 'Súmula', 'Vedada', 'Proibida', 'Prazo', 'NÃO', 'INCONDICIONADA', 'GRAVE', 'SIM', 'SEMPRE', 'NUNCA', 'JAMAIS', 'APENAS', 'MAIOR', 'ROXIN', 'JAKOBS'];
 
 function HighlightText({ text }: { text: string }) {
   const regex = new RegExp(`\\b(${KEYWORDS.join('|')})\\b`, 'gi');
@@ -44,12 +45,20 @@ interface ModalData {
   date: string;
 }
 
+interface RatingCounts {
+  again: number;
+  hard: number;
+  good: number;
+  easy: number;
+}
+
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<'decks' | 'flashcards' | 'report'>('decks');
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // SRS State
-  const [srsData, setSrsData] = useState<SrsData>({});
+  // FSRS State
+  const [fsrsData, setFsrsData] = useState<FSRSData>({});
+  const [desiredRetention, setDesiredRetention] = useState<number>(0.90);
   const [todayCards, setTodayCards] = useState<Card[]>([]);
 
   // Review Session State
@@ -60,13 +69,15 @@ export default function App() {
   const [currentStreak, setCurrentStreak] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [incorrectCards, setIncorrectCards] = useState<Card[]>([]);
+  const [sessionRatings, setSessionRatings] = useState<RatingCounts>({ again: 0, hard: 0, good: 0, easy: 0 });
 
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [modalData, setModalData] = useState<ModalData>({ tempo: 0, obs: '', date: '' });
-  const [tempSrs, setTempSrs] = useState<SrsData>({});
+  const [tempFsrs, setTempFsrs] = useState<FSRSData>({});
 
-  // Init Theme and Load
+  // Init Theme, Retention and Load FSRS
   useEffect(() => {
+    // 1. Theme
     const savedTheme = localStorage.getItem('delta-theme');
     if (savedTheme === 'dark') {
       setIsDarkMode(true);
@@ -79,11 +90,28 @@ export default function App() {
       document.documentElement.classList.add('dark');
     }
 
+    // 2. Retention Setting
+    const savedRetention = localStorage.getItem('atena_retention');
+    if (savedRetention) {
+      const parsed = parseFloat(savedRetention);
+      if (!isNaN(parsed) && parsed >= 0.7 && parsed <= 0.98) {
+        setDesiredRetention(parsed);
+      }
+    }
+
+    // 3. FSRS Data & Migration
     const savedSrs = localStorage.getItem('atena_srs');
     if (savedSrs) {
-      const parsedSrs: SrsData = JSON.parse(savedSrs);
-      setSrsData(parsedSrs);
-      calculateTodayCards(parsedSrs);
+      try {
+        const raw = JSON.parse(savedSrs);
+        const migrated = migrateLegacySRS(raw);
+        setFsrsData(migrated);
+        localStorage.setItem('atena_srs', JSON.stringify(migrated));
+        calculateTodayCards(migrated);
+      } catch (e) {
+        console.error('Erro ao ler atena_srs:', e);
+        calculateTodayCards({});
+      }
     } else {
       calculateTodayCards({});
     }
@@ -103,13 +131,19 @@ export default function App() {
     });
   };
 
-  const calculateTodayCards = (srs: SrsData) => {
+  const changeRetention = (rate: number) => {
+    setDesiredRetention(rate);
+    localStorage.setItem('atena_retention', rate.toString());
+  };
+
+  const calculateTodayCards = (data: FSRSData) => {
     const now = new Date().getTime();
     const due: Card[] = [];
     const allCards = bancosDeQuestoes.flatMap((deck) => deck.cards);
     allCards.forEach((card) => {
-      const cardSrs = srs[card.id];
-      if (cardSrs && new Date(cardSrs.nextReview).getTime() <= now) {
+      const cardFsrs = data[card.id];
+      // Se não tiver registro ou a data da próxima revisão venceu
+      if (cardFsrs && new Date(cardFsrs.nextReview).getTime() <= now) {
         due.push(card);
       }
     });
@@ -125,47 +159,53 @@ export default function App() {
     setCurrentStreak(0);
     setCorrectCount(0);
     setIncorrectCards([]);
+    setSessionRatings({ again: 0, hard: 0, good: 0, easy: 0 });
     setCurrentScreen('flashcards');
   };
 
-  const openSaveModal = (newSrs: SrsData) => {
-    const tempoTotal = Math.round(currentDeck.length * 1.5);
+  const openSaveModal = (newFsrs: FSRSData) => {
+    const tempoTotal = Math.max(1, Math.round(currentDeck.length * 1.5));
     const now = new Date();
     const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     setModalData({ tempo: tempoTotal, obs: '', date: dateStr });
-    setTempSrs(newSrs);
+    setTempFsrs(newFsrs);
     setShowSaveModal(true);
   };
 
-  const handleAnswer = (isCorrect: boolean) => {
+  const handleRating = (rating: Rating) => {
     const card = currentDeck[cardIndex];
-    const newSrs: SrsData = { ...srsData };
-    const cardData: SrsEntry = newSrs[card.id] || { interval: 0, ease: 2.5, nextReview: new Date().toISOString() };
+    const newFsrs: FSRSData = { ...fsrsData };
+    const currentCardData: FSRSCard | undefined = newFsrs[card.id];
 
-    if (isCorrect) {
-      setCorrectCount((prev) => prev + 1);
-      setCurrentStreak((prev) => prev + 1);
-      cardData.interval = cardData.interval === 0 ? 1 : Math.round(cardData.interval * cardData.ease);
-    } else {
+    // Atualizar no motor FSRS
+    const updatedCard = scheduleFSRSCard(currentCardData, card.id, rating, desiredRetention);
+    newFsrs[card.id] = updatedCard;
+
+    // Atualizar estatísticas da sessão
+    if (rating === Rating.Again) {
       setCurrentStreak(0);
       setIncorrectCards((prev) => [...prev, card]);
-      cardData.interval = 1;
-      cardData.ease = Math.max(1.3, cardData.ease - 0.2);
+      setSessionRatings((prev) => ({ ...prev, again: prev.again + 1 }));
+    } else {
+      setCorrectCount((prev) => prev + 1);
+      setCurrentStreak((prev) => prev + 1);
+      if (rating === Rating.Hard) {
+        setSessionRatings((prev) => ({ ...prev, hard: prev.hard + 1 }));
+      } else if (rating === Rating.Good) {
+        setSessionRatings((prev) => ({ ...prev, good: prev.good + 1 }));
+      } else if (rating === Rating.Easy) {
+        setSessionRatings((prev) => ({ ...prev, easy: prev.easy + 1 }));
+      }
     }
 
-    const nextDate = new Date();
-    nextDate.setDate(nextDate.getDate() + cardData.interval);
-    cardData.nextReview = nextDate.toISOString();
-
-    newSrs[card.id] = cardData;
-    setSrsData(newSrs);
-    localStorage.setItem('atena_srs', JSON.stringify(newSrs));
+    setFsrsData(newFsrs);
+    localStorage.setItem('atena_srs', JSON.stringify(newFsrs));
 
     if (cardIndex < currentDeck.length - 1) {
       setIsFlipped(false);
       setCardIndex((prev) => prev + 1);
     } else {
-      openSaveModal(newSrs);
+      openSaveModal(newFsrs);
     }
   };
 
@@ -176,41 +216,78 @@ export default function App() {
       logs.push({
         date: modalData.date,
         mat: 'RLM/REV',
-        assunto: `Flashcards: ${deckName}`,
+        assunto: `Flashcards (FSRS): ${deckName}`,
         tempo: Number(modalData.tempo) || 0,
         qts: currentDeck.length,
         acertos: correctCount,
-        obs: modalData.obs || 'Registro: Método SRS Atena',
+        obs: modalData.obs || `FSRS 90% | Errei:${sessionRatings.again} Dif:${sessionRatings.hard} Bom:${sessionRatings.good} Fac:${sessionRatings.easy}`,
       });
       localStorage.setItem('delta_estudos', JSON.stringify(logs));
     } catch (e) {
       console.error('Erro ao integrar tracker', e);
     }
     setShowSaveModal(false);
-    calculateTodayCards(tempSrs);
+    calculateTodayCards(tempFsrs);
     setCurrentScreen('report');
   };
 
   // --- RENDERS ---
   const renderDecks = () => (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-5xl mx-auto pb-12">
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-        <Layers className="text-[#ff6b00]" /> Biblioteca de Baralhos
-      </h2>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            <Layers className="text-[#ff6b00]" /> Biblioteca de Baralhos
+          </h2>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1.5">
+            <BrainCircuit size={14} className="text-[#ff6b00]" /> Motor de Repetição Espaçada <strong>FSRS v4.5/5</strong> (Modelo DSR)
+          </p>
+        </div>
 
+        {/* Seletor de Retenção Alvo */}
+        <div className="flex items-center gap-2 bg-white dark:bg-zinc-800 px-3 py-1.5 rounded-xl border border-gray-200 dark:border-zinc-700 shadow-sm text-xs">
+          <Target size={14} className="text-[#ff6b00]" />
+          <span className="text-gray-500 dark:text-gray-400 font-semibold">Meta de Retenção:</span>
+          <div className="flex gap-1">
+            {[
+              { label: '85%', val: 0.85, tip: 'Mais Rápido' },
+              { label: '90%', val: 0.90, tip: 'Padrão Otimizado' },
+              { label: '95%', val: 0.95, tip: 'Reta Final' },
+            ].map((opt) => (
+              <button
+                key={opt.val}
+                onClick={() => changeRetention(opt.val)}
+                title={opt.tip}
+                className={`px-2 py-0.5 rounded-md font-bold transition-colors ${desiredRetention === opt.val ? 'bg-[#ff6b00] text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-700'}`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Card de Revisões do Dia */}
       <div className="bg-[#fff4ed] dark:bg-[#1a0a00] border border-[#ffe6d4] dark:border-[#4d1f00] rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow mb-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h3 className="text-xl font-bold text-[#803200] dark:text-[#ff9955] flex items-center gap-2">
-              <CalendarClock className="text-[#ff6b00]" size={24} />
-              Revisões do Dia
-            </h3>
-            <p className="text-[#a64800] dark:text-[#cc6611] mt-2 font-medium">Você tem <span className="font-bold text-xl">{todayCards.length}</span> cartões agendados pelo algoritmo de Revisão Espaçada para hoje.</p>
+            <div className="flex items-center gap-2">
+              <h3 className="text-xl font-bold text-[#803200] dark:text-[#ff9955] flex items-center gap-2">
+                <CalendarClock className="text-[#ff6b00]" size={24} />
+                Revisões do Dia (FSRS)
+              </h3>
+              <span className="bg-[#ffe6d4] dark:bg-[#4d1f00] text-[#803200] dark:text-[#ffad77] text-[10px] uppercase font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                <Sparkles size={12} /> DSR 90%
+              </span>
+            </div>
+            <p className="text-[#a64800] dark:text-[#cc6611] mt-2 font-medium">
+              Você tem <span className="font-bold text-xl">{todayCards.length}</span> cartões que atingiram o limiar ótimo de recuperação para hoje.
+            </p>
           </div>
           <button
-            onClick={() => startDeck(todayCards, 'Revisões do Dia')}
+            onClick={() => startDeck(todayCards, 'Revisões do Dia (FSRS)')}
             disabled={todayCards.length === 0}
-            className={`px-8 py-3 rounded-xl font-bold flex items-center gap-2 transition-colors shrink-0 shadow-md ${todayCards.length > 0 ? 'bg-[#ff6b00] hover:bg-[#e65c00] text-white' : 'bg-gray-300 dark:bg-zinc-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'}`}
+            className={`px-8 py-3 rounded-xl font-bold flex items-center gap-2 transition-colors shrink-0 shadow-md ${todayCards.length > 0 ? 'bg-[#ff6b00] hover:bg-[#e65c00] text-white cursor-pointer' : 'bg-gray-300 dark:bg-zinc-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'}`}
           >
             <Play size={20} />
             Revisar Agora
@@ -218,6 +295,7 @@ export default function App() {
         </div>
       </div>
 
+      {/* Lista de Baralhos */}
       <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-4">Baralhos por Matéria (Estudo Direto)</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {bancosDeQuestoes.map((deck) => (
@@ -273,6 +351,18 @@ export default function App() {
   const renderFlashcard = () => {
     if (!currentDeck || currentDeck.length === 0) return null;
     const card = currentDeck[cardIndex];
+    const cardFsrs = fsrsData[card.id];
+
+    // Previsão dos 4 intervalos FSRS em tempo real
+    const previews = previewFSRSIntervals(cardFsrs, card.id, desiredRetention);
+
+    // Calcular Retrievability instantânea se o card já tiver histórico
+    let currentRText = 'Novo';
+    if (cardFsrs && cardFsrs.stability > 0 && cardFsrs.lastReview) {
+      const elapsedDays = Math.max(0, (new Date().getTime() - new Date(cardFsrs.lastReview).getTime()) / (1000 * 60 * 60 * 24));
+      const r = calculateRetrievability(elapsedDays, cardFsrs.stability);
+      currentRText = `${Math.round(r * 100)}%`;
+    }
 
     return (
       <div className="max-w-2xl mx-auto flex flex-col items-center animate-in fade-in zoom-in-95 duration-300">
@@ -281,7 +371,16 @@ export default function App() {
             <span className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">{deckName}</span>
             <span className="text-gray-900 dark:text-gray-100 font-bold">Cartão {cardIndex + 1} de {currentDeck.length}</span>
           </div>
-          <div className="flex gap-4">
+          <div className="flex items-center gap-3">
+            {/* Indicador DSR */}
+            {cardFsrs && (
+              <div className="hidden sm:flex items-center gap-2 bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-gray-300 text-xs px-3 py-1.5 rounded-full border border-gray-200 dark:border-zinc-700 font-semibold" title="Modelo DSR (Dificuldade, Estabilidade e Retenção)">
+                <Gauge size={14} className="text-[#ff6b00]" />
+                <span>Estabilidade: <strong>{cardFsrs.stability}d</strong></span>
+                <span>•</span>
+                <span>Dificuldade: <strong>{cardFsrs.difficulty}</strong></span>
+              </div>
+            )}
             <div className="flex items-center gap-1.5 bg-[#fff4ed] dark:bg-[#331500] px-4 py-2 rounded-full border border-[#ffe6d4] dark:border-[#662a00]">
               <Flame size={18} className="text-[#ff6b00] dark:text-[#ff8533]" />
               <span className="text-[#803200] dark:text-[#ffad77] font-bold text-sm">Ofensiva: {currentStreak}</span>
@@ -289,53 +388,98 @@ export default function App() {
           </div>
         </div>
 
+        {/* Card 3D Flip */}
         <div className="w-full min-h-[400px] perspective-1000">
           <div className={`relative w-full h-full transition-all duration-500 transform-style-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
-            <div className={`absolute w-full h-full bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-3xl p-8 shadow-lg flex flex-col backface-hidden ${isFlipped ? 'invisible' : 'visible'}`}>
-              <div className="mb-6 flex justify-between items-center">
+            {/* Frente */}
+            <div className={`absolute w-full h-full bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-3xl p-8 shadow-lg flex flex-col justify-between backface-hidden ${isFlipped ? 'invisible' : 'visible'}`}>
+              <div className="flex justify-between items-center">
                 <span className="bg-gray-100 dark:bg-zinc-700 text-gray-600 dark:text-gray-300 text-xs px-2.5 py-1 rounded-md font-semibold tracking-wide uppercase">{card.assunto}</span>
+                <span className="text-[11px] text-gray-400 font-medium">Clique em Revelar</span>
               </div>
-              <div className="flex-1 flex items-center justify-center text-center">
+              <div className="my-auto py-8 text-center">
                 <h2 className="text-2xl font-semibold text-gray-900 dark:text-white leading-relaxed">{card.frente}</h2>
+              </div>
+              <div className="text-center text-xs text-gray-400">
+                Toque no botão abaixo para conferir o gabarito
               </div>
             </div>
 
-            <div className={`absolute w-full h-full bg-[#fff4ed] dark:bg-[#1a0a00] border-2 border-[#ffe6d4] dark:border-[#4d1f00] rounded-3xl p-8 shadow-lg flex flex-col backface-hidden rotate-y-180 ${!isFlipped ? 'invisible' : 'visible'}`}>
-              <div className="mb-6">
-                <span className="bg-[#ffe6d4] dark:bg-[#4d1f00] text-[#803200] dark:text-[#ffad77] text-xs px-2.5 py-1 rounded-md font-bold tracking-wide uppercase">Resposta e Explicação</span>
+            {/* Verso */}
+            <div className={`absolute w-full h-full bg-[#fff4ed] dark:bg-[#1a0a00] border-2 border-[#ffe6d4] dark:border-[#4d1f00] rounded-3xl p-8 shadow-lg flex flex-col justify-between backface-hidden rotate-y-180 ${!isFlipped ? 'invisible' : 'visible'}`}>
+              <div className="flex justify-between items-center">
+                <span className="bg-[#ffe6d4] dark:bg-[#4d1f00] text-[#803200] dark:text-[#ffad77] text-xs px-2.5 py-1 rounded-md font-bold tracking-wide uppercase">Resposta e Fundamento</span>
+                <span className="bg-[#fff0e6] dark:bg-[#331500] text-[#ff6b00] dark:text-[#ff8533] text-[10px] font-bold px-2 py-0.5 rounded border border-[#ffd4b8] dark:border-[#662a00]">
+                  Retenção Atual: {currentRText}
+                </span>
               </div>
-              <div className="flex-1 flex flex-col justify-center">
+              <div className="my-auto py-6">
                 <p className="text-lg text-[#803200] dark:text-[#ffcfb3] leading-relaxed font-medium">
                   <HighlightText text={card.verso} />
                 </p>
+              </div>
+              <div className="text-center text-xs text-[#a64800] dark:text-[#cc6611] font-semibold">
+                Classifique sua lembrança abaixo para o FSRS recalcular o intervalo ideal
               </div>
             </div>
           </div>
         </div>
 
-        <div className="mt-8 w-full flex gap-4 h-16">
+        {/* Barra de Botões FSRS */}
+        <div className="mt-8 w-full">
           {!isFlipped ? (
             <button
               onClick={() => setIsFlipped(true)}
-              className="flex-1 bg-gray-900 dark:bg-gray-100 hover:bg-gray-800 dark:hover:bg-white text-white dark:text-gray-900 rounded-2xl font-bold text-lg shadow-md transition-all active:scale-95"
+              className="w-full h-16 bg-gray-900 dark:bg-gray-100 hover:bg-gray-800 dark:hover:bg-white text-white dark:text-gray-900 rounded-2xl font-bold text-lg shadow-md transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
             >
               Revelar Resposta
             </button>
           ) : (
-            <>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+              {/* 1. Again (Errei) */}
               <button
-                onClick={() => handleAnswer(false)}
-                className="flex-1 bg-red-50 dark:bg-red-950/30 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 transition-all active:scale-95"
+                onClick={() => handleRating(Rating.Again)}
+                className="flex flex-col items-center justify-center p-3 bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/60 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/60 rounded-2xl transition-all active:scale-95 shadow-sm cursor-pointer group"
               >
-                <ThumbsDown size={22} /> Errei (Reiniciar)
+                <span className="text-sm font-bold">🔴 Errei</span>
+                <span className="text-[11px] font-semibold text-red-500/80 dark:text-red-400/80 mt-0.5 bg-red-100 dark:bg-red-900/40 px-2 py-0.5 rounded-full group-hover:scale-105 transition-transform">
+                  {previews[Rating.Again].formatted}
+                </span>
               </button>
+
+              {/* 2. Hard (Difícil) */}
               <button
-                onClick={() => handleAnswer(true)}
-                className="flex-1 bg-green-50 dark:bg-green-950/30 hover:bg-green-100 dark:hover:bg-green-900/50 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-900 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 transition-all active:scale-95"
+                onClick={() => handleRating(Rating.Hard)}
+                className="flex flex-col items-center justify-center p-3 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-900/60 rounded-2xl transition-all active:scale-95 shadow-sm cursor-pointer group"
               >
-                <ThumbsUp size={22} /> Acertei (Espaçar)
+                <span className="text-sm font-bold">🟡 Difícil</span>
+                <span className="text-[11px] font-semibold text-amber-600/80 dark:text-amber-400/80 mt-0.5 bg-amber-100 dark:bg-amber-900/40 px-2 py-0.5 rounded-full group-hover:scale-105 transition-transform">
+                  +{previews[Rating.Hard].formatted}
+                </span>
               </button>
-            </>
+
+              {/* 3. Good (Bom) */}
+              <button
+                onClick={() => handleRating(Rating.Good)}
+                className="flex flex-col items-center justify-center p-3 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/60 rounded-2xl transition-all active:scale-95 shadow-sm cursor-pointer group"
+              >
+                <span className="text-sm font-bold">🟢 Bom</span>
+                <span className="text-[11px] font-semibold text-emerald-600/80 dark:text-emerald-400/80 mt-0.5 bg-emerald-100 dark:bg-emerald-900/40 px-2 py-0.5 rounded-full group-hover:scale-105 transition-transform">
+                  +{previews[Rating.Good].formatted}
+                </span>
+              </button>
+
+              {/* 4. Easy (Fácil) */}
+              <button
+                onClick={() => handleRating(Rating.Easy)}
+                className="flex flex-col items-center justify-center p-3 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-900/60 rounded-2xl transition-all active:scale-95 shadow-sm cursor-pointer group"
+              >
+                <span className="text-sm font-bold">🔵 Fácil</span>
+                <span className="text-[11px] font-semibold text-blue-600/80 dark:text-blue-400/80 mt-0.5 bg-blue-100 dark:bg-blue-900/40 px-2 py-0.5 rounded-full group-hover:scale-105 transition-transform">
+                  +{previews[Rating.Easy].formatted}
+                </span>
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -343,33 +487,70 @@ export default function App() {
   };
 
   const renderReport = () => {
-    const actualCorrect = correctCount;
-    const accuracy = Math.round((actualCorrect / currentDeck.length) * 100) || 0;
+    const totalAnswered = currentDeck.length;
+    const accuracy = totalAnswered > 0 ? Math.round((correctCount / totalAnswered) * 100) : 0;
 
     return (
       <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-500 pb-16">
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 text-center">Relatório de Sessão</h2>
-        <p className="text-gray-500 dark:text-gray-400 text-center mb-8">Essa sessão foi salva automaticamente no Tracker do Menu Principal.</p>
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 text-center">Relatório de Sessão FSRS</h2>
+        <p className="text-gray-500 dark:text-gray-400 text-center mb-8">
+          Sua sessão foi processada pelo algoritmo FSRS e integrada ao Tracker do Menu Principal.
+        </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+        {/* Métricas Principais */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
           <div className="bg-white dark:bg-zinc-800 p-6 rounded-2xl border border-gray-100 dark:border-zinc-700 shadow-sm text-center">
-            <CheckCircle className="mx-auto text-green-500 dark:text-green-400 mb-2" size={32} />
-            <p className="text-gray-500 dark:text-gray-400 text-sm font-semibold uppercase tracking-wider">Desempenho</p>
+            <CheckCircle className="mx-auto text-emerald-500 dark:text-emerald-400 mb-2" size={32} />
+            <p className="text-gray-500 dark:text-gray-400 text-sm font-semibold uppercase tracking-wider">Aproveitamento</p>
             <p className="text-4xl font-black text-gray-900 dark:text-white mt-1">{accuracy}%</p>
-            <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">{actualCorrect} de {currentDeck.length} corretos</p>
+            <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">{correctCount} de {totalAnswered} acertos</p>
           </div>
 
           <div className="bg-[#fff4ed] dark:bg-[#1a0a00] p-6 rounded-2xl border border-[#ffe6d4] dark:border-[#4d1f00] shadow-sm text-center flex flex-col justify-center items-center">
             <FileText className="text-[#ff6b00] dark:text-[#ff8533] mb-2" size={32} />
-            <p className="text-[#803200] dark:text-[#ffad77] text-sm font-semibold uppercase tracking-wider">Sessão Salva</p>
-            <p className="text-lg font-bold text-[#ff6b00] dark:text-[#ff8533] mt-1">+ {modalData.tempo} minutos registrados</p>
+            <p className="text-[#803200] dark:text-[#ffad77] text-sm font-semibold uppercase tracking-wider">Tempo Registrado</p>
+            <p className="text-2xl font-bold text-[#ff6b00] dark:text-[#ff8533] mt-1">+{modalData.tempo} minutos</p>
+            <p className="text-xs text-[#a64800] dark:text-[#cc6611] mt-1">Salvo em delta_estudos</p>
+          </div>
+
+          <div className="bg-white dark:bg-zinc-800 p-6 rounded-2xl border border-gray-100 dark:border-zinc-700 shadow-sm text-center flex flex-col justify-center">
+            <BrainCircuit className="mx-auto text-blue-500 mb-2" size={32} />
+            <p className="text-gray-500 dark:text-gray-400 text-sm font-semibold uppercase tracking-wider">Meta FSRS</p>
+            <p className="text-3xl font-black text-gray-900 dark:text-white mt-1">{Math.round(desiredRetention * 100)}%</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Retenção Projetada</p>
           </div>
         </div>
 
+        {/* Distribuição FSRS */}
+        <div className="bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-2xl p-6 shadow-sm mb-10">
+          <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-4 flex items-center gap-2">
+            <Gauge size={16} className="text-[#ff6b00]" /> Distribuição de Respostas (FSRS)
+          </h3>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+            <div className="bg-red-50 dark:bg-red-950/30 p-3 rounded-xl border border-red-100 dark:border-red-900/40">
+              <span className="text-xs font-bold text-red-600 dark:text-red-400 block">Errei (Again)</span>
+              <span className="text-2xl font-black text-red-700 dark:text-red-300">{sessionRatings.again}</span>
+            </div>
+            <div className="bg-amber-50 dark:bg-amber-950/30 p-3 rounded-xl border border-amber-100 dark:border-amber-900/40">
+              <span className="text-xs font-bold text-amber-700 dark:text-amber-400 block">Difícil (Hard)</span>
+              <span className="text-2xl font-black text-amber-800 dark:text-amber-300">{sessionRatings.hard}</span>
+            </div>
+            <div className="bg-emerald-50 dark:bg-emerald-950/30 p-3 rounded-xl border border-emerald-100 dark:border-emerald-900/40">
+              <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 block">Bom (Good)</span>
+              <span className="text-2xl font-black text-emerald-800 dark:text-emerald-300">{sessionRatings.good}</span>
+            </div>
+            <div className="bg-blue-50 dark:bg-blue-950/30 p-3 rounded-xl border border-blue-100 dark:border-blue-900/40">
+              <span className="text-xs font-bold text-blue-700 dark:text-blue-400 block">Fácil (Easy)</span>
+              <span className="text-2xl font-black text-blue-800 dark:text-blue-300">{sessionRatings.easy}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Caderno de Erros */}
         {incorrectCards.length > 0 && (
           <div className="mb-10">
             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-              <XCircle className="text-red-500" /> Caderno de Erros ({incorrectCards.length})
+              <XCircle className="text-red-500" /> Caderno de Erros da Sessão ({incorrectCards.length})
             </h3>
             <div className="space-y-4">
               {incorrectCards.map((card, idx) => (
@@ -388,7 +569,7 @@ export default function App() {
         <div className="flex gap-4 justify-center">
           <button
             onClick={() => setCurrentScreen('decks')}
-            className="px-6 py-3 bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 text-gray-700 dark:text-gray-300 font-bold rounded-xl hover:bg-gray-50 dark:hover:bg-zinc-700 transition-colors flex items-center gap-2"
+            className="px-8 py-3 bg-[#ff6b00] hover:bg-[#e65c00] text-white font-bold rounded-xl transition-colors flex items-center gap-2 shadow-md cursor-pointer"
           >
             <Layers size={20} /> Voltar aos Baralhos
           </button>
@@ -403,7 +584,9 @@ export default function App() {
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="flex flex-col">
-              <span className="text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400 font-bold leading-tight mb-0.5">Método de Revisão Espaçada</span>
+              <span className="text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400 font-bold leading-tight mb-0.5 flex items-center gap-1">
+                <BrainCircuit size={12} className="text-[#ff6b00]" /> Motor FSRS v4.5 (Modelo DSR)
+              </span>
               <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight">
                 <span className="text-gray-900 dark:text-white">Atena:</span> <span className="text-[#ff6b00]">Flashcards</span>
               </h1>
@@ -413,7 +596,7 @@ export default function App() {
           <nav className="flex items-center gap-3">
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-600 dark:text-gray-300 transition-colors"
+              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-600 dark:text-gray-300 transition-colors cursor-pointer"
               title="Alternar Tema"
               aria-label="Alternar tema claro/escuro"
             >
@@ -431,7 +614,7 @@ export default function App() {
         {currentScreen === 'flashcards' && (
           <button
             onClick={() => setCurrentScreen('decks')}
-            className="mb-8 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium flex items-center gap-2 transition-colors"
+            className="mb-8 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium flex items-center gap-2 transition-colors cursor-pointer"
           >
             <ArrowLeft size={20} /> Abortar Sessão e Voltar
           </button>
@@ -445,7 +628,9 @@ export default function App() {
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
             <div className="bg-white dark:bg-zinc-800 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden border border-gray-200 dark:border-zinc-700">
               <div className="p-6 border-b border-gray-100 dark:border-zinc-700 flex justify-between items-center">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Registro de Estudo</h3>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                  <BrainCircuit className="text-[#ff6b00]" /> Registro de Estudo (FSRS)
+                </h3>
               </div>
               <div className="p-6 space-y-4">
                 <div className="grid grid-cols-2 gap-4">
@@ -472,22 +657,22 @@ export default function App() {
                   <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Tópico</label>
                   <input
                     type="text"
-                    value={`Flashcards: ${deckName}`}
+                    value={`Flashcards (FSRS): ${deckName}`}
                     readOnly
                     className="w-full bg-gray-100 dark:bg-zinc-900/50 border border-gray-200 dark:border-zinc-700 rounded-lg px-3 py-2 text-gray-600 dark:text-gray-400 cursor-not-allowed"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Questões</label>
+                    <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Total de Cards</label>
                     <div className="w-full bg-gray-100 dark:bg-zinc-900/50 border border-gray-200 dark:border-zinc-700 rounded-lg px-3 py-2 text-gray-600 dark:text-gray-400 text-center font-bold">
                       {currentDeck.length}
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-green-600 dark:text-green-500 uppercase tracking-wider mb-1">Acertos</label>
-                    <div className="w-full bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-900/50 rounded-lg px-3 py-2 text-green-700 dark:text-green-400 text-center font-bold">
-                      {correctCount}
+                    <label className="block text-xs font-bold text-emerald-600 dark:text-emerald-500 uppercase tracking-wider mb-1">Acertos</label>
+                    <div className="w-full bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-900/50 rounded-lg px-3 py-2 text-emerald-700 dark:text-emerald-400 text-center font-bold">
+                      {correctCount} ({Math.round((correctCount / currentDeck.length) * 100)}%)
                     </div>
                   </div>
                 </div>
@@ -504,7 +689,7 @@ export default function App() {
               <div className="p-4 bg-gray-50 dark:bg-zinc-900 border-t border-gray-100 dark:border-zinc-700 flex justify-end gap-3">
                 <button
                   onClick={confirmSaveSession}
-                  className="px-6 py-2 bg-[#ff6b00] hover:bg-[#e65c00] text-white font-bold rounded-xl transition-colors"
+                  className="px-6 py-2 bg-[#ff6b00] hover:bg-[#e65c00] text-white font-bold rounded-xl transition-colors cursor-pointer"
                 >
                   Salvar Registro
                 </button>

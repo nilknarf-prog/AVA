@@ -21,6 +21,7 @@
       "data_ultima_sessao": "2026-08-17"
   },
   "review_tracking": {
+      "motor_srs": "FSRS v4.5/5 (Modelo DSR, Retenção Alvo 90%)",
       "data_ultima_revisao": "2026-07-08",
       "aproveitamento_ultima_revisao": 85.7,
       "cards_consolidados": 0,
