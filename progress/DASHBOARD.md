@@ -8,8 +8,8 @@ Este arquivo será atualizado automaticamente com o seu progresso no edital.
 ## Estatísticas
 - **Dias de Ofensiva:** 1
 - **Sessões Registradas:** 3
-- **Flashcards Criados:** 16
-- **Questões Resolvidas:** 56 (85,7% de aproveitamento)
+- **Flashcards Criados:** 18 (Motor FSRS v4.5)
+- **Questões Resolvidas:** 59 (86,4% de aproveitamento geral)
 
 ## Tópicos Dominados
 *Nenhum tópico dominado ainda. Vamos começar!*
