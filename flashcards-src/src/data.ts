@@ -33,6 +33,9 @@ export const bancosDeQuestoes: Deck[] = [
       { id: 'dp8', assunto: 'Roubo e Furto', frente: 'O sistema de câmeras de segurança torna o furto crime impossível?', verso: 'NÃO. Súmula 567 do STJ: não torna o crime impossível.' },
       { id: 'dp9', assunto: 'Penas', frente: 'A pena de multa pode ser convertida em detenção se o condenado não pagar?', verso: 'NÃO. A multa passa a ser dívida de valor, cobrada pela Fazenda Pública.' },
       { id: 'dp10', assunto: 'Crime Impossível', frente: 'A ineficácia relativa do meio ou impropriedade relativa do objeto configuram crime impossível?', verso: 'NÃO. Devem ser ABSOLUTAS (Art. 17, CP).' },
+      { id: 'dp11', assunto: 'Funcionalismo Penal', frente: 'No Funcionalismo, qual a diferença entre a finalidade do Direito Penal para Roxin e para Jakobs?', verso: 'ROXIN (Moderado): Proteção de Bens Jurídicos. JAKOBS (Radical/Sistêmico): Assegurar a vigência da Norma (autor do Direito Penal do Inimigo). MACETE: Roxin = Respeita os Bens Jurídicos (O bonzinho, moderado). Jakobs = Justiça para o Sistema (Judoca radical).' },
+      { id: 'dp12', assunto: 'Interpretação Restritiva', frente: 'Na interpretação restritiva da lei penal, qual é a premissa sobre o texto legal e a vontade da lei?', verso: 'A premissa é que a lei disse MAIS do que queria ("lex dixit plus quam voluit"). O intérprete deve limitar/restringir seu alcance.' },
+      { id: 'dp13', assunto: 'Consunção', frente: 'Para a aplicação do princípio da consunção, é obrigatório que o crime absorvido (meio) tenha pena menor que o crime continente (fim)?', verso: 'NÃO. É plenamente possível que o crime absorvido tenha pena MAIOR. O que importa é a relação de dependência (meio e fim) e não o quantum da pena.' },
     ],
   },
   {
