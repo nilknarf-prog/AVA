@@ -1,0 +1,134 @@
+/* ── GLOBAL STOPWATCH WIDGET & FAB ── */
+.delta-sw-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  font-family: 'Public Sans', 'Inter', sans-serif;
+}
+
+.delta-sw-widget {
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 18px;
+  padding: 16px 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  transform-origin: bottom right;
+  animation: deltaPopIn .25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  backdrop-filter: blur(10px);
+  min-width: 220px;
+}
+
+@keyframes deltaPopIn {
+  0% { opacity: 0; transform: scale(0.85); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.delta-sw-header {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim, #94a3b8);
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.delta-sw-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  display: inline-block;
+}
+.delta-sw-pulse.paused {
+  background: #f59e0b;
+}
+.delta-sw-pulse.running {
+  animation: deltaPulse 1.5s infinite;
+}
+@keyframes deltaPulse {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+
+.delta-sw-time {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--brand, #ff6b00);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.delta-sw-controls {
+  display: flex;
+  gap: 10px;
+}
+
+.delta-sw-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  transition: transform .15s, opacity .15s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.delta-sw-btn:hover {
+  transform: scale(1.1);
+}
+.delta-sw-btn:active {
+  transform: scale(0.95);
+}
+
+.delta-btn-play {
+  background: #10b981;
+  color: white;
+}
+.delta-btn-pause {
+  background: #f59e0b;
+  color: white;
+}
+.delta-btn-stop {
+  background: #ef4444;
+  color: white;
+}
+
+.delta-fab-btn {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: #10b981;
+  color: white;
+  border: none;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+  font-size: 22px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform .2s, background .2s;
+}
+.delta-fab-btn:hover {
+  transform: scale(1.08);
+}
+.delta-fab-btn.is-running {
+  background: var(--brand, #ff6b00);
+  box-shadow: 0 4px 16px rgba(255, 107, 0, 0.4);
+}

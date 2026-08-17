@@ -465,6 +465,7 @@
   }
 </style>
 <link rel="stylesheet" href="./assets/tokens.css"/>
+<link rel="stylesheet" href="./assets/stopwatch.css"/>
 </head>
 <body>
 
@@ -1537,17 +1538,6 @@
 
   document.addEventListener('DOMContentLoaded', initTracker);
 </script>
-  <!-- STOPWATCH FAB -->
-  <div class="fab-container">
-    <div class="stopwatch-widget" id="swWidget">
-      <div class="sw-time" id="swDisplay">00:00:00</div>
-      <div class="sw-controls">
-        <button class="sw-btn btn-play" onclick="swPlay()" title="Continuar">▶️</button>
-        <button class="sw-btn btn-pause" onclick="swPause()" title="Pausar">⏸️</button>
-        <button class="sw-btn btn-stop" onclick="swStop()" title="Finalizar">⏹️</button>
-      </div>
-    </div>
-    <button class="fab-btn" onclick="toggleStopwatch()" title="Cronômetro">⏱️</button>
-  </div>
+<script src="./assets/stopwatch.js"></script>
 </body>
 </html>
