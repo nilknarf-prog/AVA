@@ -6,6 +6,11 @@ export interface Card {
   assunto: string;
   frente: string;
   verso: string;
+  tipo?: 'basico' | 'cloze';
+  extra?: string; // Fundamentação / observação complementar
+  deckId?: string;
+  isCustom?: boolean;
+  createdAt?: string;
 }
 
 export interface Deck {
@@ -14,6 +19,7 @@ export interface Deck {
   sigla: string;
   descricao: string;
   cards: Card[];
+  isCustom?: boolean;
 }
 
 export const bancosDeQuestoes: Deck[] = [
