@@ -7,9 +7,9 @@ Este arquivo será atualizado automaticamente com o seu progresso no edital.
 
 ## Estatísticas
 - **Dias de Ofensiva:** 1
-- **Sessões Registradas:** 3
-- **Flashcards Criados:** 18 (Motor FSRS v4.5)
-- **Questões Resolvidas:** 59 (86,4% de aproveitamento geral)
+- **Sessões Registradas:** 4
+- **Flashcards Criados:** 18 (Motor FSRS v4.5 + suporte a Cloze Deletion)
+- **Questões Resolvidas:** 72 (86,1% de aproveitamento geral)
 
 ## Tópicos Dominados
-*Nenhum tópico dominado ainda. Vamos começar!*
+- **Direito Penal:** Teoria do Crime, Aplicação da Lei Penal e Conflito Aparente de Normas (Semana 02 DD) — *Consolidado em 17/08/2026*
