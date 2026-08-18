@@ -9,16 +9,16 @@
   "topic": "Aprovação no Concurso para Delegado de Polícia",
   "current_stage": "Fase 1 - Missão 1 CONCLUÍDA. Próximo: Missão 2 (Revisão Semana 02)",
   "stats": {
-      "sessoes": 4,
-      "minutos_estudo": 162,
+      "sessoes": 5,
+      "minutos_estudo": 186,
       "topicos_dominados": 1,
-      "flashcards_total": 18,
+      "flashcards_total": 19,
       "flashcards_devidos": 0,
-      "questoes_resolvidas": 72,
+      "questoes_resolvidas": 87,
       "pecas_redigidas": 0,
       "feynman_attempts": 0,
-      "dias_ofensiva": 1,
-      "data_ultima_sessao": "2026-08-17"
+      "dias_ofensiva": 2,
+      "data_ultima_sessao": "2026-08-18"
   },
   "review_tracking": {
       "motor_srs": "FSRS v4.5/5 (Modelo DSR, Retenção Alvo 90%)",
