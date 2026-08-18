@@ -55,6 +55,119 @@ interface RatingCounts {
   easy: number;
 }
 
+function HeaderStopwatch({ onStopSession }: { onStopSession?: (minutes: number) => void }) {
+  const [isRunning, setIsRunning] = useState(false);
+  const [seconds, setSeconds] = useState(0);
+
+  const STORAGE_KEY = 'delta_stopwatch_state';
+
+  const updateStateFromStorage = () => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const state = JSON.parse(raw);
+        setIsRunning(state.isRunning || false);
+        if (state.isRunning && state.startTimestamp) {
+          const diff = Math.max(0, Math.floor((Date.now() - state.startTimestamp) / 1000));
+          setSeconds((state.accumulatedSec || 0) + diff);
+        } else {
+          setSeconds(state.accumulatedSec || 0);
+        }
+      }
+    } catch (e) {}
+  };
+
+  useEffect(() => {
+    updateStateFromStorage();
+    const interval = setInterval(updateStateFromStorage, 1000);
+    window.addEventListener('storage', updateStateFromStorage);
+    document.addEventListener('visibilitychange', updateStateFromStorage);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('storage', updateStateFromStorage);
+      document.removeEventListener('visibilitychange', updateStateFromStorage);
+    };
+  }, []);
+
+  const handlePlay = () => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const state = raw ? JSON.parse(raw) : { accumulatedSec: 0 };
+      state.isRunning = true;
+      state.startTimestamp = Date.now();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      setIsRunning(true);
+      window.dispatchEvent(new Event('storage'));
+    } catch (e) {}
+  };
+
+  const handlePause = () => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const state = JSON.parse(raw);
+      if (!state.isRunning) return;
+      const diff = Math.max(0, Math.floor((Date.now() - state.startTimestamp) / 1000));
+      state.accumulatedSec = (state.accumulatedSec || 0) + diff;
+      state.isRunning = false;
+      state.startTimestamp = 0;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      setIsRunning(false);
+      setSeconds(state.accumulatedSec);
+      window.dispatchEvent(new Event('storage'));
+    } catch (e) {}
+  };
+
+  const handleStop = () => {
+    handlePause();
+    if (seconds <= 0) return;
+    const mins = Math.max(1, Math.round(seconds / 60));
+    if (onStopSession) {
+      onStopSession(mins);
+    }
+  };
+
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  const timeFormatted = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+
+  return (
+    <div className="flex items-center gap-1.5 bg-gray-100 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 px-2.5 py-1 rounded-xl shadow-sm">
+      <span className={`w-2 h-2 rounded-full ${isRunning ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+      <span className="font-mono font-bold text-xs sm:text-sm text-[#ff6b00] dark:text-[#ff8533] min-w-[62px]">
+        {timeFormatted}
+      </span>
+      <div className="flex items-center gap-0.5 ml-1 border-l border-gray-200 dark:border-zinc-700 pl-1">
+        {!isRunning ? (
+          <button
+            onClick={handlePlay}
+            className="p-1 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg text-emerald-600 dark:text-emerald-400 text-xs font-bold transition cursor-pointer"
+            title="Iniciar / Continuar cronômetro"
+          >
+            ▶️
+          </button>
+        ) : (
+          <button
+            onClick={handlePause}
+            className="p-1 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg text-amber-600 dark:text-amber-400 text-xs font-bold transition cursor-pointer"
+            title="Pausar cronômetro"
+          >
+            ⏸️
+          </button>
+        )}
+        <button
+          onClick={handleStop}
+          className="p-1 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg text-red-500 text-xs font-bold transition cursor-pointer"
+          title="Finalizar e Salvar tempo estudado"
+        >
+          ⏹️
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<'decks' | 'flashcards' | 'report'>('decks');
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -801,13 +914,39 @@ export default function App() {
             </div>
           </div>
 
-          <nav className="flex items-center gap-3">
+          <nav className="flex flex-wrap items-center gap-2.5">
+            <HeaderStopwatch
+              onStopSession={(mins) => {
+                const now = new Date();
+                const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+                const confirmSave = confirm(`Deseja registrar essa sessão de estudo?\n\n⏱️ Tempo: ${mins} min\n📚 Matéria: Flashcards Atena (FSRS)`);
+                if (confirmSave) {
+                  try {
+                    const logsStr = localStorage.getItem('delta_estudos') || '[]';
+                    const logs = JSON.parse(logsStr);
+                    logs.push({
+                      date: dateStr,
+                      mat: 'RLM/REV',
+                      assunto: `Estudo de Flashcards Atena (FSRS)`,
+                      categoria: 'Revisão',
+                      tempo: mins,
+                      qts: 0,
+                      acertos: 0,
+                      obs: 'Registrado via Cronômetro Atena'
+                    });
+                    localStorage.setItem('delta_estudos', JSON.stringify(logs));
+                    alert(`✅ Sessão de ${mins} min registrada com sucesso!`);
+                  } catch (e) {}
+                }
+              }}
+            />
+
             <button
               onClick={() => {
                 setEditingCard(null);
                 setIsCreateModalOpen(true);
               }}
-              className="px-3.5 py-1.5 bg-[#ff6b00] hover:bg-[#e65c00] text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm transition"
+              className="px-3.5 py-1.5 bg-[#ff6b00] hover:bg-[#e65c00] text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm transition cursor-pointer"
             >
               <Plus size={14} /> Novo Card
             </button>
@@ -823,9 +962,9 @@ export default function App() {
 
             <a
               href="../index.html"
-              className="px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-white transition-colors shadow-sm"
+              className="px-3.5 py-1.5 rounded-lg font-bold text-xs flex items-center gap-1.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-white transition-colors shadow-sm"
             >
-              <LogOut size={16} /> <span className="hidden sm:inline">Menu Principal</span>
+              <LogOut size={14} /> <span className="hidden sm:inline">Menu Principal</span>
             </a>
           </nav>
         </div>
