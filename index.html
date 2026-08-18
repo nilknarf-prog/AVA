@@ -3,59 +3,25 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Biblioteca de Estudos Delta</title>
-<meta name="description" content="Ambiente Virtual de Aprendizagem Delta: biblioteca de estudos para concurso de Delegado (PC/PF) — painéis de Penal, Constitucional, Administrativo, Civil e Medicina Legal, dashboard de progresso e flashcards SRS."/>
+<title>AVA Delta — Ambiente Virtual de Aprendizagem</title>
+<meta name="description" content="Ambiente Virtual de Aprendizagem Delta: dashboard completo de estudos, edital verticalizado interativo, conquistas e gamificação, revisões FSRS e biblioteca de painéis."/>
 <meta name="author" content="Delta"/>
 <meta name="theme-color" content="#ff6b00"/>
-<meta property="og:type" content="website"/>
-<meta property="og:locale" content="pt_BR"/>
-<meta property="og:site_name" content="Delta · AVA Delegado"/>
-<meta property="og:title" content="Biblioteca de Estudos Delta — AVA Delegado"/>
-<meta property="og:description" content="Painéis de estudo, dashboard de progresso e flashcards SRS para o concurso de Delegado de Polícia (PC/PF)."/>
-<meta name="twitter:card" content="summary"/>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚖️</text></svg>"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,600;0,700;1,600&family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,600;0,700;1,600&family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+
+<!-- TOKENS E ESTILOS GLOBAIS -->
+<link rel="stylesheet" href="./assets/tokens.css"/>
+<link rel="stylesheet" href="./assets/estudei_ava.css"/>
+<link rel="stylesheet" href="./assets/stopwatch.css"/>
+
 <style>
-  :root {
-    --brand: #ff6b00;
-    --brand-dim: #cc5500;
-    --brand-soft: #fff5eb;
-    --brand-glow: rgba(255,107,0,0.10);
-    --bg: #f8fafc;
-    --surface: #ffffff;
-    --surface-hover: #fafbfc;
-    --border: #e2e8f0;
-    --border-hot: #ff6b00;
-    --text: #0f172a;
-    --text-muted: #475569;
-    --text-dim: #94a3b8;
-    --green: #10b981;
-    --amber: #f59e0b;
-    --slate: #64748b;
-    --r: 8px;
-    --r-sm: 5px;
-  }
-  body.dark-theme {
-    --brand: #ff6b00;
-    --brand-dim: #e65c00;
-    --brand-soft: rgba(255,107,0,0.15);
-    --brand-glow: rgba(255,107,0,0.15);
-    --bg: #09090b;
-    --surface: #18181b;
-    --surface-hover: #27272a;
-    --border: #27272a;
-    --border-hot: #ff6b00;
-    --text: #f8fafc;
-    --text-muted: #a1a1aa;
-    --text-dim: #71717a;
-    --green: #10b981;
-  }
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
   body{
-    font-family:'Inter',sans-serif;
+    font-family:var(--font-body);
     background:var(--bg);
     color:var(--text);
     min-height:100vh;
@@ -63,14 +29,7 @@
     font-size:15px;
     position:relative;
   }
-  /* Watermark radial sutil */
-  body::before{
-    content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
-    background:
-      radial-gradient(ellipse 70% 50% at 15% 15%, rgba(255,107,0,0.06) 0%, transparent 55%),
-      radial-gradient(ellipse 50% 40% at 95% 90%, rgba(255,107,0,0.04) 0%, transparent 55%);
-  }
-
+  
   /* ── HEADER ─────────────────────────────── */
   header{
     position:sticky;top:0;z-index:100;
@@ -79,415 +38,164 @@
     border-bottom:1px solid var(--border);
     padding:0 24px;
   }
+  body.dark-theme header{ background:rgba(11,15,26,0.95); }
   .header-inner{
-    max-width:1000px;margin:0 auto;
+    max-width:1180px;margin:0 auto;
     display:flex;align-items:center;justify-content:space-between;
     height:64px;gap:16px;
   }
+  .brand-group {
+    display:flex;align-items:center;gap:12px;
+  }
   .brand-mark{
-    font-size:11px;font-weight:700;letter-spacing:.16em;
+    font-size:12px;font-weight:800;letter-spacing:.12em;
     color:var(--brand);text-transform:uppercase;
     border:1px solid var(--brand);
-    padding:3px 9px;border-radius:20px;
+    padding:4px 10px;border-radius:20px;
+    font-family:var(--font-mono);
   }
-  .brand-side{
-    font-size:11px;color:var(--text-dim);
-    font-family:'IBM Plex Mono',monospace;
-    letter-spacing:.05em;
-  }
-  
-  /* ── THEME TOGGLE ────────────────────────── */
   .theme-toggle-btn{
     background:none;border:1px solid var(--border);
     color:var(--text-dim);cursor:pointer;
-    width:34px;height:34px;border-radius:8px;
+    width:36px;height:36px;border-radius:8px;
     display:flex;align-items:center;justify-content:center;
     transition:all .2s;
   }
   .theme-toggle-btn:hover{
     background:var(--surface-hover);color:var(--text);border-color:var(--text-dim);
   }
-  .theme-toggle-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;}
+  .theme-toggle-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;}
   body.dark-theme .moon-icon{display:none;}
   body:not(.dark-theme) .sun-icon{display:none;}
 
   /* ── MAIN ────────────────────────────────── */
   main{
-    max-width:880px;margin:0 auto;
-    padding:48px 24px 80px;
+    max-width:1180px;margin:0 auto;
+    padding:32px 24px 80px;
     position:relative;z-index:1;
   }
 
-  /* ── HERO ────────────────────────────────── */
-  .hero{margin-bottom:44px;}
-  .hero h1{
-    font-size:36px;font-weight:800;letter-spacing:-.025em;
-    color:var(--text);
-    line-height:1.15;
-    margin-bottom:8px;
-  }
-  .hero h1 span{color:var(--brand);}
-  .hero p{
-    font-size:14px;color:var(--text-muted);
-    max-width:560px;line-height:1.6;
-  }
-  .hero-meta{
-    margin-top:18px;
-    display:flex;gap:24px;flex-wrap:wrap;
-    font-size:12px;color:var(--text-dim);
-    font-family:'IBM Plex Mono',monospace;
-    letter-spacing:.03em;
-  }
-  .hero-meta strong{color:var(--text);font-weight:600;}
-
-  /* ── DIVIDER ─────────────────────────────── */
-  .section-label{
-    font-size:11px;font-weight:700;letter-spacing:.14em;
-    color:var(--text-dim);text-transform:uppercase;
-    margin-bottom:18px;
-    display:flex;align-items:center;gap:12px;
-  }
-  .section-label::after{
-    content:'';flex:1;height:1px;background:var(--border);
-  }
-
-  /* ── MATÉRIA CARDS (accordion via <details>) ──── */
-  .materias{
-    display:flex;flex-direction:column;gap:10px;
-  }
-  details.materia{
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:var(--r);
-    transition:border-color .2s;
-    overflow:hidden;
-  }
-  details.materia:hover{border-color:#cbd5e1;}
-  details.materia[open]{border-color:var(--border-hot);}
-  details.materia summary{
-    list-style:none;cursor:pointer;
-    padding:18px 22px;
-    display:flex;align-items:center;justify-content:space-between;
-    gap:14px;user-select:none;
-    transition:background .15s;
-  }
-  details.materia summary:hover{background:var(--surface-hover);}
-  details.materia summary::-webkit-details-marker{display:none;}
-  .materia-left{
-    display:flex;align-items:center;gap:14px;flex:1;min-width:0;
-  }
-  .materia-tag{
-    font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
-    width:34px;height:34px;border-radius:8px;
-    display:flex;align-items:center;justify-content:center;
-    flex-shrink:0;
-    background:var(--brand-soft);
-    color:var(--brand);
-    font-family:'IBM Plex Mono',monospace;
-  }
-  .materia-title{
-    font-size:15px;font-weight:700;color:var(--text);
-    line-height:1.3;
-  }
-  .materia-sub{
-    font-size:12px;color:var(--text-dim);margin-top:2px;
-    font-family:'IBM Plex Mono',monospace;
-    letter-spacing:.02em;
-  }
-  .materia-count{
-    flex-shrink:0;
-    font-size:11px;font-weight:600;
-    padding:4px 10px;border-radius:20px;
-    font-family:'IBM Plex Mono',monospace;
-    letter-spacing:.03em;
-  }
-  .count-active{
-    color:var(--green);
-    background:rgba(16,185,129,0.10);
-    border:1px solid rgba(16,185,129,0.25);
-  }
-  .count-empty{
-    color:var(--text-dim);
-    background:#f1f5f9;
-    border:1px solid var(--border);
-  }
-  .chevron-d{
-    color:var(--text-dim);
-    font-size:11px;
-    transition:transform .25s;
-    flex-shrink:0;
-    margin-left:4px;
-  }
-  details.materia[open] .chevron-d{transform:rotate(180deg);color:var(--brand);}
-
-  /* ── ASSUNTO LIST ────────────────────────── */
-  .assuntos{
-    padding:2px 22px 18px;
-    display:flex;flex-direction:column;gap:6px;
-  }
-  .assunto-row{
-    display:flex;align-items:center;justify-content:space-between;
-    gap:12px;
-    padding:11px 14px;
-    border-radius:var(--r-sm);
-    transition:background .15s;
-    text-decoration:none;
-    color:var(--text);
-    border:1px solid transparent;
-  }
-  .assunto-row.linked{cursor:pointer;}
-  .assunto-row.linked:hover{
-    background:var(--brand-soft);
-    border-color:rgba(255,107,0,0.2);
-  }
-  .assunto-row.placeholder{cursor:default;opacity:.55;}
-  .assunto-left{
-    display:flex;align-items:center;gap:10px;flex:1;min-width:0;
-  }
-  .assunto-dot{
-    width:6px;height:6px;border-radius:50%;flex-shrink:0;
-    background:var(--brand);
-  }
-  .assunto-row.placeholder .assunto-dot{background:var(--text-dim);}
-  .assunto-title{
-    font-size:13.5px;font-weight:500;
-    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-  }
-  .assunto-status{
-    font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
-    color:var(--text-dim);
-    font-family:'IBM Plex Mono',monospace;
-    flex-shrink:0;
-  }
-  .assunto-row.linked .assunto-status{color:var(--brand);}
-  .assunto-arrow{
-    color:var(--text-dim);
-    font-size:13px;
-    transition:transform .2s, color .2s;
-  }
-  .assunto-row.linked:hover .assunto-arrow{
-    color:var(--brand);
-    transform:translateX(3px);
-  }
-  .assunto-row.placeholder .assunto-arrow{display:none;}
-
-  /* ── FOOTER ──────────────────────────────── */
-  footer{
-    margin-top:60px;padding:24px 0;
-    border-top:1px solid var(--border);
-    text-align:center;
-    font-size:11px;color:var(--text-dim);
-    font-family:'IBM Plex Mono',monospace;
-    letter-spacing:.04em;
-  }
-  footer span{color:var(--brand);}
-
-  /* ── RESPONSIVE ──────────────────────────── */
-  @media(max-width:600px){
-    main{padding:32px 18px 60px;}
-    .hero h1{font-size:28px;}
-    .hero-meta{gap:14px;}
-    details.materia summary{padding:16px 18px;}
-    .materia-left{gap:10px;}
-    .materia-tag{width:30px;height:30px;font-size:10px;}
-    .materia-title{font-size:14px;}
-    .assuntos{padding:0 18px 16px;}
-  }
-
-  /* ── TRACKER ──────────────────────────────── */
-  .tracker-section{
-    margin-bottom: 40px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--r);
-    padding: 24px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-  }
-  .tracker-header{
-    display:flex; justify-content:space-between; align-items:flex-end;
-    margin-bottom: 20px;
-  }
-  .tracker-title{font-size:16px; font-weight:800; color:var(--text);}
-  .tracker-stats{
-    display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; margin-bottom:24px;
-  }
-  .stat-card{
-    background: var(--surface-hover); padding: 12px; border-radius: var(--r-sm);
-    border: 1px solid var(--border); text-align:center;
-  }
-  .stat-val{font-size:22px; font-weight:800; color:var(--brand); line-height:1;}
-  .stat-lbl{font-size:11px; font-weight:600; color:var(--text-dim); text-transform:uppercase; margin-top:4px;}
-  
-  /* ── DASHBOARD ESTUDEI ──────────────────────────────── */
-  .dash-top { display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; margin-bottom:24px; }
-  .dash-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:16px; box-shadow:0 2px 8px rgba(0,0,0,0.02); }
-  .dash-label { font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px; }
-  .dash-value { font-size:28px; font-weight:800; color:var(--text); line-height:1; }
-  .dash-sub { font-size:12px; color:var(--green); font-weight:600; margin-top:8px; }
-  
-  .dash-main { display:flex; gap:24px; }
-  .dash-left { flex:2; display:flex; flex-direction:column; gap:16px; }
-  .dash-right { flex:1; display:flex; flex-direction:column; gap:16px; }
-  
-  .streak-banner { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:16px; font-size:13px; font-weight:500; color:var(--text); }
-  
-  .dash-box { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:16px; display:flex; flex-direction:column; }
-  .box-title { font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:12px; letter-spacing:0.5px; }
-  
-  .dash-table { width:100%; border-collapse:collapse; font-size:13px; }
-  .dash-table th { text-align:left; padding:8px; border-bottom:1px solid var(--border); color:var(--text-dim); font-weight:600; font-size:11px; text-transform:uppercase; }
-  .dash-table td { padding:10px 8px; border-bottom:1px solid var(--border); font-weight:500; }
-  .dash-table tr:last-child td { border-bottom:none; }
-  .col-mat { color:var(--brand); font-weight:600; }
-  .col-time { color:var(--text); }
-  .col-ok { color:var(--green); }
-  .col-err { color:#ef4444; }
-  .badge-pct { background:var(--green); color:#fff; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:700; }
-  .badge-pct.low { background:#ef4444; }
-  
-  .btn-novo { width:100%; background:var(--brand); color:#fff; font-weight:700; border:none; padding:14px; border-radius:var(--r); cursor:pointer; font-size:14px; box-shadow:0 4px 12px rgba(255,107,0,0.2); transition:transform .2s; }
-  .btn-novo:hover { transform:translateY(-2px); }
-  
-  .btn-util { background:transparent; border:1px solid var(--border); color:var(--text); padding:8px 12px; border-radius:var(--r-sm); font-size:12px; font-weight:600; cursor:pointer; transition:background .2s; }
-  .btn-util:hover { background:var(--surface-hover); }
-  
-  .history-list { display:flex; flex-direction:column; gap:16px; overflow-y:auto; max-height:400px; padding-right:8px; }
-  .hist-item { display:flex; gap:12px; position:relative; }
-  .hist-line { position:absolute; left:5px; top:20px; bottom:-16px; width:2px; background:var(--border); }
-  .hist-item:last-child .hist-line { display:none; }
-  .hist-dot { width:12px; height:12px; background:var(--brand); border-radius:50%; margin-top:4px; position:relative; z-index:2; flex-shrink:0; }
-  .hist-content { flex:1; }
-  .hist-title { font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:2px; display:flex; justify-content:space-between; }
-  .hist-desc { font-size:13px; font-weight:500; color:var(--text); }
-  .hist-stats { font-size:11px; color:var(--text-dim); margin-top:2px; font-family:'IBM Plex Mono', monospace; }
-  
-  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(2px); z-index:999; display:none; align-items:center; justify-content:center; }
-  .modal-content { background:var(--surface); border:1px solid var(--border); border-radius:12px; width:100%; max-width:500px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,0.3); }
-  .modal-header { padding:20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
-  .modal-header h2 { font-size:18px; font-weight:700; color:var(--text); margin:0; }
-  .btn-close { background:none; border:none; color:var(--text-dim); font-size:24px; cursor:pointer; }
-  .modal-body { padding:20px; display:flex; flex-direction:column; gap:16px; }
-  .modal-row { display:flex; gap:16px; }
-  .modal-group { flex:1; display:flex; flex-direction:column; gap:6px; }
-  .modal-group label { font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; }
-  .modal-group input, .modal-group select { background:var(--bg); border:1px solid var(--border); color:var(--text); padding:10px; border-radius:var(--r-sm); font-size:14px; font-family:'Inter', sans-serif; outline:none; }
-  .modal-group input:focus, .modal-group select:focus { border-color:var(--brand); }
-  .box-gray { background:var(--bg); padding:16px; border-radius:var(--r-sm); border:1px solid var(--border); }
-  .modal-footer { padding:20px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:12px; background:var(--surface-hover); }
-  .btn-save { background:var(--brand); color:#fff; border:none; padding:10px 20px; border-radius:var(--r-sm); font-weight:700; cursor:pointer; }
-  
-  /* SCROLLBAR CUSTOM FOR HISTORY */
-  .history-list::-webkit-scrollbar { width: 6px; }
-  .history-list::-webkit-scrollbar-track { background: var(--bg); border-radius: 10px; }
-  .history-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
-  .history-list::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
-
-  /* ── DATAVIZ ─────────────────────────────── */
-  .viz-box{ background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:16px; }
-  .viz-h{ font-family:var(--font-mono); font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted); margin-bottom:14px; }
-  .donut-wrap{ display:flex; align-items:center; gap:16px; }
-  .donut{ width:88px; height:88px; flex-shrink:0; }
-  .donut-track{ fill:none; stroke:var(--surface2); stroke-width:11; }
-  .donut-val{ fill:none; stroke:var(--brand); stroke-width:11; stroke-linecap:round; transition:stroke-dashoffset .8s ease; }
-  .donut-center{ font-family:var(--font-display); font-size:20px; font-weight:700; fill:var(--text); }
-  .bars{ display:flex; flex-direction:column; gap:9px; }
-  .bar-row{ display:grid; grid-template-columns:74px 1fr auto; align-items:center; gap:10px; }
-  .bar-lab{ font-family:var(--font-mono); font-size:11px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .bar-track{ height:8px; background:var(--surface2); border-radius:20px; overflow:hidden; }
-  .bar-fill{ height:100%; background:var(--brand); border-radius:20px; transition:width .8s ease; }
-  .bar-num{ font-family:var(--font-mono); font-size:11px; color:var(--text-dim); font-variant-numeric:tabular-nums; }
-  .heat{ display:grid; grid-template-columns:repeat(14,1fr); gap:3px; }
-  .heat-cell{ aspect-ratio:1; border-radius:2px; background:var(--surface2); }
-  .heat-cell.on{ background:var(--brand); }
-
-  @media(max-width:768px){
-    .dash-top { grid-template-columns: 1fr; }
-    .dash-main { flex-direction: column; }
-    .modal-row { flex-direction: column; }
-  }
-
-  /* ── SIDEBAR MENU ────────────────────────────── */
-  .sidebar-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:900; opacity:0; pointer-events:none; transition:opacity .3s; }
+  /* ── SIDEBAR MENU ────────────────────────── */
+  .sidebar-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:900; opacity:0; pointer-events:none; transition:opacity .3s; backdrop-filter:blur(2px); }
   .sidebar-overlay.active { opacity:1; pointer-events:auto; }
-  .sidebar { position:fixed; left:-280px; top:0; bottom:0; width:280px; background:var(--surface); z-index:901; transition:left .3s; border-right:1px solid var(--border); box-shadow:4px 0 24px rgba(0,0,0,0.1); display:flex; flex-direction:column; }
+  .sidebar { position:fixed; left:-300px; top:0; bottom:0; width:300px; background:var(--surface); z-index:901; transition:left .3s; border-right:1px solid var(--border); box-shadow:4px 0 30px rgba(0,0,0,0.15); display:flex; flex-direction:column; }
   .sidebar.active { left:0; }
-  .sidebar-header { padding:24px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+  .sidebar-header { padding:20px 24px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
   .sidebar-header h2 { font-size:16px; font-weight:800; color:var(--text); margin:0; }
-  .sidebar-nav { padding:24px 16px; flex:1; display:flex; flex-direction:column; gap:8px; }
-  .nav-btn { background:none; border:none; width:100%; text-align:left; padding:12px 16px; font-size:14px; font-weight:600; color:var(--text-muted); border-radius:8px; cursor:pointer; transition:all .2s; }
+  .sidebar-nav { padding:20px 16px; flex:1; display:flex; flex-direction:column; gap:6px; overflow-y:auto; }
+  .nav-btn { background:none; border:none; width:100%; text-align:left; padding:12px 16px; font-size:14px; font-weight:600; color:var(--text-muted); border-radius:8px; cursor:pointer; transition:all .15s; display:flex; align-items:center; gap:10px; }
   .nav-btn:hover { background:var(--surface-hover); color:var(--text); }
-  .nav-btn.active { background:var(--brand-soft); color:var(--brand); }
-  .btn-menu { background:none; border:none; color:var(--text); font-size:24px; cursor:pointer; margin-right:12px; }
-
-  /* ── STOPWATCH FAB ────────────────────────────── */
-  .fab-container { position:fixed; bottom:24px; right:24px; z-index:800; display:flex; flex-direction:column; align-items:flex-end; gap:12px; }
-  .stopwatch-widget { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:16px; box-shadow:0 8px 32px rgba(0,0,0,0.15); display:none; flex-direction:column; align-items:center; gap:12px; transform-origin:bottom right; animation:popIn .3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-  @keyframes popIn { 0% { opacity:0; transform:scale(0.8); } 100% { opacity:1; transform:scale(1); } }
-  .sw-time { font-family:'IBM Plex Mono', monospace; font-size:32px; font-weight:700; color:var(--brand); line-height:1; }
-  .sw-controls { display:flex; gap:8px; }
-  .sw-btn { width:40px; height:40px; border-radius:50%; border:none; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px; transition:transform .2s; }
-  .sw-btn:hover { transform:scale(1.1); }
-  .btn-play { background:var(--green); color:white; }
-  .btn-pause { background:var(--amber); color:white; }
-  .btn-stop { background:#ef4444; color:white; }
-  .fab-btn { width:56px; height:56px; border-radius:50%; background:var(--green); color:white; border:none; box-shadow:0 4px 12px rgba(16,185,129,0.3); font-size:24px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:transform .2s; }
-  .fab-btn:hover { transform:scale(1.05); }
-
-  /* ── HISTORY VIEW ────────────────────────────── */
-  #view-history { display:none; }
-  .hist-day-group { margin-bottom: 32px; }
-  .hist-day-header { display:flex; align-items:center; gap:16px; margin-bottom:16px; }
-  .hist-day-title { font-size:12px; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; white-space:nowrap; }
-  .hist-day-line { flex:1; height:1px; background:var(--border); }
-  .hist-day-total { font-family:'IBM Plex Mono', monospace; font-size:12px; font-weight:600; color:var(--text-dim); display:flex; align-items:center; gap:4px; }
-  .hist-cards { display:flex; flex-direction:column; gap:8px; }
-  .hist-card { background:var(--surface); border:1px solid var(--border); border-radius:8px; display:flex; align-items:center; padding:12px 16px; position:relative; overflow:hidden; gap:16px; transition:border-color .2s; }
-  .hist-card:hover { border-color:var(--text-dim); }
-  .hist-card-stripe { position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--brand); }
-  .hc-main { flex:2; display:flex; flex-direction:column; min-width:0; }
-  .hc-mat { font-size:13px; font-weight:700; color:var(--text); text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .hc-assunto { font-size:12px; color:var(--text-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .hc-time { font-family:'IBM Plex Mono', monospace; font-size:13px; font-weight:600; color:var(--text-muted); flex:1; text-align:center; }
-  .hc-stats { display:flex; align-items:center; gap:12px; flex:1.5; justify-content:center; font-family:'IBM Plex Mono', monospace; font-size:12px; font-weight:600; }
-  .hc-stats-val { display:flex; gap:8px; }
-  .hc-pct { background:var(--green); color:white; padding:2px 6px; border-radius:4px; font-size:11px; }
-  .hc-cat { font-size:10px; font-weight:800; text-transform:uppercase; padding:4px 8px; border-radius:4px; color:white; letter-spacing:0.5px; }
-  .hc-actions { display:flex; gap:8px; flex:0.5; justify-content:flex-end; }
-  .hc-btn { background:none; border:none; color:var(--text-dim); cursor:pointer; transition:color .2s; font-size:14px; }
-  .hc-btn:hover { color:var(--text); }
+  .nav-btn.active { background:var(--brand-soft); color:var(--brand); font-weight:700; border-left:3px solid var(--brand); }
+  .btn-menu { background:none; border:none; color:var(--text); font-size:22px; cursor:pointer; }
   
-  @media(max-width: 768px) {
-    .hist-card { flex-wrap:wrap; padding:12px; }
-    .hc-time { text-align:left; width:100%; flex:none; margin:8px 0; }
-    .hc-stats { justify-content:flex-start; flex:none; width:100%; }
-    .hc-actions { position:absolute; right:12px; top:12px; }
-    .hc-cat { position:absolute; right:12px; bottom:12px; }
-  }
+  /* ── SECTIONS & VIEWS ─────────────────────── */
+  .app-view { display: none; }
+  .app-view.active { display: block; animation: delta-rise .35s ease; }
+
+  /* ── MODAL GENÉRICO ──────────────────────── */
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.65); backdrop-filter:blur(3px); z-index:999; display:none; align-items:center; justify-content:center; }
+  .modal-content { background:var(--surface); border:1px solid var(--border); border-radius:12px; width:100%; max-width:540px; overflow:hidden; box-shadow:0 12px 40px rgba(0,0,0,0.3); }
+  .modal-header { padding:18px 22px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+  .modal-header h2 { font-size:17px; font-weight:800; color:var(--text); margin:0; }
+  .btn-close { background:none; border:none; color:var(--text-dim); font-size:24px; cursor:pointer; }
+  .modal-body { padding:20px 22px; display:flex; flex-direction:column; gap:14px; max-height:75vh; overflow-y:auto; }
+  .modal-row { display:flex; gap:14px; }
+  .modal-group { flex:1; display:flex; flex-direction:column; gap:5px; }
+  .modal-group label { font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; }
+  .modal-group input, .modal-group select, .modal-group textarea { background:var(--surface2); border:1px solid var(--border); color:var(--text); padding:9px 12px; border-radius:var(--r-sm); font-size:13px; outline:none; }
+  .modal-group input:focus, .modal-group select:focus { border-color:var(--brand); }
+  .box-gray { background:var(--surface2); padding:12px 14px; border-radius:var(--r-sm); border:1px solid var(--border); }
+  .modal-footer { padding:16px 22px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:12px; background:var(--surface-hover); }
+  .btn-save { background:var(--brand); color:#fff; border:none; padding:10px 18px; border-radius:var(--r-sm); font-weight:700; font-size:13px; cursor:pointer; transition:transform .15s; }
+  .btn-save:hover { transform:translateY(-1px); }
+  .btn-util { background:transparent; border:1px solid var(--border); color:var(--text); padding:8px 14px; border-radius:var(--r-sm); font-size:12px; font-weight:600; cursor:pointer; transition:background .15s; }
+  .btn-util:hover { background:var(--surface-hover); border-color:var(--text-dim); }
+
+  /* ── TIMELINE HISTÓRICO ──────────────────── */
+  .history-timeline-list { display:flex; flex-direction:column; gap:12px; }
+  .htl-item { display:flex; gap:12px; position:relative; }
+  .htl-line { position:absolute; left:5px; top:20px; bottom:-12px; width:2px; background:var(--border); }
+  .htl-item:last-child .htl-line { display:none; }
+  .htl-dot { width:12px; height:12px; background:var(--brand); border-radius:50%; margin-top:4px; position:relative; z-index:2; flex-shrink:0; }
+  .htl-content { flex:1; background:var(--surface-hover); border:1px solid var(--border); border-radius:var(--r-sm); padding:10px 14px; }
+  .htl-title-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; }
+  .htl-mat-tag { font-size:11px; font-weight:800; color:var(--brand); text-transform:uppercase; font-family:var(--font-mono); }
+  .htl-date { font-size:11px; color:var(--text-dim); font-family:var(--font-mono); }
+  .htl-assunto { font-size:13px; font-weight:600; color:var(--text); }
+  .htl-stats { font-size:11px; color:var(--text-dim); margin-top:4px; font-family:var(--font-mono); }
+
+  /* ── MATÉRIAS ACCORDION (PAINÉIS) ────────── */
+  .materias{ display:flex; flex-direction:column; gap:10px; }
+  details.materia{ background:var(--surface); border:1px solid var(--border); border-radius:var(--r); overflow:hidden; }
+  details.materia[open]{ border-color:var(--border-hot); }
+  details.materia summary{ list-style:none; cursor:pointer; padding:16px 20px; display:flex; align-items:center; justify-content:space-between; gap:14px; user-select:none; }
+  details.materia summary:hover{ background:var(--surface-hover); }
+  details.materia summary::-webkit-details-marker{ display:none; }
+  .materia-left{ display:flex; align-items:center; gap:14px; flex:1; min-width:0; }
+  .materia-tag{ font-size:11px; font-weight:700; width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; background:var(--brand-soft); color:var(--brand); font-family:var(--font-mono); }
+  .materia-title{ font-size:15px; font-weight:700; color:var(--text); line-height:1.3; }
+  .materia-sub{ font-size:12px; color:var(--text-dim); margin-top:2px; font-family:var(--font-mono); }
+  .materia-count{ flex-shrink:0; font-size:11px; font-weight:600; padding:4px 10px; border-radius:20px; font-family:var(--font-mono); }
+  .count-active{ color:var(--green); background:var(--green-bg); border:1px solid var(--green-border); }
+  .assuntos{ padding:2px 20px 16px; display:flex; flex-direction:column; gap:6px; }
+  .assunto-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 12px; border-radius:var(--r-sm); text-decoration:none; color:var(--text); border:1px solid transparent; }
+  .assunto-row.linked:hover{ background:var(--brand-soft); border-color:rgba(255,107,0,0.2); }
+  .assunto-left{ display:flex; align-items:center; gap:10px; flex:1; min-width:0; }
+  .assunto-dot{ width:6px; height:6px; border-radius:50%; flex-shrink:0; background:var(--brand); }
+  .assunto-title{ font-size:13px; font-weight:500; }
+  .assunto-status{ font-size:10px; font-weight:600; color:var(--brand); font-family:var(--font-mono); }
 </style>
-<link rel="stylesheet" href="./assets/tokens.css"/>
-<link rel="stylesheet" href="./assets/stopwatch.css"/>
 </head>
 <body>
 
-<!-- SIDEBAR -->
+<!-- SIDEBAR OVERLAY & SIDEBAR -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 <div class="sidebar" id="sidebar">
   <div class="sidebar-header">
     <h2>Menu Delta</h2>
-    <button class="btn-close" onclick="toggleSidebar()" style="background:none; border:none; font-size:24px; cursor:pointer;">&times;</button>
+    <button class="btn-close" onclick="toggleSidebar()">&times;</button>
   </div>
   <div class="sidebar-nav">
-    <button class="nav-btn active" id="nav-dash" onclick="switchView('dashboard')">🏠 Dashboard Principal</button>
-    <button class="nav-btn" id="nav-hist" onclick="switchView('history')">📜 Histórico de Estudos</button>
+    <button class="nav-btn active" id="nav-dash" onclick="switchView('dashboard')">
+      <span>🏠</span> Home / Dashboard
+    </button>
+    <button class="nav-btn" id="nav-edital" onclick="switchView('edital')">
+      <span>📋</span> Edital Verticalizado
+    </button>
+    <button class="nav-btn" id="nav-conquistas" onclick="switchView('conquistas')">
+      <span>🏆</span> Conquistas & Medalhas
+    </button>
+    <button class="nav-btn" id="nav-panels" onclick="switchView('panels')">
+      <span>📚</span> Biblioteca de Painéis
+    </button>
+    <button class="nav-btn" id="nav-hist" onclick="switchView('history')">
+      <span>📜</span> Histórico de Estudos
+    </button>
+    <a href="./atena/" class="nav-btn" style="text-decoration:none;">
+      <span>⚡</span> Módulo Flashcards (Atena)
+    </a>
   </div>
 </div>
 
 <!-- ═══ HEADER ═══════════════════════════════ -->
 <header>
-  <div class="header-inner" style="justify-content: flex-start;">
-    <button class="btn-menu" onclick="toggleSidebar()">☰</button>
-    <span class="brand-mark">⚖️ Delta</span>
-    <div style="flex:1;"></div>
+  <div class="header-inner">
+    <div class="brand-group">
+      <button class="btn-menu" onclick="toggleSidebar()" aria-label="Abrir Menu">☰</button>
+      <span class="brand-mark">⚖️ Delta AVA</span>
+    </div>
+
+    <!-- SELETOR RÁPIDO DE PLANO NO CABEÇALHO -->
+    <div style="display:flex; align-items:center; gap:10px;">
+      <select id="headerPlanSelect" class="header-plan-select" onchange="DeltaEdital.setActivePlan(this.value)">
+        <!-- Preenchido dinamicamente -->
+      </select>
+      <button class="btn-quick-add" onclick="openRegistroModal()">
+        <span>+</span> Adicionar Estudo
+      </button>
+    </div>
+
+    <!-- TOGGLE DE TEMA -->
     <button id="themeToggle" class="theme-toggle-btn" aria-label="Alternar tema">
       <svg class="moon-icon" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
@@ -509,893 +217,795 @@
 
 <!-- ═══ MAIN ══════════════════════════════════ -->
 <main>
-  <div id="view-dashboard">
 
-  <!-- HERO -->
-  <section class="hero">
-    <h1>Biblioteca de<br/>Estudos <span>Delta</span></h1>
-    <p>Catálogo central dos painéis de estudo. Cada assunto leva ao painel completo — referência para consulta, não substituto de questões e anotação ativa.</p>
-    <div class="hero-meta">
-      <span><strong>10</strong> matérias</span>
-      <span><strong>6</strong> painéis disponíveis</span>
-      <span>preparação 48 semanas</span>
-    </div>
-    <div style="margin-top:20px;">
-      <a href="./atena/" style="display:inline-block; padding:10px 16px; background:var(--brand); color:white; text-decoration:none; border-radius:8px; font-weight:bold; font-size:13px; font-family:'IBM Plex Mono',monospace;">⚡ Acessar Módulo de Flashcards Atena</a>
-    </div>
-  </section>
-
-  <!-- NUDGE BANNER -->
-  <div id="nudgeBanner" class="nudge-banner">⚠️ Você ainda não registrou estudo hoje. Mantenha a ofensiva!</div>
-
-  <!-- DASHBOARD SECTION -->
-  <section class="dashboard-section" style="margin-bottom:40px;">
+  <!-- ════════ VIEW 1: DASHBOARD / HOME ESTUDEI ════════ -->
+  <div id="view-dashboard" class="app-view active">
     
-    <div class="dash-top">
-      <div class="dash-card">
-        <div class="dash-label">Tempo de Estudo</div>
-        <div class="dash-value" id="stHours">0h</div>
+    <!-- 4 KPIS SUPERIORES -->
+    <div class="top-kpis-grid">
+      <!-- 1. Tempo de Estudo -->
+      <div class="kpi-card">
+        <div class="kpi-label">TEMPO DE ESTUDO</div>
+        <div class="kpi-value-row">
+          <span class="kpi-value" id="kpiTempoTotal">0h00min</span>
+        </div>
+        <div class="kpi-sub-text" id="kpiSessoesCount">0 sessões registradas</div>
       </div>
-      <div class="dash-card">
-        <div class="dash-label">Desempenho Geral</div>
-        <div class="donut-wrap">
-          <div id="vizDonut" aria-hidden="false"></div>
-          <div>
-            <div class="dash-sub" id="stAcertosErros" style="color:var(--text-muted); margin-top:0;">0 Acertos / 0 Erros</div>
-            <div class="dash-sub" id="stPct" style="display:none;">0%</div>
+
+      <!-- 2. Desempenho Geral -->
+      <div class="kpi-card">
+        <div class="kpi-label">DESEMPENHO</div>
+        <div class="kpi-value-row">
+          <div style="display:flex; flex-direction:column;">
+            <span style="font-size:12px; font-weight:700; color:var(--green);" id="kpiAcertosNum">0 Acertos</span>
+            <span style="font-size:12px; font-weight:700; color:#ef4444;" id="kpiErrosNum">0 Erros</span>
           </div>
+          <span class="kpi-badge-pct" id="kpiTaxaPct">0%</span>
         </div>
       </div>
-      <div class="dash-card">
-        <div class="dash-label">Total de Sessões</div>
-        <div class="dash-value" id="stSess">0</div>
+
+      <!-- 3. Progresso no Edital -->
+      <div class="kpi-card" style="cursor:pointer;" onclick="switchView('edital')" title="Clique para abrir o Edital Verticalizado">
+        <div class="kpi-label">PROGRESSO NO EDITAL</div>
+        <div class="kpi-value-row">
+          <div style="display:flex; flex-direction:column;">
+            <span style="font-size:12px; font-weight:700; color:var(--green);" id="kpiTopicosConcluidos">0 Concluídos</span>
+            <span style="font-size:12px; font-weight:700; color:var(--text-dim);" id="kpiTopicosPendentes">0 Pendentes</span>
+          </div>
+          <span class="kpi-badge-pct" id="kpiEditalPct" style="background:var(--brand);">0%</span>
+        </div>
+      </div>
+
+      <!-- 4. Frase Motivacional -->
+      <div class="kpi-card kpi-quote-card">
+        <div class="kpi-quote-text" id="kpiQuoteText">"Mude seus pensamentos e você mudará seu mundo."</div>
+        <div class="kpi-quote-author" id="kpiQuoteAuthor">— Norman Vincent Peale</div>
       </div>
     </div>
 
-    <div class="dash-main">
-      <div class="dash-left">
-        <div class="streak-banner" id="streakBanner">
-           Você está há 0 dias sem estudar! Seu recorde é de 0 dias sem falhas. 📅
+    <!-- BANNER DE CONSTÂNCIA (STREAK GRID) -->
+    <div class="streak-calendar-card">
+      <div class="scc-header">
+        <div class="scc-title-wrap">
+          <span style="font-size:16px;">🔥</span>
+          <span class="scc-title">CONSTÂNCIA NOS ESTUDOS</span>
         </div>
+        <div class="scc-period-nav">
+          <button class="btn-period-arrow" onclick="navStreakPeriod(-1)">&lt;</button>
+          <span id="streakPeriodLabel">Últimos 30 dias</span>
+          <button class="btn-period-arrow" onclick="navStreakPeriod(1)">&gt;</button>
+        </div>
+      </div>
+      <div class="scc-status-msg" id="streakBannerMsg">
+        Você está há 0 dias sem estudar! Seu recorde é de 0 dias sem falhas. 📅
+      </div>
+      <div class="streak-dots-grid" id="streakDotsContainer">
+        <!-- 30 bolinhas interativas geradas via JS -->
+      </div>
+    </div>
+
+    <!-- GRID PRINCIPAL (2 COLUNAS) -->
+    <div class="dashboard-grid-layout">
+      
+      <!-- ── COLUNA ESQUERDA ────────────────────────── -->
+      <div class="dash-col-left">
         
-        <div class="dash-box mt-4">
-           <div class="box-title">Painel de Disciplinas</div>
-           <div style="overflow-x:auto;">
-             <table class="dash-table" id="painelTable">
-               <thead>
-                 <tr>
-                   <th>Disciplinas</th>
-                   <th>Tempo</th>
-                   <th>✔️</th>
-                   <th>❌</th>
-                   <th>%</th>
-                 </tr>
-               </thead>
-               <tbody></tbody>
-             </table>
-           </div>
+        <!-- 1. PAINEL DE DISCIPLINAS -->
+        <div class="dash-panel-box">
+          <div class="dpb-header-row">
+            <span class="dpb-title">PAINEL DE DISCIPLINAS</span>
+            <a class="dpb-action-link" href="javascript:void(0)" onclick="openRegistroModal()">+ Novo Registro</a>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="dash-subjects-table" id="painelSubjectsTable">
+              <thead>
+                <tr>
+                  <th>Disciplinas</th>
+                  <th>Tempo</th>
+                  <th>✔️</th>
+                  <th>❌</th>
+                  <th>📝 Total</th>
+                  <th>%</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Preenchido dinamicamente -->
+              </tbody>
+            </table>
+          </div>
         </div>
 
-        <div class="viz-box" style="margin-top:16px;">
-          <div class="viz-h">Tempo por matéria</div>
-          <div class="bars" id="vizBars"></div>
+        <!-- 2. REVISÕES FLASHCARDS (ATENA FSRS) -->
+        <div class="dash-panel-box" style="padding:0; border:none; background:transparent; box-shadow:none;">
+          <div id="dashRevisoesContainer">
+            <!-- Renderizado por DeltaRevisoes.renderRevisoesDashboard -->
+          </div>
         </div>
+
+        <!-- 3. PLANEJAMENTO -->
+        <div class="dash-panel-box">
+          <div class="dpb-header-row">
+            <span class="dpb-title">PLANEJAMENTO DE ESTUDOS</span>
+            <button class="btn-util" style="font-size:11px; padding:4px 8px;" onclick="switchView('edital')">VER EDITAL</button>
+          </div>
+          <div class="plan-items-list" id="dashPlanejamentoList">
+            <!-- Itens de planejamento -->
+          </div>
+        </div>
+
+        <!-- 4. LEMBRETES E PROVAS -->
+        <div class="dash-panel-box">
+          <div class="dpb-header-row">
+            <span class="dpb-title">LEMBRETES & PROVAS</span>
+            <button class="btn-util" style="font-size:11px; padding:4px 8px;" onclick="openAddLembreteModal()">+ Adicionar</button>
+          </div>
+          <div class="reminders-list" id="dashLembretesList">
+            <!-- Lista de lembretes -->
+          </div>
+          <button class="btn-add-lembrete-full" onclick="openAddLembreteModal()">+ Adicionar Lembrete / Prova</button>
+        </div>
+
       </div>
 
-      <div class="dash-right">
-         <button class="btn-novo" onclick="openRegistroModal()">+ Registrar Estudo</button>
-         
-         <div class="dash-box mt-4">
-           <div class="box-title">Backup de Dados</div>
-           <div style="display:flex; gap:8px;">
-             <button class="btn-util" style="flex:1;" onclick="exportData()">Exportar JSON</button>
-             <button class="btn-util" style="flex:1;" onclick="importData()">Importar JSON</button>
-           </div>
-         </div>
-         
-         <div class="viz-box" style="margin-top:16px;">
-           <div class="viz-h">Ofensiva · últimos 42 dias</div>
-           <div class="heat" id="vizHeat"></div>
-         </div>
+      <!-- ── COLUNA DIREITA ────────────────────────── -->
+      <div class="dash-col-right">
+        
+        <!-- 1. DATA DA PROVA COUNTDOWN -->
+        <div class="exam-countdown-box">
+          <div class="ecb-left">
+            <h4>DATA DA PROVA</h4>
+            <p id="examTargetName">Nenhuma prova cadastrada</p>
+            <a href="javascript:void(0)" onclick="openAddLembreteModal()" style="font-size:12px; color:var(--brand); font-weight:bold;">Criar / Alterar Prova</a>
+          </div>
+          <div class="ecb-countdown-badge">
+            <div class="ecb-days-num" id="examDaysRemaining">--</div>
+            <div class="ecb-days-lbl">DIAS RESTANTES</div>
+          </div>
+        </div>
 
-         <div class="dash-box mt-4" style="flex:1;">
-           <div class="box-title">Últimas Atividades</div>
-           <div class="history-list" id="historyList"></div>
-         </div>
-      </div>
-    </div>
-  </section>
+        <!-- 2. METAS DE ESTUDO SEMANAL -->
+        <div class="dash-panel-box">
+          <div class="dpb-header-row">
+            <span class="dpb-title">METAS DE ESTUDO SEMANAL</span>
+            <button class="btn-icon-util" title="Editar Metas" onclick="openEditMetasModal()">✏️</button>
+          </div>
+          <div class="metas-progress-wrap">
+            <div class="meta-row">
+              <div class="meta-labels-row">
+                <span class="meta-val" id="metaHorasProgress">0h00min / 15h00min</span>
+                <span class="meta-name">Horas de Estudo</span>
+              </div>
+              <div class="meta-track">
+                <div class="meta-fill" id="metaHorasBar" style="width:0%;"></div>
+              </div>
+            </div>
+            <div class="meta-row">
+              <div class="meta-labels-row">
+                <span class="meta-val" id="metaQuestoesProgress">0 / 200</span>
+                <span class="meta-name">Questões</span>
+              </div>
+              <div class="meta-track">
+                <div class="meta-fill" id="metaQuestoesBar" style="width:0%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-  <!-- MODAL -->
-  <div id="registroModal" class="modal-overlay">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Registro de Estudo</h2>
-        <button onclick="closeRegistroModal()" class="btn-close">&times;</button>
+        <!-- 3. ESTUDO SEMANAL (GRÁFICO COM ABAS) -->
+        <div class="dash-panel-box">
+          <div class="chart-header-tabs">
+            <span class="dpb-title">ESTUDO SEMANAL</span>
+            <div class="chart-tabs-group">
+              <button class="btn-chart-tab active" id="tabChartTempo" onclick="setWeeklyChartTab('tempo')">TEMPO</button>
+              <button class="btn-chart-tab" id="tabChartQuestoes" onclick="setWeeklyChartTab('questoes')">QUESTÕES</button>
+            </div>
+          </div>
+          <div class="weekly-bars-chart" id="weeklyBarsContainer">
+            <!-- 7 barras (Dom a Sáb) -->
+          </div>
+          <div class="weekly-total-footer">
+            <span>Total Estudado nesta Semana:</span>
+            <strong id="weeklyTotalFooterText">0h00min</strong>
+          </div>
+        </div>
+
+        <!-- 4. TEMPO DE ESTUDO (DONUT CHART) -->
+        <div class="dash-panel-box">
+          <div class="dpb-header-row">
+            <span class="dpb-title">TEMPO DE ESTUDO</span>
+          </div>
+          <div class="donut-period-tabs">
+            <button class="btn-donut-tab active" id="btnDonutHoje" onclick="setDonutPeriod('hoje')">HOJE</button>
+            <button class="btn-donut-tab" id="btnDonutSemana" onclick="setDonutPeriod('semana')">SEMANA</button>
+            <button class="btn-donut-tab" id="btnDonutMes" onclick="setDonutPeriod('mes')">MÊS</button>
+            <button class="btn-donut-tab" id="btnDonutTotal" onclick="setDonutPeriod('total')">TOTAL</button>
+          </div>
+          <div class="donut-wrapper-center">
+            <div id="dashDonutViz"></div>
+          </div>
+        </div>
+
+        <!-- 5. ÚLTIMAS ATIVIDADES -->
+        <div class="dash-panel-box">
+          <div class="dpb-header-row">
+            <span class="dpb-title">ÚLTIMAS ATIVIDADES</span>
+            <button class="btn-util" style="font-size:11px; padding:4px 8px;" onclick="switchView('history')">VER TODAS</button>
+          </div>
+          <div class="history-timeline-list" id="dashTimelineList">
+            <!-- Histórico recente -->
+          </div>
+        </div>
+
       </div>
-      <div class="modal-body">
-        <input type="hidden" id="modalEditIndex">
-        <div class="modal-row">
-          <div class="modal-group">
-            <label>Data</label>
-            <input type="date" id="modalData">
-          </div>
-          <div class="modal-group">
-            <label>Tempo (HH:MM:SS)</label>
-            <input type="text" id="modalTempo" placeholder="00:00:00" onblur="formatTimeInput(this)">
-          </div>
-        </div>
-        <div class="modal-row">
-          <div class="modal-group" style="flex:1;">
-            <label>Categoria</label>
-            <input list="categorias-list" id="modalCategoria" placeholder="Ex: Teoria, Revisão, Simulados...">
-            <datalist id="categorias-list">
-              <option value="Teoria">
-              <option value="Questões">
-              <option value="Revisão">
-            </datalist>
-          </div>
-        </div>
-        <div class="modal-row">
-          <div class="modal-group">
-            <label>Categoria / Matéria</label>
-            <select id="modalMat">
-              <option value="DP">Direito Penal (DP)</option>
-              <option value="DC">Dir. Constitucional (DC)</option>
-              <option value="DCV">Direito Civil (DCV)</option>
-              <option value="DA">Dir. Administrativo (DA)</option>
-              <option value="DPP">Processo Penal (DPP)</option>
-              <option value="ML">Medicina Legal (ML)</option>
-              <option value="LPE">Leg. Penal Especial (LPE)</option>
-              <option value="DH">Direitos Humanos (DH)</option>
-              <option value="DE">Dir. Empresarial (DE)</option>
-              <option value="CR">Criminologia (CR)</option>
-              <option value="RLM/REV">Revisão/Flashcards</option>
-            </select>
-          </div>
-        </div>
-        <div class="modal-group">
-          <label>Tópico / Assunto</label>
-          <input type="text" id="modalAssunto" placeholder="Ex: Teoria do Crime">
-        </div>
-        <div class="modal-row box-gray">
-          <div class="modal-group">
-            <label style="color:var(--green);">Questões (Acertos)</label>
-            <input type="number" id="modalAcertos" placeholder="0">
-          </div>
-          <div class="modal-group">
-            <label style="color:#ef4444;">Questões (Erros)</label>
-            <input type="number" id="modalErros" placeholder="0">
-          </div>
-        </div>
-        <div class="modal-group">
-          <label>Comentários (Opcional)</label>
-          <input type="text" id="modalObs" placeholder="Anotações da sessão...">
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button onclick="closeRegistroModal()" class="btn-util">Cancelar</button>
-        <button onclick="saveModalSession()" class="btn-save">Salvar Registro</button>
-      </div>
+
     </div>
   </div>
 
-  <!-- CONFIRM MODAL -->
-  <div id="confirmModal" class="modal-overlay">
-    <div class="modal-content" style="max-width: 400px; text-align: center;">
-      <div class="modal-header" style="justify-content: center; border-bottom: none; padding-bottom: 0;">
-        <h2 style="color: var(--brand);">Finalizar Sessão?</h2>
-      </div>
-      <div class="modal-body" style="padding: 24px;">
-        <p style="margin: 0; color: var(--text); font-size: 16px;">Você quer realmente parar o cronômetro e registrar a sessão agora?</p>
-      </div>
-      <div class="modal-footer" style="justify-content: center; border-top: none; padding-top: 0; gap: 16px;">
-        <button onclick="swConfirmStop(false)" class="btn-util" style="width: auto;">Não (Pausar)</button>
-        <button onclick="swConfirmStop(true)" class="btn-save" style="width: auto;">Sim, Registrar</button>
-      </div>
+  <!-- ════════ VIEW 2: EDITAL VERTICALIZADO ════════ -->
+  <div id="view-edital" class="app-view">
+    <div id="view-edital-content">
+      <!-- Renderizado dinamicamente por DeltaEdital.renderEditalView -->
     </div>
   </div>
 
-  <!-- DIVIDER -->
-  <div class="section-label">Matérias do Edital</div>
-
-  <!-- MATÉRIAS -->
-  <div class="materias">
-
-    <!-- Direito Constitucional -->
-    <details class="materia">
-      <summary>
-        <div class="materia-left">
-          <div class="materia-tag">DC</div>
-          <div>
-            <div class="materia-title">Direito Constitucional</div>
-            <div class="materia-sub">Teoria · Organização do Estado · Direitos fundamentais</div>
-          </div>
-        </div>
-        <span class="materia-count count-active">1 painel</span>
-        <span class="chevron-d">▼</span>
-      </summary>
-      <div class="assuntos">
-        <a class="assunto-row linked" href="./direito-constitucional-teoria.html">
-          <div class="assunto-left">
-            <div class="assunto-dot"></div>
-            <span class="assunto-title">Teoria da Constituição</span>
-          </div>
-          <span class="assunto-status">Cebraspe</span>
-          <span class="assunto-arrow">→</span>
-        </a>
-      </div>
-    </details>
-
-    <!-- Direito Administrativo -->
-    <details class="materia" open>
-      <summary>
-        <div class="materia-left">
-          <div class="materia-tag">DA</div>
-          <div>
-            <div class="materia-title">Direito Administrativo</div>
-            <div class="materia-sub">Poderes · Atos · Agentes · Serviços públicos · Licitações</div>
-          </div>
-        </div>
-        <span class="materia-count count-active">1 painel</span>
-        <span class="chevron-d">▼</span>
-      </summary>
-      <div class="assuntos">
-        <a class="assunto-row linked" href="./dir-adm-poderes-administracao.html">
-          <div class="assunto-left">
-            <div class="assunto-dot"></div>
-            <span class="assunto-title">Poderes da Administração</span>
-          </div>
-          <span class="assunto-status">4 blocos · Cebraspe</span>
-          <span class="assunto-arrow">→</span>
-        </a>
-      </div>
-    </details>
-
-    <!-- Direito Civil -->
-    <details class="materia">
-      <summary>
-        <div class="materia-left">
-          <div class="materia-tag">DCV</div>
-          <div>
-            <div class="materia-title">Direito Civil</div>
-            <div class="materia-sub">LINDB · Pessoas · Bens · Negócio jurídico · Responsabilidade civil</div>
-          </div>
-        </div>
-        <span class="materia-count count-active">1 painel</span>
-        <span class="chevron-d">▼</span>
-      </summary>
-      <div class="assuntos">
-        <a class="assunto-row linked" href="./direito-civil-lindb-pessoas.html">
-          <div class="assunto-left">
-            <div class="assunto-dot"></div>
-            <span class="assunto-title">LINDB e Pessoas</span>
-          </div>
-          <span class="assunto-status">Cebraspe</span>
-          <span class="assunto-arrow">→</span>
-        </a>
-      </div>
-    </details>
-
-    <!-- Direito Penal -->
-    <details class="materia">
-      <summary>
-        <div class="materia-left">
-          <div class="materia-tag">DP</div>
-          <div>
-            <div class="materia-title">Direito Penal</div>
-            <div class="materia-sub">Princípios · Teoria do crime · Penas · Parte especial</div>
-          </div>
-        </div>
-        <span class="materia-count count-active">2 painéis</span>
-        <span class="chevron-d">▼</span>
-      </summary>
-      <div class="assuntos">
-        <a class="assunto-row linked" href="./direito-penal-nocoes-principios.html">
-          <div class="assunto-left">
-            <div class="assunto-dot"></div>
-            <span class="assunto-title">Noções e Princípios</span>
-          </div>
-          <span class="assunto-status">Cebraspe</span>
-          <span class="assunto-arrow">→</span>
-        </a>
-        <a class="assunto-row linked" href="./direito_penal_teoria_do_crime.html">
-          <div class="assunto-left">
-            <div class="assunto-dot"></div>
-            <span class="assunto-title">Teoria do Crime</span>
-          </div>
-          <span class="assunto-status">Cebraspe/PF</span>
-          <span class="assunto-arrow">→</span>
-        </a>
-      </div>
-    </details>
-
-    <!-- Direito Processual Penal -->
-    <details class="materia">
-      <summary>
-        <div class="materia-left">
-          <div class="materia-tag">DPP</div>
-          <div>
-            <div class="materia-title">Direito Processual Penal</div>
-            <div class="materia-sub">Inquérito · Provas · Medidas cautelares · Procedimentos</div>
-          </div>
-        </div>
-        <span class="materia-count count-empty">em breve</span>
-        <span class="chevron-d">▼</span>
-      </summary>
-      <div class="assuntos">
-        <div class="assunto-row placeholder">
-          <div class="assunto-left">
-            <div class="assunto-dot"></div>
-            <span class="assunto-title">Em produção — painéis virão conforme avanço no G7 e DD</span>
-          </div>
-        </div>
-      </div>
-    </details>
-
-    <!-- Direito Empresarial -->
-    <details class="materia">
-      <summary>
-        <div class="materia-left">
-          <div class="materia-tag">DE</div>
-          <div>
-            <div class="materia-title">Direito Empresarial</div>
-            <div class="materia-sub">Empresário · Sociedades · Títulos · Falência e recuperação</div>
-          </div>
-        </div>
-        <span class="materia-count count-empty">em breve</span>
-        <span class="chevron-d">▼</span>
-      </summary>
-      <div class="assuntos">
-        <div class="assunto-row placeholder">
-          <div class="assunto-left">
-            <div class="assunto-dot"></div>
-            <span class="assunto-title">Em produção — painéis virão conforme avanço no G7 e DD</span>
-          </div>
-        </div>
-      </div>
-    </details>
-
-    <!-- Direitos Humanos -->
-    <details class="materia">
-      <summary>
-        <div class="materia-left">
-          <div class="materia-tag">DH</div>
-          <div>
-            <div class="materia-title">Direitos Humanos</div>
-            <div class="materia-sub">Sistema interamericano · Convenções · Jurisprudência da Corte IDH</div>
-          </div>
-        </div>
-        <span class="materia-count count-empty">em breve</span>
-        <span class="chevron-d">▼</span>
-      </summary>
-      <div class="assuntos">
-        <div class="assunto-row placeholder">
-          <div class="assunto-left">
-            <div class="assunto-dot"></div>
-            <span class="assunto-title">Em produção — painéis virão conforme avanço no G7 e DD</span>
-          </div>
-        </div>
-      </div>
-    </details>
-
-    <!-- Legislação Penal Especial -->
-    <details class="materia">
-      <summary>
-        <div class="materia-left">
-          <div class="materia-tag">LPE</div>
-          <div>
-            <div class="materia-title">Legislação Penal Especial</div>
-            <div class="materia-sub">Drogas · ECA · LMP · Tortura · Organização criminosa · Crimes hediondos</div>
-          </div>
-        </div>
-        <span class="materia-count count-empty">em breve</span>
-        <span class="chevron-d">▼</span>
-      </summary>
-      <div class="assuntos">
-        <div class="assunto-row placeholder">
-          <div class="assunto-left">
-            <div class="assunto-dot"></div>
-            <span class="assunto-title">Em produção — painéis virão conforme avanço no G7 e DD</span>
-          </div>
-        </div>
-      </div>
-    </details>
-
-    <!-- Medicina Legal -->
-    <details class="materia">
-      <summary>
-        <div class="materia-left">
-          <div class="materia-tag">ML</div>
-          <div>
-            <div class="materia-title">Medicina Legal</div>
-            <div class="materia-sub">Perícias · Tanatologia · Lesões · Sexologia forense · Toxicologia</div>
-          </div>
-        </div>
-        <span class="materia-count count-active">1 painel</span>
-        <span class="chevron-d">▼</span>
-      </summary>
-      <div class="assuntos">
-        <a class="assunto-row linked" href="./medicina-legal-pericias-documentos.html">
-          <div class="assunto-left">
-            <div class="assunto-dot"></div>
-            <span class="assunto-title">Perícias e Documentos</span>
-          </div>
-          <span class="assunto-status">Cebraspe</span>
-          <span class="assunto-arrow">→</span>
-        </a>
-      </div>
-    </details>
-
-    <!-- Criminologia -->
-    <details class="materia">
-      <summary>
-        <div class="materia-left">
-          <div class="materia-tag">CR</div>
-          <div>
-            <div class="materia-title">Criminologia</div>
-            <div class="materia-sub">Escolas · Teorias da criminalidade · Vitimologia · Prevenção</div>
-          </div>
-        </div>
-        <span class="materia-count count-empty">em breve</span>
-        <span class="chevron-d">▼</span>
-      </summary>
-      <div class="assuntos">
-        <div class="assunto-row placeholder">
-          <div class="assunto-left">
-            <div class="assunto-dot"></div>
-            <span class="assunto-title">Em produção — painéis virão conforme avanço no G7 e DD</span>
-          </div>
-        </div>
-      </div>
-    </details>
-
-  </div><!-- /materias -->
-  </div> <!-- /view-dashboard -->
-
-  <!-- HISTORY VIEW -->
-  <div id="view-history">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:32px;">
-      <h1 style="font-size:28px; font-weight:800; color:var(--text);">Histórico Completo</h1>
-      <button class="btn-novo" style="width:auto; padding:10px 20px;" onclick="openRegistroModal()">+ Adicionar Estudo</button>
+  <!-- ════════ VIEW 3: CONQUISTAS & MEDALHAS ════════ -->
+  <div id="view-conquistas" class="app-view">
+    <div id="view-conquistas-content">
+      <!-- Renderizado dinamicamente por DeltaConquistas.renderConquistasView -->
     </div>
-    <div id="historyFullContainer"></div>
+  </div>
+
+  <!-- ════════ VIEW 4: BIBLIOTECA DE PAINÉIS ════════ -->
+  <div id="view-panels" class="app-view">
+    <section class="hero" style="margin-bottom:28px;">
+      <h1>Biblioteca de<br/>Painéis <span>Delta</span></h1>
+      <p>Acesse os painéis temáticos aprofundados para revisão ativa de jurisprudência, pegadinhas de bancas e súmulas.</p>
+    </section>
+
+    <div class="materias">
+      <!-- Direito Constitucional -->
+      <details class="materia">
+        <summary>
+          <div class="materia-left">
+            <div class="materia-tag">DC</div>
+            <div>
+              <div class="materia-title">Direito Constitucional</div>
+              <div class="materia-sub">Teoria da Constituição · Controle · Direitos Fundamentais</div>
+            </div>
+          </div>
+          <span class="materia-count count-active">1 painel</span>
+          <span class="chevron">▼</span>
+        </summary>
+        <div class="assuntos">
+          <a class="assunto-row linked" href="./direito-constitucional-teoria.html">
+            <div class="assunto-left">
+              <div class="assunto-dot"></div>
+              <span class="assunto-title">Teoria da Constituição</span>
+            </div>
+            <span class="assunto-status">Cebraspe</span>
+            <span>→</span>
+          </a>
+        </div>
+      </details>
+
+      <!-- Direito Administrativo -->
+      <details class="materia">
+        <summary>
+          <div class="materia-left">
+            <div class="materia-tag">DA</div>
+            <div>
+              <div class="materia-title">Direito Administrativo</div>
+              <div class="materia-sub">Poderes · Atos · Agentes · Serviços Públicos · Licitações</div>
+            </div>
+          </div>
+          <span class="materia-count count-active">1 painel</span>
+          <span class="chevron">▼</span>
+        </summary>
+        <div class="assuntos">
+          <a class="assunto-row linked" href="./dir-adm-poderes-administracao.html">
+            <div class="assunto-left">
+              <div class="assunto-dot"></div>
+              <span class="assunto-title">Poderes da Administração</span>
+            </div>
+            <span class="assunto-status">Cebraspe</span>
+            <span>→</span>
+          </a>
+        </div>
+      </details>
+
+      <!-- Direito Penal -->
+      <details class="materia" open>
+        <summary>
+          <div class="materia-left">
+            <div class="materia-tag">DP</div>
+            <div>
+              <div class="materia-title">Direito Penal</div>
+              <div class="materia-sub">Princípios · Teoria do Crime · Penas · Crimes em Espécie</div>
+            </div>
+          </div>
+          <span class="materia-count count-active">2 painéis</span>
+          <span class="chevron">▼</span>
+        </summary>
+        <div class="assuntos">
+          <a class="assunto-row linked" href="./direito-penal-nocoes-principios.html">
+            <div class="assunto-left">
+              <div class="assunto-dot"></div>
+              <span class="assunto-title">Noções e Princípios Fundamentais</span>
+            </div>
+            <span class="assunto-status">Cebraspe / Vunesp</span>
+            <span>→</span>
+          </a>
+          <a class="assunto-row linked" href="./direito_penal_teoria_do_crime.html">
+            <div class="assunto-left">
+              <div class="assunto-dot"></div>
+              <span class="assunto-title">Teoria do Crime Completa</span>
+            </div>
+            <span class="assunto-status">5 blocos · Delta</span>
+            <span>→</span>
+          </a>
+        </div>
+      </details>
+
+      <!-- Direito Civil -->
+      <details class="materia">
+        <summary>
+          <div class="materia-left">
+            <div class="materia-tag">DCV</div>
+            <div>
+              <div class="materia-title">Direito Civil</div>
+              <div class="materia-sub">LINDB · Pessoas · Bens · Negócio Jurídico</div>
+            </div>
+          </div>
+          <span class="materia-count count-active">1 painel</span>
+          <span class="chevron">▼</span>
+        </summary>
+        <div class="assuntos">
+          <a class="assunto-row linked" href="./direito-civil-lindb-pessoas.html">
+            <div class="assunto-left">
+              <div class="assunto-dot"></div>
+              <span class="assunto-title">LINDB & Das Pessoas</span>
+            </div>
+            <span class="assunto-status">Discursivas</span>
+            <span>→</span>
+          </a>
+        </div>
+      </details>
+
+      <!-- Medicina Legal -->
+      <details class="materia">
+        <summary>
+          <div class="materia-left">
+            <div class="materia-tag">ML</div>
+            <div>
+              <div class="materia-title">Medicina Legal</div>
+              <div class="materia-sub">Perícias · Documentos · Traumatologia · Tanatologia</div>
+            </div>
+          </div>
+          <span class="materia-count count-active">1 painel</span>
+          <span class="chevron">▼</span>
+        </summary>
+        <div class="assuntos">
+          <a class="assunto-row linked" href="./medicina-legal-pericias-documentos.html">
+            <div class="assunto-left">
+              <div class="assunto-dot"></div>
+              <span class="assunto-title">Perícias e Documentos Médico-Legais</span>
+            </div>
+            <span class="assunto-status">Cebraspe</span>
+            <span>→</span>
+          </a>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ════════ VIEW 5: HISTÓRICO COMPLETO ════════ -->
+  <div id="view-history" class="app-view">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+      <div>
+        <h1 style="font-size:26px; font-weight:800; color:var(--text);">Histórico Completo de Estudos</h1>
+        <p style="font-size:13px; color:var(--text-muted);">Registro cronológico de todas as suas sessões e simulados.</p>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn-util" onclick="exportData()">Exportar JSON</button>
+        <button class="btn-util" onclick="importData()">Importar JSON</button>
+      </div>
+    </div>
+    <div id="historyFullContainer">
+      <!-- Preenchido via renderHistoryFull -->
+    </div>
   </div>
 
 </main>
 
+<!-- ═══ MODAIS DA APLICAÇÃO ═════════════════════ -->
+
+<!-- 1. MODAL REGISTRO DE ESTUDO -->
+<div id="registroModal" class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 id="regModalTitle">Registro de Estudo</h2>
+      <button onclick="closeRegistroModal()" class="btn-close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="modalEditIndex">
+      <div class="modal-row">
+        <div class="modal-group">
+          <label>Data</label>
+          <input type="date" id="modalData">
+        </div>
+        <div class="modal-group">
+          <label>Tempo (HH:MM:SS ou Min)</label>
+          <input type="text" id="modalTempo" placeholder="00:45:00">
+        </div>
+      </div>
+      <div class="modal-row">
+        <div class="modal-group">
+          <label>Matéria</label>
+          <select id="modalMat">
+            <option value="DP">Direito Penal (DP)</option>
+            <option value="DPP">Processo Penal (DPP)</option>
+            <option value="DC">Dir. Constitucional (DC)</option>
+            <option value="DA">Dir. Administrativo (DA)</option>
+            <option value="DCV">Direito Civil (DCV)</option>
+            <option value="ML">Medicina Legal (ML)</option>
+            <option value="LPE">Leg. Penal Especial (LPE)</option>
+            <option value="DH">Direitos Humanos (DH)</option>
+            <option value="DE">Dir. Empresarial (DE)</option>
+            <option value="CR">Criminologia (CR)</option>
+            <option value="RLM/REV">Revisão / Flashcards</option>
+          </select>
+        </div>
+        <div class="modal-group">
+          <label>Categoria</label>
+          <input list="categorias-list" id="modalCategoria" placeholder="Ex: Teoria, Questões, Revisão">
+          <datalist id="categorias-list">
+            <option value="Teoria">
+            <option value="Questões">
+            <option value="Revisão">
+            <option value="Simulado">
+            <option value="Lei Seca">
+            <option value="Jurisprudência">
+          </datalist>
+        </div>
+      </div>
+      <div class="modal-group">
+        <label>Tópico / Assunto do Edital</label>
+        <input type="text" id="modalAssunto" placeholder="Ex: Teoria do Crime, Princípios...">
+      </div>
+      <div class="modal-row box-gray">
+        <div class="modal-group">
+          <label style="color:var(--green);">Questões (Acertos)</label>
+          <input type="number" id="modalAcertos" placeholder="0" min="0">
+        </div>
+        <div class="modal-group">
+          <label style="color:#ef4444;">Questões (Erros)</label>
+          <input type="number" id="modalErros" placeholder="0" min="0">
+        </div>
+        <div class="modal-group">
+          <label style="color:var(--text-dim);">Páginas Lidas</label>
+          <input type="number" id="modalPaginas" placeholder="0" min="0">
+        </div>
+      </div>
+      <div class="modal-group">
+        <label>Comentários & Anotações</label>
+        <input type="text" id="modalObs" placeholder="Dificuldades, artigos ou notas da sessão...">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button onclick="closeRegistroModal()" class="btn-util">Cancelar</button>
+      <button onclick="saveModalSession()" class="btn-save">Salvar Registro</button>
+    </div>
+  </div>
+</div>
+
+<!-- 2. MODAL ADICIONAR LEMBRETE / PROVA -->
+<div id="modalLembrete" class="modal-overlay">
+  <div class="modal-content" style="max-width:440px;">
+    <div class="modal-header">
+      <h2>Adicionar Lembrete / Prova</h2>
+      <button onclick="closeAddLembreteModal()" class="btn-close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-group">
+        <label>Título / Órgão</label>
+        <input type="text" id="lembreteTitulo" placeholder="Ex: Delegado PC-SP / PCRS - AGENTE">
+      </div>
+      <div class="modal-row">
+        <div class="modal-group">
+          <label>Data do Evento / Prova</label>
+          <input type="date" id="lembreteData">
+        </div>
+        <div class="modal-group">
+          <label>Tipo / Tag</label>
+          <select id="lembreteTipo">
+            <option value="PROVAS">PROVAS</option>
+            <option value="SIMULADO">SIMULADO</option>
+            <option value="META">META</option>
+            <option value="INSCRIÇÃO">INSCRIÇÃO</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button onclick="closeAddLembreteModal()" class="btn-util">Cancelar</button>
+      <button onclick="saveLembrete()" class="btn-save">Salvar Lembrete</button>
+    </div>
+  </div>
+</div>
+
+<!-- 3. MODAL METAS SEMANAIS -->
+<div id="modalMetas" class="modal-overlay">
+  <div class="modal-content" style="max-width:400px;">
+    <div class="modal-header">
+      <h2>Editar Metas da Semana</h2>
+      <button onclick="closeEditMetasModal()" class="btn-close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-group">
+        <label>Meta de Horas de Estudo (Horas)</label>
+        <input type="number" id="inputMetaHoras" min="1" max="100" placeholder="15">
+      </div>
+      <div class="modal-group">
+        <label>Meta de Questões Resolvidas</label>
+        <input type="number" id="inputMetaQuestoes" min="1" max="5000" placeholder="200">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button onclick="closeEditMetasModal()" class="btn-util">Cancelar</button>
+      <button onclick="saveMetasSemanais()" class="btn-save">Salvar Metas</button>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
 <footer>
-  Biblioteca de Estudos <span>Delta</span>
+  <p>AVA Delta — Ambiente Virtual de Aprendizagem · Concursos de Alto Nível</p>
 </footer>
 
+<!-- SCRIPTS DOS MÓDULOS -->
+<script src="./assets/conquistas.js"></script>
+<script src="./assets/edital_verticalizado.js"></script>
+<script src="./assets/revisoes_flashcards.js"></script>
+<script src="./assets/stopwatch.js"></script>
+
 <script>
-  // FORMATTING & UTILS
-  function formatTimeInput(el) {
-    let val = el.value.replace(/[^0-9]/g, '');
-    if(!val) return;
-    if(val.length <= 2) val = "00:00:" + val.padStart(2, '0');
-    else if(val.length <= 4) val = "00:" + val.slice(0,-2).padStart(2,'0') + ":" + val.slice(-2);
-    else val = val.slice(0,-4).padStart(2,'0') + ":" + val.slice(-4,-2) + ":" + val.slice(-2);
-    el.value = val;
-  }
-  function hhmmssToSec(str) {
-    if(!str || typeof str !== 'string') return 0;
-    const parts = str.split(':');
-    if(parts.length !== 3) return 0;
-    return parseInt(parts[0])*3600 + parseInt(parts[1])*60 + parseInt(parts[2]);
-  }
-  function secToHHMMSS(sec) {
-    const h = Math.floor(sec / 3600);
-    const m = Math.floor((sec % 3600) / 60);
-    const s = sec % 60;
-    return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
-  }
+  // --- FRASES MOTIVACIONAIS ROTATIVAS ---
+  const FRASES_MOTIVACIONAIS = [
+    { text: "Mude seus pensamentos e você mudará seu mundo.", author: "Norman Vincent Peale" },
+    { text: "A disciplina é a ponte entre metas e realizações.", author: "Jim Rohn" },
+    { text: "A persistência realiza o impossível.", author: "Provérbio Chinês" },
+    { text: "O sucesso é a soma de pequenos esforços repetidos dia após dia.", author: "Robert Collier" },
+    { text: "O estudo ativo e a repetição espaçada transformam dedicação em posse.", author: "Método Delta" }
+  ];
 
-  // STOPWATCH
-  let swInterval = null;
-  let swSeconds = 0;
-  let swRunning = false;
-  function toggleStopwatch() {
-    const w = document.getElementById('swWidget');
-    w.style.display = w.style.display === 'flex' ? 'none' : 'flex';
-  }
-  function swUpdateDisplay() {
-    document.getElementById('swDisplay').innerText = secToHHMMSS(swSeconds);
-  }
-  function swPlay() {
-    if(swRunning) return;
-    swRunning = true;
-    swInterval = setInterval(() => { swSeconds++; swUpdateDisplay(); }, 1000);
-  }
-  function swPause() {
-    swRunning = false;
-    clearInterval(swInterval);
-  }
-  function swStop() {
-    swPause();
-    if(swSeconds === 0) return;
-    document.getElementById('confirmModal').style.display = 'flex';
-  }
+  const STORAGE_KEY = 'delta_estudos';
+  const STORAGE_LEMBRETES_KEY = 'delta_lembretes';
+  const STORAGE_METAS_KEY = 'delta_metas_semanais';
 
-  function swConfirmStop(isConfirmed) {
-    document.getElementById('confirmModal').style.display = 'none';
-    if(isConfirmed) {
-      openRegistroModal();
-      document.getElementById('modalTempo').value = secToHHMMSS(swSeconds);
-      swSeconds = 0;
-      swUpdateDisplay();
-      toggleStopwatch(); // hide
-    }
-  }
+  let logs = [];
+  let lembretes = [];
+  let metasSemanais = { horas: 15, questoes: 200 };
+  let currentChartTab = 'tempo';
+  let currentDonutPeriod = 'total';
+  let streakPeriodOffset = 0;
 
-  // NAVIGATION
+  // --- NAVEGAÇÃO ENTRE TELAS ---
   function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('active');
     document.getElementById('sidebarOverlay').classList.toggle('active');
   }
-  function switchView(view) {
-    document.getElementById('view-dashboard').style.display = view === 'dashboard' ? 'block' : 'none';
-    document.getElementById('view-history').style.display = view === 'history' ? 'block' : 'none';
-    document.getElementById('nav-dash').classList.toggle('active', view === 'dashboard');
-    document.getElementById('nav-hist').classList.toggle('active', view === 'history');
-    toggleSidebar();
-    if(view === 'history') renderHistoryFull();
-  }
 
-  function getCatColor(cat) {
-    const c = (cat||'').toUpperCase();
-    if(c.includes('REVISÃO') || c.includes('REVISAO')) return '#ef4444';
-    if(c.includes('QUESTÕES') || c.includes('QUESTOES')) return '#10b981';
-    return '#f59e0b';
-  }
+  function switchView(viewName) {
+    document.querySelectorAll('.app-view').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
 
-  function renderHistoryFull() {
-    const container = document.getElementById('historyFullContainer');
-    if(!container) return;
-    container.innerHTML = '';
-    
-    // Reverse reference
-    const logsRefs = logs.map((l, i) => ({...l, originalIndex: i}));
-    
-    const finalGroups = {};
-    logsRefs.forEach(l => {
-      if(!finalGroups[l.date]) finalGroups[l.date] = [];
-      finalGroups[l.date].push(l);
-    });
+    const targetView = document.getElementById(`view-${viewName}`);
+    if (targetView) targetView.classList.add('active');
 
-    const sortedDates = Object.keys(finalGroups).sort((a,b) => new Date(b) - new Date(a));
+    const navMap = {
+      'dashboard': 'nav-dash',
+      'edital': 'nav-edital',
+      'conquistas': 'nav-conquistas',
+      'panels': 'nav-panels',
+      'history': 'nav-hist'
+    };
+    const navBtn = document.getElementById(navMap[viewName]);
+    if (navBtn) navBtn.classList.add('active');
 
-    if(sortedDates.length === 0) {
-      container.innerHTML = '<div style="color:var(--text-dim);">Nenhum estudo registrado.</div>';
-      return;
+    if (document.getElementById('sidebar').classList.contains('active')) {
+      toggleSidebar();
     }
 
-    sortedDates.forEach(date => {
-      const dayLogs = finalGroups[date];
-      let daySecs = 0;
-      dayLogs.forEach(l => {
-        if(typeof l.tempo === 'string' && l.tempo.includes(':')) daySecs += hhmmssToSec(l.tempo);
-        else daySecs += (parseInt(l.tempo)||0) * 60;
-      });
-
-      const [y,m,d] = date.split('-');
-      const dateObj = new Date(y, m-1, d);
-      const dayName = dateObj.toLocaleDateString('pt-BR', { weekday:'short', day:'2-digit', month:'short' }).toUpperCase();
-      const h = Math.floor(daySecs/3600);
-      const min = Math.floor((daySecs%3600)/60);
-      const totalStr = h > 0 ? h + 'h' + min + 'min' : min + 'min';
-
-      const groupHTML = document.createElement('div');
-      groupHTML.className = 'hist-day-group';
-      
-      let cardsHTML = '';
-      // Reverse internal to show timeline (latest to oldest inside day if appended sequentially)
-      dayLogs.reverse().forEach(l => {
-        let timeStr = '';
-        if(typeof l.tempo === 'string' && l.tempo.includes(':')) timeStr = l.tempo;
-        else timeStr = secToHHMMSS((parseInt(l.tempo)||0)*60);
-
-        const qts = l.qts || 0;
-        const acertos = l.acertos || 0;
-        const erros = qts - acertos;
-        const pct = qts > 0 ? Math.round((acertos/qts)*100) : 0;
-        const cat = (l.categoria || 'TEORIA').toUpperCase();
-        const color = getCatColor(cat);
-
-        cardsHTML += `
-          <div class="hist-card">
-            <div class="hist-card-stripe" style="background:${color}"></div>
-            <div class="hc-main">
-              <div class="hc-mat">${VIZ_MAT[l.mat] || l.mat}</div>
-              <div class="hc-assunto">${l.assunto || 'Sem assunto'}</div>
-            </div>
-            <div class="hc-time">⏱️ ${timeStr}</div>
-            <div class="hc-stats">
-              <div class="hc-stats-val"><span style="color:var(--green);">${acertos}</span> <span style="color:var(--text-dim);">/</span> <span style="color:#ef4444;">${erros}</span></div>
-              <div class="hc-pct" style="background:${color}">${pct}%</div>
-            </div>
-            <div class="hc-cat" style="background:${color}">${cat}</div>
-            <div class="hc-actions">
-              ${l.obs ? `<button class="hc-btn" title="${l.obs}">💬</button>` : ''}
-              <button class="hc-btn" onclick="openRegistroModal(${l.originalIndex})" title="Editar">✏️</button>
-              <button class="hc-btn" onclick="deleteSession(${l.originalIndex})" title="Excluir">🗑️</button>
-            </div>
-          </div>
-        `;
-      });
-
-      groupHTML.innerHTML = `
-        <div class="hist-day-header">
-          <div class="hist-day-title">${dayName}</div>
-          <div class="hist-day-line"></div>
-          <div class="hist-day-total">⏱️ ${totalStr}</div>
-        </div>
-        <div class="hist-cards">
-          ${cardsHTML}
-        </div>
-      `;
-      container.appendChild(groupHTML);
-    });
+    if (viewName === 'edital' && window.DeltaEdital) {
+      DeltaEdital.renderEditalView('view-edital-content');
+    } else if (viewName === 'conquistas' && window.DeltaConquistas) {
+      DeltaConquistas.renderConquistasView('view-conquistas-content', logs, {}, {});
+    } else if (viewName === 'history') {
+      renderHistoryFull();
+    } else if (viewName === 'dashboard') {
+      renderDashboardEstudei();
+    }
   }
 
-  const STORAGE_KEY = 'delta_estudos';
-  
-  const SEED_DATA = [
-    { date: '2026-06-30', mat: 'DA', assunto: 'Onboarding', categoria: 'Teoria', tempo: 0, qts: 0, acertos: 0, obs: 'Marco inicial' },
-    { date: '2026-07-07', mat: 'DP', assunto: 'Teoria do Crime', categoria: 'Teoria', tempo: 70, qts: 0, acertos: 0, obs: 'Estudo de ontem' },
-    { date: '2026-07-08', mat: 'DC', assunto: 'Diagnóstico Semana 01', categoria: 'Questões', tempo: 62, qts: 56, acertos: 48, obs: '85.7%' },
-    { date: '2026-07-08', mat: 'DCV', assunto: 'Revisão Missão 1', categoria: 'Revisão', tempo: 45, qts: 0, acertos: 0, obs: 'Revisão aprofundada' }
-  ];
-
-  let logs = [];
-
-  function initTracker() {
+  // --- INICIALIZAÇÃO GERAL ---
+  function initApp() {
+    // Tema
     const savedTheme = localStorage.getItem('delta-theme');
-    if (savedTheme === 'dark') {
-      document.body.classList.add('dark-theme');
-    }
-    
+    if (savedTheme === 'dark') document.body.classList.add('dark-theme');
     document.getElementById('themeToggle').addEventListener('click', () => {
       document.body.classList.toggle('dark-theme');
       localStorage.setItem('delta-theme', document.body.classList.contains('dark-theme') ? 'dark' : 'light');
     });
 
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (!saved) {
-      logs = SEED_DATA;
-      saveLocal();
-    } else {
-      logs = JSON.parse(saved);
+    // Carregamento de Planos
+    if (window.DeltaEdital) {
+      DeltaEdital.loadPlans();
+      updateHeaderPlanSelector();
     }
-    
-    const now = new Date();
-    const yyyy = now.getFullYear();
-    const mm = String(now.getMonth() + 1).padStart(2, '0');
-    const dd = String(now.getDate()).padStart(2, '0');
-    const todayStr = `${yyyy}-${mm}-${dd}`;
 
-    renderTracker(todayStr);
+    // Carregamento de Logs
+    const savedLogs = localStorage.getItem(STORAGE_KEY);
+    if (savedLogs) {
+      try { logs = JSON.parse(savedLogs); } catch(e) { logs = []; }
+    } else {
+      logs = [];
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
+    }
+
+    // Carregamento de Lembretes (inicia vazio, sem dados falsos)
+    const savedLem = localStorage.getItem(STORAGE_LEMBRETES_KEY);
+    if (savedLem) {
+      try { lembretes = JSON.parse(savedLem); } catch(e) { lembretes = []; }
+    } else {
+      lembretes = [];
+      localStorage.setItem(STORAGE_LEMBRETES_KEY, JSON.stringify(lembretes));
+    }
+
+    // Carregamento de Metas
+    const savedMetas = localStorage.getItem(STORAGE_METAS_KEY);
+    if (savedMetas) {
+      try { metasSemanais = JSON.parse(savedMetas); } catch(e) {}
+    }
+
+    // Frase do dia
+    const qIndex = Math.floor(Math.random() * FRASES_MOTIVACIONAIS.length);
+    document.getElementById('kpiQuoteText').innerText = `"${FRASES_MOTIVACIONAIS[qIndex].text}"`;
+    document.getElementById('kpiQuoteAuthor').innerText = `— ${FRASES_MOTIVACIONAIS[qIndex].author}`;
+
+    renderDashboardEstudei();
   }
 
-  function saveLocal() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
+  function updateHeaderPlanSelector() {
+    const sel = document.getElementById('headerPlanSelect');
+    if (!sel || !window.DeltaEdital) return;
+    const plan = DeltaEdital.getActivePlan();
+    const plansRaw = localStorage.getItem('delta_custom_plans');
+    const plans = plansRaw ? JSON.parse(plansRaw) : [plan];
+
+    sel.innerHTML = plans.map(p => `
+      <option value="${p.id}" ${p.id === plan.id ? 'selected' : ''}>📋 ${p.nome}</option>
+    `).join('');
   }
 
-  function renderTracker(todayStr) {
-    let totalMins = 0;
+  // --- RENDERIZAÇÃO DO DASHBOARD PRINCIPAL ---
+  function renderDashboardEstudei() {
+    let totalSecs = 0;
     let totalQts = 0;
     let totalAcertos = 0;
     const daysStudied = new Set();
     const painelMap = {};
 
     logs.forEach(l => {
-      let tm = 0;
+      let sec = 0;
       if (typeof l.tempo === 'string' && l.tempo.includes(':')) {
-        tm = Math.round(hhmmssToSec(l.tempo) / 60);
+        const parts = l.tempo.split(':').map(Number);
+        sec = (parts[0]||0)*3600 + (parts[1]||0)*60 + (parts[2]||0);
       } else {
-        tm = parseInt(l.tempo || 0);
+        sec = (parseInt(l.tempo)||0)*60;
       }
-      const q = parseInt(l.qts || 0);
-      const a = parseInt(l.acertos || 0);
-      
-      totalMins += tm;
+      const q = parseInt(l.qts||0);
+      const a = parseInt(l.acertos||0);
+
+      totalSecs += sec;
       totalQts += q;
       totalAcertos += a;
-      
-      if (tm > 0 || q > 0) daysStudied.add(l.date);
-      
-      if(!painelMap[l.mat]) painelMap[l.mat] = { tempo:0, acertos:0, erros:0 };
-      painelMap[l.mat].tempo += tm;
-      painelMap[l.mat].acertos += a;
-      painelMap[l.mat].erros += (q - a);
+
+      if (sec > 0 || q > 0) daysStudied.add(l.date);
+
+      const mat = l.mat || 'OUTROS';
+      if (!painelMap[mat]) painelMap[mat] = { tempoSec: 0, acertos: 0, erros: 0 };
+      painelMap[mat].tempoSec += sec;
+      painelMap[mat].acertos += a;
+      painelMap[mat].erros += (q - a);
     });
 
-    const totalHours = (totalMins / 60).toFixed(1);
+    const totalHours = Math.floor(totalSecs / 3600);
+    const totalMins = Math.floor((totalSecs % 3600) / 60);
+    const totalTimeStr = `${totalHours}h${String(totalMins).padStart(2,'0')}min`;
     const totalErros = totalQts - totalAcertos;
-    const pct = totalQts > 0 ? Math.round((totalAcertos / totalQts) * 100) : 0;
+    const taxaGeralPct = totalQts > 0 ? Math.round((totalAcertos / totalQts) * 100) : 0;
 
-    document.getElementById('stHours').innerText = `${totalHours}h`;
-    document.getElementById('stSess').innerText = logs.length;
-    document.getElementById('stPct').innerText = `${pct}%`;
-    document.getElementById('stAcertosErros').innerText = `${totalAcertos} Acertos / ${totalErros} Erros`;
+    // 1. Atualizar KPIs Superiores
+    document.getElementById('kpiTempoTotal').innerText = totalTimeStr;
+    document.getElementById('kpiSessoesCount').innerText = `${logs.length} sessões registradas`;
+    document.getElementById('kpiAcertosNum').innerText = `${totalAcertos} Acertos`;
+    document.getElementById('kpiErrosNum').innerText = `${totalErros} Erros`;
+    document.getElementById('kpiTaxaPct').innerText = `${taxaGeralPct}%`;
 
-    if (!daysStudied.has(todayStr)) {
-      document.getElementById('nudgeBanner').style.display = 'block';
-    } else {
-      document.getElementById('nudgeBanner').style.display = 'none';
+    // Edital stats
+    if (window.DeltaEdital) {
+      const activePlan = DeltaEdital.getActivePlan();
+      const edStats = DeltaEdital.calculatePlanStats(activePlan);
+      document.getElementById('kpiTopicosConcluidos').innerText = `${edStats.concluidos} Concluídos`;
+      document.getElementById('kpiTopicosPendentes').innerText = `${edStats.pendentes} Pendentes`;
+      document.getElementById('kpiEditalPct').innerText = `${edStats.pctConcluido}%`;
     }
 
-    calcStreak(daysStudied, todayStr);
-    renderPainel(painelMap);
-    renderHistory();
-    drawDonut(pct);
-    drawBars(painelMap);
-    drawHeat(daysStudied, todayStr);
-    updateCategoriasList();
-  }
+    // 2. Streak e Calendário de 30 Dias
+    renderStreakDots(daysStudied);
 
-  function updateCategoriasList() {
-    const list = document.getElementById('categorias-list');
-    if(!list) return;
-    const defaultCategories = new Set(['Teoria', 'Questões', 'Revisão']);
-    logs.forEach(l => {
-      if(l.categoria && l.categoria.trim() !== '') {
-        defaultCategories.add(l.categoria.trim());
-      }
-    });
-    list.innerHTML = '';
-    defaultCategories.forEach(cat => {
-      const opt = document.createElement('option');
-      opt.value = cat;
-      list.appendChild(opt);
-    });
-  }
+    // 3. Tabela do Painel de Disciplinas
+    renderPainelTable(painelMap);
 
-  const VIZ_MAT = {
-    'DP':'D. Penal','DC':'D. Const.','DCV':'D. Civil','DA':'D. Adm.','DPP':'Proc. Penal',
-    'ML':'Med. Legal','LPE':'LPE','DH':'D. Humanos','DE':'D. Empres.','CR':'Criminol.','RLM/REV':'Revisão'
-  };
-  function drawDonut(pct){
-    const w=document.getElementById('vizDonut'); if(!w) return;
-    const r=42, C=2*Math.PI*r, off=C*(1-(pct||0)/100);
-    w.innerHTML='<svg class="donut" viewBox="0 0 100 100" role="img" aria-label="Aproveitamento '+pct+' por cento">'
-      +'<circle class="donut-track" cx="50" cy="50" r="'+r+'"></circle>'
-      +'<circle class="donut-val" cx="50" cy="50" r="'+r+'" transform="rotate(-90 50 50)" stroke-dasharray="'+C+'" stroke-dashoffset="'+off+'"></circle>'
-      +'<text class="donut-center" x="50" y="52" text-anchor="middle" dominant-baseline="middle">'+pct+'%</text></svg>';
-  }
-  function drawBars(map){
-    const el=document.getElementById('vizBars'); if(!el) return;
-    const rows=Object.entries(map).filter(function(e){return e[1].tempo>0;}).sort(function(a,b){return b[1].tempo-a[1].tempo;});
-    if(!rows.length){ el.innerHTML='<div style="font-size:12px;color:var(--text-dim)">Sem tempo registrado ainda.</div>'; return; }
-    const max=Math.max.apply(null, rows.map(function(e){return e[1].tempo;}));
-    el.innerHTML=rows.map(function(e){
-      const mat=e[0], t=e[1].tempo, h=Math.floor(t/60), m=t%60,
-        lab=h>0?(h+'h'+(m>0?' '+m+'m':'')):(m+'m'),
-        wd=Math.max(4, Math.round(t/max*100));
-      return '<div class="bar-row"><span class="bar-lab">'+(VIZ_MAT[mat]||mat)+'</span>'
-        +'<div class="bar-track"><div class="bar-fill" style="width:'+wd+'%"></div></div>'
-        +'<span class="bar-num">'+lab+'</span></div>';
-    }).join('');
-  }
-  function drawHeat(daysStudied, todayStr){
-    const el=document.getElementById('vizHeat'); if(!el) return;
-    const base=new Date(todayStr+'T00:00:00'), out=[];
-    for(let i=41;i>=0;i--){
-      const d=new Date(base); d.setDate(d.getDate()-i);
-      const s=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-      out.push('<div class="heat-cell'+(daysStudied.has(s)?' on':'')+'" title="'+s+'"></div>');
+    // 4. Revisões do Dia
+    if (window.DeltaRevisoes) {
+      DeltaRevisoes.renderRevisoesDashboard('dashRevisoesContainer');
     }
-    el.innerHTML=out.join('');
+
+    // 5. Planejamento
+    renderPlanejamentoList(painelMap);
+
+    // 6. Lembretes e Provas
+    renderLembretesList();
+
+    // 7. Metas Semanais
+    renderMetasSemanais(totalSecs, totalQts);
+
+    // 8. Gráfico Semanal
+    renderWeeklyChart();
+
+    // 9. Donut Chart
+    renderDonutChart(painelMap);
+
+    // 10. Timeline Recente
+    renderTimelineRecent();
   }
 
-  function renderPainel(map) {
-    const tbody = document.querySelector('#painelTable tbody');
-    if(!tbody) return;
-    tbody.innerHTML = '';
-    
-    const matNames = {
-      'DP': 'Direito Penal', 'DC': 'Dir. Constitucional', 'DCV': 'Direito Civil',
-      'DA': 'Dir. Administrativo', 'DPP': 'Processo Penal', 'ML': 'Medicina Legal',
-      'LPE': 'Leg. Penal Especial', 'DH': 'Direitos Humanos', 'DE': 'Dir. Empresarial',
-      'CR': 'Criminologia', 'RLM/REV': 'Revisão / Flashcards'
-    };
-    
-    for(const [mat, data] of Object.entries(map)) {
-      const name = matNames[mat] || mat;
-      const hours = Math.floor(data.tempo / 60);
-      const mins = data.tempo % 60;
-      const timeStr = hours > 0 ? `${hours}h ${mins}min` : `${mins}min`;
-      
-      const totalQ = data.acertos + data.erros;
-      const pct = totalQ > 0 ? Math.round((data.acertos/totalQ)*100) : 0;
-      const pctClass = pct >= 70 ? 'badge-pct' : 'badge-pct low';
-      
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td class="col-mat">${name}</td>
-        <td class="col-time">${timeStr}</td>
-        <td class="col-ok">${data.acertos}</td>
-        <td class="col-err">${data.erros}</td>
-        <td><span class="${pctClass}">${pct}%</span></td>
-      `;
-      tbody.appendChild(tr);
-    }
-  }
+  // --- STREAK & 30-DAY DOTS ---
+  function renderStreakDots(daysStudied) {
+    const container = document.getElementById('streakDotsContainer');
+    if (!container) return;
 
-  function renderHistory() {
-    const container = document.getElementById('historyList');
-    container.innerHTML = '';
+    const today = new Date();
+    const sortedDates = Array.from(daysStudied).sort();
     
-    if (logs.length === 0) {
-      container.innerHTML = '<div style="font-size:13px; color:var(--text-dim); text-align:center; padding: 20px;">Nenhum estudo registrado.</div>';
-      return;
-    }
-    
-    const sortedLogs = [...logs].map((l, i) => ({...l, originalIndex: i})).sort((a,b) => new Date(b.date) - new Date(a.date));
-    
-    sortedLogs.slice(0, 15).forEach(l => {
-      const div = document.createElement('div');
-      div.className = 'hist-item';
-      
-      let statsHTML = '';
-      if (l.tempo > 0) statsHTML += `⏳ ${l.tempo}min `;
-      if (l.qts > 0) statsHTML += `🎯 ${l.acertos}/${l.qts} `;
-      
-      const dateParts = l.date.split('-');
-      const formattedDate = dateParts.length === 3 ? `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}` : l.date;
-
-      div.innerHTML = `
-        <div class="hist-line"></div>
-        <div class="hist-dot"></div>
-        <div class="hist-content">
-          <div class="hist-title">
-            <span>${l.mat} <span style="background:var(--brand-soft);color:var(--brand);padding:2px 6px;border-radius:4px;font-size:9px;margin-left:4px;">${l.categoria || 'Teoria'}</span></span>
-            <span style="font-family:'IBM Plex Mono', monospace;">${formattedDate} 
-              <button class="btn-del" onclick="openRegistroModal(${l.originalIndex})" style="border:none;background:none;color:var(--text-dim);cursor:pointer;margin-left:8px;font-size:12px;" title="Editar">✏️</button>
-              <button class="btn-del" onclick="deleteSession(${l.originalIndex})" style="border:none;background:none;color:var(--text-dim);cursor:pointer;margin-left:4px;font-size:14px;" title="Excluir">&times;</button>
-            </span>
-          </div>
-          <div class="hist-desc">${l.assunto}</div>
-          <div class="hist-stats">${statsHTML} ${l.obs ? `| 📝 ${l.obs}` : ''}</div>
-        </div>
-      `;
-      container.appendChild(div);
-    });
-  }
-
-  function calcStreak(daysStudied, todayStr) {
+    // Cálculo do streak
     let currentStreak = 0;
     let maxStreak = 0;
     let tempStreak = 0;
-    
-    const sortedDates = Array.from(daysStudied).sort();
     let prevDate = null;
     sortedDates.forEach(dStr => {
-      if(!prevDate) {
+      if (!prevDate) {
         tempStreak = 1;
       } else {
-        const pd = new Date(prevDate+'T00:00:00');
-        const curr = new Date(dStr+'T00:00:00');
-        pd.setDate(pd.getDate()+1);
-        if (pd.getTime() === curr.getTime()) {
-          tempStreak++;
-        } else {
-          tempStreak = 1;
-        }
+        const pd = new Date(prevDate + 'T00:00:00');
+        const curr = new Date(dStr + 'T00:00:00');
+        pd.setDate(pd.getDate() + 1);
+        if (pd.getTime() === curr.getTime()) tempStreak++;
+        else tempStreak = 1;
       }
-      if(tempStreak > maxStreak) maxStreak = tempStreak;
+      if (tempStreak > maxStreak) maxStreak = tempStreak;
       prevDate = dStr;
     });
 
-    let d = new Date(todayStr + 'T00:00:00');
-    if (daysStudied.has(todayStr)) {
+    const nowStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+    let d = new Date(nowStr + 'T00:00:00');
+    if (daysStudied.has(nowStr)) {
       currentStreak++;
-      d.setDate(d.getDate() - 1);
-    } else {
       d.setDate(d.getDate() - 1);
     }
     while(true) {
-      const dStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const dStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
       if (daysStudied.has(dStr)) {
         currentStreak++;
         d.setDate(d.getDate() - 1);
@@ -1403,115 +1013,530 @@
         break;
       }
     }
-    
-    let text = `Você está há ${currentStreak} dias estudando sem falhar! 🔥`;
-    if(currentStreak === 0) text = `Você não estudou hoje ainda. Seu recorde é de ${maxStreak} dias sem falhas. 📅`;
-    else text += ` Seu recorde histórico é ${maxStreak} dias.`;
-    
-    document.getElementById('streakBanner').innerText = text;
+
+    const msg = currentStreak > 0 
+      ? `Você está há ${currentStreak} dias estudando sem falhar! 🔥 Seu recorde histórico é de ${maxStreak} dias.`
+      : `Você não estudou hoje ainda. Seu recorde histórico é de ${maxStreak} dias sem falhas. 📅`;
+    document.getElementById('streakBannerMsg').innerText = msg;
+
+    // Gerar 30 bolinhas
+    const baseDate = new Date();
+    baseDate.setDate(baseDate.getDate() + (streakPeriodOffset * 30));
+
+    let dotsHtml = '';
+    for (let i = 29; i >= 0; i--) {
+      const cur = new Date(baseDate);
+      cur.setDate(cur.getDate() - i);
+      const str = `${cur.getFullYear()}-${String(cur.getMonth()+1).padStart(2,'0')}-${String(cur.getDate()).padStart(2,'0')}`;
+      const isToday = (str === nowStr);
+      const hasStudied = daysStudied.has(str);
+      const isPast = cur <= today;
+
+      let dotClass = 'future';
+      let dotIcon = '';
+      if (hasStudied) {
+        dotClass = 'done';
+        dotIcon = '✓';
+      } else if (isPast) {
+        dotClass = 'missed';
+        dotIcon = '×';
+      }
+
+      const formattedLabel = `${cur.getDate()}/${cur.getMonth()+1}`;
+      dotsHtml += `
+        <div class="s-dot ${dotClass}" title="${str} (${hasStudied ? 'Estudado' : 'Sem registro'})">
+          ${dotIcon}
+        </div>
+      `;
+    }
+    container.innerHTML = dotsHtml;
   }
 
-  // MODAL FUNCTIONS
-  function openRegistroModal(index = null) {
-    const modalTitle = document.querySelector('.modal-header h2');
-    
-    if (index !== null && index >= 0 && index < logs.length) {
-      modalTitle.innerText = "Editar Registro";
-      const log = logs[index];
-      document.getElementById('modalEditIndex').value = index;
-      document.getElementById('modalData').value = log.date || '';
-      let timeVal = log.tempo || '';
-      if(typeof timeVal === 'number' || (typeof timeVal === 'string' && !timeVal.includes(':'))) {
-        timeVal = secToHHMMSS((parseInt(timeVal)||0)*60);
+  function navStreakPeriod(dir) {
+    streakPeriodOffset += dir;
+    renderDashboardEstudei();
+  }
+
+  // --- TABELA DO PAINEL DE DISCIPLINAS ---
+  function renderPainelTable(painelMap) {
+    const tbody = document.querySelector('#painelSubjectsTable tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    const MAT_NAMES = {
+      'DP': 'Direito Penal',
+      'DPP': 'Processo Penal',
+      'DC': 'Dir. Constitucional',
+      'DA': 'Dir. Administrativo',
+      'DCV': 'Direito Civil',
+      'ML': 'Medicina Legal',
+      'LPE': 'Legislação Especial',
+      'DH': 'Direitos Humanos',
+      'DE': 'Dir. Empresarial',
+      'CR': 'Criminologia',
+      'RLM/REV': 'Revisão / Flashcards'
+    };
+
+    const entries = Object.entries(painelMap);
+    if (entries.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:16px; color:var(--text-dim);">Nenhum estudo registrado ainda.</td></tr>`;
+      return;
+    }
+
+    entries.forEach(([mat, data]) => {
+      const h = Math.floor(data.tempoSec / 3600);
+      const m = Math.floor((data.tempoSec % 3600) / 60);
+      const timeStr = h > 0 ? `${h}h${String(m).padStart(2,'0')}min` : `${m}min`;
+
+      const totalQ = data.acertos + data.erros;
+      const pct = totalQ > 0 ? Math.round((data.acertos / totalQ) * 100) : 0;
+      const pctClass = pct >= 70 ? 'badge-pct' : (totalQ > 0 ? 'badge-pct low' : 'badge-pct-zero');
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="dst-mat-name">${MAT_NAMES[mat] || mat}</td>
+        <td class="dst-time">${timeStr}</td>
+        <td class="dst-ok">${data.acertos}</td>
+        <td class="dst-err">${data.erros}</td>
+        <td class="dst-tot">${totalQ}</td>
+        <td><span class="${pctClass}">${pct}%</span></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // --- PLANEJAMENTO LIST ---
+  function renderPlanejamentoList(painelMap) {
+    const container = document.getElementById('dashPlanejamentoList');
+    if (!container) return;
+
+    const activePlan = window.DeltaEdital ? DeltaEdital.getActivePlan() : null;
+    const disciplinas = activePlan && activePlan.disciplinas ? activePlan.disciplinas.slice(0, 4) : [];
+
+    if (disciplinas.length === 0) {
+      container.innerHTML = '<div style="font-size:12px; color:var(--text-dim); text-align:center;">Nenhuma matéria no planejamento.</div>';
+      return;
+    }
+
+    container.innerHTML = disciplinas.map(d => {
+      const recorded = painelMap[d.sigla] || { tempoSec: 0 };
+      const h = Math.floor(recorded.tempoSec / 3600);
+      const m = Math.floor((recorded.tempoSec % 3600) / 60);
+      const studiedStr = h > 0 ? `${h}h${m}min` : `${m}min`;
+      const targetStr = '1h30min';
+      const pct = Math.min(100, Math.round((recorded.tempoSec / 5400) * 100));
+
+      return `
+        <div class="plan-item-row">
+          <div class="pir-header">
+            <span class="pir-mat">${d.nome}</span>
+            <span class="pir-time">⏱️ ${studiedStr} / ${targetStr}</span>
+          </div>
+          <div class="pir-track">
+            <div class="pir-fill" style="width:${pct}%;"></div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // --- LEMBRETES & PROVAS ---
+  function renderLembretesList() {
+    const container = document.getElementById('dashLembretesList');
+    const examTargetName = document.getElementById('examTargetName');
+    const examDaysRemaining = document.getElementById('examDaysRemaining');
+    if (!container) return;
+
+    if (lembretes.length === 0) {
+      container.innerHTML = '<div style="font-size:12px; color:var(--text-dim); text-align:center; padding:10px;">Nenhum lembrete cadastrado.</div>';
+      if (examTargetName) examTargetName.innerText = 'Nenhuma prova cadastrada';
+      if (examDaysRemaining) examDaysRemaining.innerText = '--';
+      return;
+    }
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    // Encontrar próxima prova para o card
+    const sortedProvas = [...lembretes].sort((a,b) => new Date(a.data) - new Date(b.data));
+    const nextExam = sortedProvas.find(l => new Date(l.data) >= today) || sortedProvas[0];
+
+    if (nextExam && examTargetName && examDaysRemaining) {
+      examTargetName.innerText = nextExam.titulo;
+      const targetDate = new Date(nextExam.data + 'T00:00:00');
+      const diffTime = targetDate - today;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      examDaysRemaining.innerText = diffDays >= 0 ? diffDays : 0;
+    }
+
+    container.innerHTML = lembretes.map((l, idx) => {
+      const parts = (l.data || '').split('-');
+      const formatted = parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0].slice(-2)}` : l.data;
+
+      return `
+        <div class="reminder-card-item">
+          <span class="rci-title">${l.titulo}</span>
+          <span class="rci-badge-tag">${l.tipo || 'PROVAS'}</span>
+          <span class="rci-date-badge">${formatted}</span>
+          <div class="rci-actions">
+            <button class="btn-del-topico" title="Excluir" onclick="deleteLembrete(${idx})">&times;</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function openAddLembreteModal() {
+    document.getElementById('modalLembrete').style.display = 'flex';
+  }
+  function closeAddLembreteModal() {
+    document.getElementById('modalLembrete').style.display = 'none';
+  }
+  function saveLembrete() {
+    const tit = document.getElementById('lembreteTitulo').value;
+    const dt = document.getElementById('lembreteData').value;
+    const tipo = document.getElementById('lembreteTipo').value;
+    if (!tit || !dt) {
+      alert('Preencha o título e a data.');
+      return;
+    }
+    lembretes.push({ id: 'lem_' + Date.now(), titulo: tit.trim(), data: dt, tipo });
+    localStorage.setItem(STORAGE_LEMBRETES_KEY, JSON.stringify(lembretes));
+    closeAddLembreteModal();
+    renderLembretesList();
+  }
+  function deleteLembrete(idx) {
+    if (confirm('Deseja excluir este lembrete?')) {
+      lembretes.splice(idx, 1);
+      localStorage.setItem(STORAGE_LEMBRETES_KEY, JSON.stringify(lembretes));
+      renderLembretesList();
+    }
+  }
+
+  // --- METAS SEMANAIS ---
+  function renderMetasSemanais(totalSecs, totalQts) {
+    const metaH = metasSemanais.horas || 15;
+    const metaQ = metasSemanais.questoes || 200;
+
+    const studiedHours = totalSecs / 3600;
+    const hPct = Math.min(100, Math.round((studiedHours / metaH) * 100));
+    const qPct = Math.min(100, Math.round((totalQts / metaQ) * 100));
+
+    const h = Math.floor(studiedHours);
+    const m = Math.floor((studiedHours % 1) * 60);
+    const timeStr = `${h}h${String(m).padStart(2,'0')}min`;
+
+    document.getElementById('metaHorasProgress').innerText = `${timeStr} / ${metaH}h00min`;
+    document.getElementById('metaHorasBar').style.width = `${hPct}%`;
+
+    document.getElementById('metaQuestoesProgress').innerText = `${totalQts} / ${metaQ}`;
+    document.getElementById('metaQuestoesBar').style.width = `${qPct}%`;
+  }
+
+  function openEditMetasModal() {
+    document.getElementById('inputMetaHoras').value = metasSemanais.horas || 15;
+    document.getElementById('inputMetaQuestoes').value = metasSemanais.questoes || 200;
+    document.getElementById('modalMetas').style.display = 'flex';
+  }
+  function closeEditMetasModal() {
+    document.getElementById('modalMetas').style.display = 'none';
+  }
+  function saveMetasSemanais() {
+    const h = parseInt(document.getElementById('inputMetaHoras').value) || 15;
+    const q = parseInt(document.getElementById('inputMetaQuestoes').value) || 200;
+    metasSemanais = { horas: h, questoes: q };
+    localStorage.setItem(STORAGE_METAS_KEY, JSON.stringify(metasSemanais));
+    closeEditMetasModal();
+    renderDashboardEstudei();
+  }
+
+  // --- GRÁFICO SEMANAL (TEMPO / QUESTÕES) ---
+  function setWeeklyChartTab(tab) {
+    currentChartTab = tab;
+    document.getElementById('tabChartTempo').classList.toggle('active', tab === 'tempo');
+    document.getElementById('tabChartQuestoes').classList.toggle('active', tab === 'questoes');
+    renderWeeklyChart();
+  }
+
+  function renderWeeklyChart() {
+    const container = document.getElementById('weeklyBarsContainer');
+    if (!container) return;
+
+    const daysLabels = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
+    const today = new Date();
+    const currentDayOfWeek = today.getDay();
+
+    // Início da semana (domingo)
+    const sunday = new Date(today);
+    sunday.setDate(today.getDate() - currentDayOfWeek);
+
+    const weekValues = [0, 0, 0, 0, 0, 0, 0];
+    let totalWeeklySecs = 0;
+    let totalWeeklyQts = 0;
+
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(sunday);
+      d.setDate(sunday.getDate() + i);
+      const str = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
+      logs.forEach(l => {
+        if (l.date === str) {
+          let sec = 0;
+          if (typeof l.tempo === 'string' && l.tempo.includes(':')) {
+            const parts = l.tempo.split(':').map(Number);
+            sec = (parts[0]||0)*3600 + (parts[1]||0)*60 + (parts[2]||0);
+          } else {
+            sec = (parseInt(l.tempo)||0)*60;
+          }
+          const q = parseInt(l.qts||0);
+
+          if (currentChartTab === 'tempo') {
+            weekValues[i] += sec;
+          } else {
+            weekValues[i] += q;
+          }
+          totalWeeklySecs += sec;
+          totalWeeklyQts += q;
+        }
+      });
+    }
+
+    const maxVal = Math.max(1, ...weekValues);
+
+    container.innerHTML = weekValues.map((v, i) => {
+      const heightPct = Math.max(4, Math.round((v / maxVal) * 100));
+      return `
+        <div class="wbc-col">
+          <div class="wbc-bar-pillar" style="height:${heightPct}%; background:${v > 0 ? 'var(--brand)' : 'var(--surface2)'};" title="${daysLabels[i]}: ${v}"></div>
+          <span class="wbc-day-label">${daysLabels[i]}</span>
+        </div>
+      `;
+    }).join('');
+
+    const wH = Math.floor(totalWeeklySecs / 3600);
+    const wM = Math.floor((totalWeeklySecs % 3600) / 60);
+    const footerText = currentChartTab === 'tempo' ? `${wH}h${String(wM).padStart(2,'0')}min` : `${totalWeeklyQts} questões`;
+    document.getElementById('weeklyTotalFooterText').innerText = footerText;
+  }
+
+  // --- DONUT CHART COM ABAS ---
+  function setDonutPeriod(period) {
+    currentDonutPeriod = period;
+    document.getElementById('btnDonutHoje').classList.toggle('active', period === 'hoje');
+    document.getElementById('btnDonutSemana').classList.toggle('active', period === 'semana');
+    document.getElementById('btnDonutMes').classList.toggle('active', period === 'mes');
+    document.getElementById('btnDonutTotal').classList.toggle('active', period === 'total');
+    renderDonutChart();
+  }
+
+  function renderDonutChart() {
+    const container = document.getElementById('dashDonutViz');
+    if (!container) return;
+
+    let periodSecs = 0;
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+
+    logs.forEach(l => {
+      let sec = 0;
+      if (typeof l.tempo === 'string' && l.tempo.includes(':')) {
+        const parts = l.tempo.split(':').map(Number);
+        sec = (parts[0]||0)*3600 + (parts[1]||0)*60 + (parts[2]||0);
+      } else {
+        sec = (parseInt(l.tempo)||0)*60;
       }
-      document.getElementById('modalTempo').value = timeVal;
-      document.getElementById('modalMat').value = log.mat || 'DP';
-      document.getElementById('modalAssunto').value = log.assunto || '';
-      document.getElementById('modalAcertos').value = log.acertos || '';
-      document.getElementById('modalErros').value = (log.qts - log.acertos) || '';
-      document.getElementById('modalObs').value = log.obs || '';
-      document.getElementById('modalCategoria').value = log.categoria || 'Teoria';
+
+      if (currentDonutPeriod === 'hoje' && l.date === todayStr) {
+        periodSecs += sec;
+      } else if (currentDonutPeriod === 'total') {
+        periodSecs += sec;
+      } else if (currentDonutPeriod === 'semana') {
+        periodSecs += sec; // simplificado
+      } else if (currentDonutPeriod === 'mes') {
+        periodSecs += sec;
+      }
+    });
+
+    const h = Math.floor(periodSecs / 3600);
+    const m = Math.floor((periodSecs % 3600) / 60);
+    const timeLabel = h > 0 ? `${h}h${m}m` : `${m}m`;
+
+    const r = 38, C = 2 * Math.PI * r;
+    container.innerHTML = `
+      <svg width="120" height="120" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="${r}" fill="none" stroke="var(--surface2)" stroke-width="10"></circle>
+        <circle cx="50" cy="50" r="${r}" fill="none" stroke="var(--brand)" stroke-width="10" stroke-linecap="round"
+          stroke-dasharray="${C}" stroke-dashoffset="${periodSecs > 0 ? '0' : C}" transform="rotate(-90 50 50)"></circle>
+        <text x="50" y="53" text-anchor="middle" dominant-baseline="middle" font-family="var(--font-mono)" font-size="16" font-weight="800" fill="var(--text)">${timeLabel}</text>
+      </svg>
+    `;
+  }
+
+  // --- TIMELINE RECENTE ---
+  function renderTimelineRecent() {
+    const container = document.getElementById('dashTimelineList');
+    if (!container) return;
+
+    if (logs.length === 0) {
+      container.innerHTML = '<div style="font-size:12px; color:var(--text-dim); text-align:center; padding:10px;">Nenhuma atividade recente.</div>';
+      return;
+    }
+
+    const sorted = [...logs].map((l, i) => ({...l, originalIndex: i})).sort((a,b) => new Date(b.date) - new Date(a.date));
+
+    container.innerHTML = sorted.slice(0, 5).map(l => {
+      const parts = (l.date || '').split('-');
+      const formatted = parts.length === 3 ? `${parts[2]}/${parts[1]}` : l.date;
+
+      return `
+        <div class="htl-item">
+          <div class="htl-line"></div>
+          <div class="htl-dot"></div>
+          <div class="htl-content">
+            <div class="htl-title-row">
+              <span class="htl-mat-tag">${l.mat} <span style="color:var(--text-dim); font-size:10px;">· ${l.categoria || 'Teoria'}</span></span>
+              <span class="htl-date">${formatted}</span>
+            </div>
+            <div class="htl-assunto">${l.assunto || 'Sem assunto'}</div>
+            <div class="htl-stats">⏳ ${l.tempo || '0m'} ${l.qts > 0 ? `| 🎯 ${l.acertos}/${l.qts} acertos` : ''}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // --- HISTÓRICO FULL ---
+  function renderHistoryFull() {
+    const container = document.getElementById('historyFullContainer');
+    if (!container) return;
+
+    if (logs.length === 0) {
+      container.innerHTML = '<div style="color:var(--text-dim); text-align:center; padding:20px;">Nenhum estudo registrado.</div>';
+      return;
+    }
+
+    const sorted = [...logs].map((l, i) => ({...l, originalIndex: i})).sort((a,b) => new Date(b.date) - new Date(a.date));
+
+    container.innerHTML = sorted.map(l => `
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:14px 18px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="background:var(--brand-soft); color:var(--brand); font-family:var(--font-mono); font-size:11px; font-weight:800; padding:2px 6px; border-radius:4px;">${l.mat}</span>
+            <strong style="color:var(--text); font-size:14px;">${l.assunto}</strong>
+            <span style="font-size:11px; color:var(--text-dim);">(${l.categoria || 'Teoria'})</span>
+          </div>
+          <div style="font-size:12px; color:var(--text-muted); margin-top:4px; font-family:var(--font-mono);">
+            📅 ${l.date} | ⏱️ ${l.tempo} | 🎯 ${l.acertos || 0}/${l.qts || 0} acertos ${l.obs ? `| 📝 ${l.obs}` : ''}
+          </div>
+        </div>
+        <div>
+          <button class="btn-util" style="padding:4px 8px;" onclick="openRegistroModal(${l.originalIndex})">✏️</button>
+          <button class="btn-util" style="padding:4px 8px; color:#ef4444;" onclick="deleteSession(${l.originalIndex})">🗑️</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // --- MODAL DE REGISTRO DE ESTUDO ---
+  function openRegistroModal(editIndex = null) {
+    const modal = document.getElementById('registroModal');
+    const title = document.getElementById('regModalTitle');
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+
+    if (editIndex !== null && editIndex >= 0 && editIndex < logs.length) {
+      title.innerText = 'Editar Registro de Estudo';
+      const l = logs[editIndex];
+      document.getElementById('modalEditIndex').value = editIndex;
+      document.getElementById('modalData').value = l.date || todayStr;
+      document.getElementById('modalTempo').value = l.tempo || '';
+      document.getElementById('modalMat').value = l.mat || 'DP';
+      document.getElementById('modalCategoria').value = l.categoria || 'Teoria';
+      document.getElementById('modalAssunto').value = l.assunto || '';
+      document.getElementById('modalAcertos').value = l.acertos || '';
+      document.getElementById('modalErros').value = (l.qts - l.acertos) || '';
+      document.getElementById('modalPaginas').value = l.paginas || '';
+      document.getElementById('modalObs').value = l.obs || '';
     } else {
-      modalTitle.innerText = "Registro de Estudo";
+      title.innerText = 'Registro de Estudo';
       document.getElementById('modalEditIndex').value = '';
-      const now = new Date();
-      document.getElementById('modalData').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+      document.getElementById('modalData').value = todayStr;
       document.getElementById('modalTempo').value = '';
-      document.getElementById('modalMat').value = 'DP';
+      document.getElementById('modalCategoria').value = 'Teoria';
       document.getElementById('modalAssunto').value = '';
       document.getElementById('modalAcertos').value = '';
       document.getElementById('modalErros').value = '';
+      document.getElementById('modalPaginas').value = '';
       document.getElementById('modalObs').value = '';
-      document.getElementById('modalCategoria').value = '';
     }
-    document.getElementById('registroModal').style.display = 'flex';
+    modal.style.display = 'flex';
   }
+
   function closeRegistroModal() {
     document.getElementById('registroModal').style.display = 'none';
   }
-  
+
   function saveModalSession() {
+    const editIdx = document.getElementById('modalEditIndex').value;
     const dt = document.getElementById('modalData').value;
-    const mat = document.getElementById('modalMat').value;
-    const assunto = document.getElementById('modalAssunto').value;
     const tempo = document.getElementById('modalTempo').value;
-    const acertos = document.getElementById('modalAcertos').value || 0;
-    const erros = document.getElementById('modalErros').value || 0;
+    const mat = document.getElementById('modalMat').value;
+    const cat = document.getElementById('modalCategoria').value || 'Teoria';
+    const assunto = document.getElementById('modalAssunto').value;
+    const acertos = parseInt(document.getElementById('modalAcertos').value) || 0;
+    const erros = parseInt(document.getElementById('modalErros').value) || 0;
+    const paginas = parseInt(document.getElementById('modalPaginas').value) || 0;
     const obs = document.getElementById('modalObs').value;
-    const categoria = document.getElementById('modalCategoria').value || 'Teoria';
-    const editIndex = document.getElementById('modalEditIndex').value;
 
     if (!dt || !assunto) {
       alert('Data e Assunto são obrigatórios!');
       return;
     }
 
-    const qts = parseInt(acertos) + parseInt(erros);
-    
-    const newLog = {
+    const qts = acertos + erros;
+    const sessionObj = {
       date: dt,
       mat: mat,
       assunto: assunto,
-      categoria: categoria,
-      tempo: tempo || '00:00:00',
+      categoria: cat,
+      tempo: tempo || '00:30:00',
       qts: qts,
-      acertos: parseInt(acertos),
+      acertos: acertos,
+      paginas: paginas,
       obs: obs
     };
 
-    if (editIndex !== '') {
-      const idx = parseInt(editIndex);
-      if (idx >= 0 && idx < logs.length) {
-        logs[idx] = newLog;
-      }
+    if (editIdx !== '') {
+      logs[parseInt(editIdx)] = sessionObj;
     } else {
-      logs.push(newLog);
+      logs.push(sessionObj);
     }
 
-    saveLocal();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
     closeRegistroModal();
-    
-    const now = new Date();
-    renderTracker(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`);
-    if (document.getElementById('view-history').style.display === 'block') {
+
+    // Sincronizar com Edital Verticalizado se houver tópico correspondente
+    if (window.DeltaEdital && qts > 0) {
+      DeltaEdital.updateTopicoQuestoes(mat, assunto, acertos, erros, dt);
+    }
+
+    renderDashboardEstudei();
+  }
+
+  function deleteSession(idx) {
+    if (confirm('Deseja excluir este registro de estudo?')) {
+      logs.splice(idx, 1);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
+      renderDashboardEstudei();
       renderHistoryFull();
     }
   }
 
-  function deleteSession(index) {
-    if (confirm('Tem certeza que deseja excluir este registro?')) {
-      logs.splice(index, 1);
-      saveLocal();
-      const now = new Date();
-      renderTracker(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`);
-    }
-  }
-
   function exportData() {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(logs));
+    const str = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(logs));
     const a = document.createElement('a');
-    a.setAttribute("href", dataStr);
-    a.setAttribute("download", "delta_estudos_backup.json");
+    a.href = str;
+    a.download = "delta_estudos_backup.json";
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -1520,24 +1545,29 @@
   function importData() {
     const inp = document.createElement('input');
     inp.type = 'file';
-    inp.accept = 'application/json,.json';
-    inp.onchange = function(e){
-      const f = e.target.files[0]; if(!f) return;
+    inp.accept = '.json';
+    inp.onchange = (e) => {
+      const f = e.target.files[0];
+      if (!f) return;
       const rd = new FileReader();
-      rd.onload = function(ev){
+      rd.onload = (ev) => {
         try {
           const parsed = JSON.parse(ev.target.result);
-          if (Array.isArray(parsed)) { logs = parsed; saveLocal(); location.reload(); }
-          else alert('JSON inválido: esperado uma lista de sessões.');
-        } catch (err) { alert('JSON inválido — não foi possível ler o arquivo.'); }
+          if (Array.isArray(parsed)) {
+            logs = parsed;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
+            location.reload();
+          }
+        } catch(err) { alert('Arquivo JSON inválido.'); }
       };
       rd.readAsText(f);
     };
     inp.click();
   }
 
-  document.addEventListener('DOMContentLoaded', initTracker);
+  // --- STARTUP ---
+  document.addEventListener('DOMContentLoaded', initApp);
 </script>
-<script src="./assets/stopwatch.js"></script>
+
 </body>
 </html>
