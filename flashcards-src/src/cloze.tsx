@@ -36,9 +36,10 @@ function renderFormattedChunk(text: string, keyPrefix: string): React.ReactNode[
 
 /**
  * Renderiza a Frente do Cartão com Ocultação
- * Substitui {{c1::termo}} por [...] ou [💡 dica]
+ * Por padrão (targetCloze = 0), oculta TODOS os termos marcados (c1, c2, c3...).
+ * Se especificado targetCloze > 0, oculta apenas aquele índice.
  */
-export function renderClozeFront(text: string, targetCloze = 1): React.ReactNode {
+export function renderClozeFront(text: string, targetCloze = 0): React.ReactNode {
   if (!text) return null;
   const elements: React.ReactNode[] = [];
   let lastIndex = 0;
@@ -56,7 +57,7 @@ export function renderClozeFront(text: string, targetCloze = 1): React.ReactNode
       elements.push(...renderFormattedChunk(text.substring(lastIndex, matchStart), `front-pre-${matchStart}`));
     }
 
-    if (clozeIndex === targetCloze || targetCloze === 0) {
+    if (targetCloze === 0 || clozeIndex === targetCloze) {
       // Ocultar este termo
       const label = hint ? `💡 ${hint}` : '...';
       elements.push(
@@ -85,8 +86,9 @@ export function renderClozeFront(text: string, targetCloze = 1): React.ReactNode
 
 /**
  * Renderiza o Verso do Cartão com o termo revelado em destaque
+ * Por padrão (targetCloze = 0), revela TODOS os termos em destaque.
  */
-export function renderClozeBack(text: string, targetCloze = 1): React.ReactNode {
+export function renderClozeBack(text: string, targetCloze = 0): React.ReactNode {
   if (!text) return null;
   const elements: React.ReactNode[] = [];
   let lastIndex = 0;
@@ -103,7 +105,7 @@ export function renderClozeBack(text: string, targetCloze = 1): React.ReactNode 
       elements.push(...renderFormattedChunk(text.substring(lastIndex, matchStart), `back-pre-${matchStart}`));
     }
 
-    if (clozeIndex === targetCloze || targetCloze === 0) {
+    if (targetCloze === 0 || clozeIndex === targetCloze) {
       // Termo revelado em destaque
       elements.push(
         <span
