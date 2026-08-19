@@ -389,10 +389,22 @@
   function flipCurrentCard() {
     if (isCardFlipped) return;
     isCardFlipped = true;
+    const cardEl = document.querySelector('.fc-card-container');
+    const tapHint = document.querySelector('.fc-tap-hint');
     const backBox = document.getElementById('fcBackBox');
     const ratingBar = document.getElementById('fcRatingBar');
-    if (backBox) backBox.style.display = 'block';
+    if (cardEl) cardEl.classList.add('flipped');
+    if (tapHint) tapHint.style.display = 'none';
+    if (backBox) backBox.style.display = 'flex';
     if (ratingBar) ratingBar.style.display = 'grid';
+
+    // Rolar suavemente para exibir os botões de resposta se o cartão for longo
+    setTimeout(() => {
+      const reviewBody = document.getElementById('reviewBodyContent');
+      if (reviewBody) {
+        reviewBody.scrollTo({ top: reviewBody.scrollHeight, behavior: 'smooth' });
+      }
+    }, 50);
   }
 
   // --- CLASSIFICAÇÃO FSRS DO CARTÃO ---
