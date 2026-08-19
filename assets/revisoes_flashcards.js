@@ -229,6 +229,12 @@
   let sessionStats = { again: 0, hard: 0, good: 0, easy: 0, total: 0 };
   let isCardFlipped = false;
   let failedCardsInSession = [];
+  
+  // Timer de Latência de Recuperação por Cartão
+  let cardStartTime = 0;
+  let cardResponseTimeSec = 0;
+  let cardTimerInterval = null;
+  let sessionResponseTimes = [];
 
   function startReviewSession(filterSubj = null, shuffle = false) {
     let cards = getDueCards();
@@ -249,6 +255,7 @@
     currentCardIndex = 0;
     sessionStats = { again: 0, hard: 0, good: 0, easy: 0, total: cards.length };
     failedCardsInSession = [];
+    sessionResponseTimes = [];
     isCardFlipped = false;
 
     openReviewModal();
@@ -272,6 +279,7 @@
       currentCardIndex = 0;
       sessionStats = { again: 0, hard: 0, good: 0, easy: 0, total: 1 };
       failedCardsInSession = [];
+      sessionResponseTimes = [];
       isCardFlipped = false;
       openReviewModal();
       renderActiveCard();
@@ -309,6 +317,10 @@
   }
 
   function closeReviewModal() {
+    if (cardTimerInterval) {
+      clearInterval(cardTimerInterval);
+      cardTimerInterval = null;
+    }
     const modal = document.getElementById('modalReviewPlayer');
     if (modal) modal.style.display = 'none';
     renderRevisoesDashboard('dashRevisoesContainer');
@@ -326,6 +338,11 @@
   }
 
   function renderActiveCard() {
+    if (cardTimerInterval) {
+      clearInterval(cardTimerInterval);
+      cardTimerInterval = null;
+    }
+
     const container = document.getElementById('reviewBodyContent');
     const counter = document.getElementById('mrhCounter');
     if (!container) return;
@@ -339,12 +356,20 @@
     if (counter) counter.innerText = `${currentCardIndex + 1} de ${activeSessionCards.length}`;
 
     isCardFlipped = false;
+    cardStartTime = Date.now();
+    cardResponseTimeSec = 0;
 
     container.innerHTML = `
       <div class="fc-card-container ${isCardFlipped ? 'flipped' : ''}" onclick="DeltaRevisoes.flipCurrentCard()">
         <div class="fc-badge-top">
-          <span class="fc-tag-mat">${card.sigla || 'MAT'}</span>
-          <span class="fc-assunto-lbl">${card.assunto}</span>
+          <div class="fc-badge-left">
+            <span class="fc-tag-mat">${card.sigla || 'MAT'}</span>
+            <span class="fc-assunto-lbl">${card.assunto}</span>
+          </div>
+          <div class="fc-card-timer running" id="fcLiveTimerBox" title="Tempo de resposta">
+            <span class="fc-timer-dot"></span>
+            <span id="fcCardLiveTimer">0.0s</span>
+          </div>
         </div>
 
         <div class="fc-front-box">
@@ -384,19 +409,52 @@
         </button>
       </div>
     `;
+
+    // Iniciar contagem do cronômetro por cartão
+    const timerLabel = document.getElementById('fcCardLiveTimer');
+    cardTimerInterval = setInterval(() => {
+      if (isCardFlipped) {
+        clearInterval(cardTimerInterval);
+        return;
+      }
+      const elapsed = ((Date.now() - cardStartTime) / 1000).toFixed(1);
+      if (timerLabel) timerLabel.innerText = `${elapsed}s`;
+    }, 100);
   }
 
   function flipCurrentCard() {
     if (isCardFlipped) return;
     isCardFlipped = true;
+
+    if (cardTimerInterval) {
+      clearInterval(cardTimerInterval);
+      cardTimerInterval = null;
+    }
+
+    cardResponseTimeSec = Math.max(0.3, parseFloat(((Date.now() - cardStartTime) / 1000).toFixed(1)));
+    sessionResponseTimes.push(cardResponseTimeSec);
+
     const cardEl = document.querySelector('.fc-card-container');
     const tapHint = document.querySelector('.fc-tap-hint');
     const backBox = document.getElementById('fcBackBox');
     const ratingBar = document.getElementById('fcRatingBar');
+    const timerBox = document.getElementById('fcLiveTimerBox');
+
     if (cardEl) cardEl.classList.add('flipped');
     if (tapHint) tapHint.style.display = 'none';
     if (backBox) backBox.style.display = 'flex';
     if (ratingBar) ratingBar.style.display = 'grid';
+
+    // Substituir cronômetro em tempo real pelo badge de latência
+    if (timerBox) {
+      if (cardResponseTimeSec <= 6.0) {
+        timerBox.outerHTML = `<span class="fc-latency-badge badge-fast" title="Recuperação fluida e automática">⚡ ${cardResponseTimeSec}s · Instantâneo</span>`;
+      } else if (cardResponseTimeSec <= 18.0) {
+        timerBox.outerHTML = `<span class="fc-latency-badge badge-medium" title="Recuperação com esforço moderado">💡 ${cardResponseTimeSec}s · Normal</span>`;
+      } else {
+        timerBox.outerHTML = `<span class="fc-latency-badge badge-slow" title="Alta hesitação e esforço cognitivo">⏳ ${cardResponseTimeSec}s · Hesitação</span>`;
+      }
+    }
 
     // Rolar suavemente para exibir os botões de resposta se o cartão for longo
     setTimeout(() => {
@@ -407,8 +465,13 @@
     }, 50);
   }
 
-  // --- CLASSIFICAÇÃO FSRS DO CARTÃO ---
+  // --- CLASSIFICAÇÃO FSRS DO CARTÃO COM CALIBRAÇÃO DE LATÊNCIA ---
   function rateCard(rating) {
+    if (cardTimerInterval) {
+      clearInterval(cardTimerInterval);
+      cardTimerInterval = null;
+    }
+
     const card = activeSessionCards[currentCardIndex];
     const fsrs = getFSRSData();
     const now = new Date();
@@ -428,6 +491,7 @@
     // Atualização de repetições e estabilidade
     currentSrs.reps = (currentSrs.reps || 0) + 1;
     currentSrs.lastReview = todayStr;
+    currentSrs.lastLatency = cardResponseTimeSec;
 
     let addDays = 1;
     if (rating === 1) {
@@ -445,11 +509,18 @@
       failedCardsInSession.push(card); // entra na fila de reforço
     } else if (rating === 3) {
       sessionStats.good++;
-      currentSrs.stability = (currentSrs.stability || 1) * 2.5;
+      // Calibração Inteligente FSRS por Latência:
+      // Se demorou mais de 18s para responder, a estabilidade cresce menos (evita esquecimento)
+      const multiplier = cardResponseTimeSec > 18.0 ? 1.5 : (cardResponseTimeSec <= 5.0 ? 2.8 : 2.5);
+      currentSrs.stability = (currentSrs.stability || 1) * multiplier;
+      if (cardResponseTimeSec > 18.0) {
+        currentSrs.difficulty = Math.min(10, (currentSrs.difficulty || 5) + 0.3);
+      }
       addDays = Math.max(2, Math.round(currentSrs.stability));
     } else if (rating === 4) {
       sessionStats.easy++;
-      currentSrs.stability = (currentSrs.stability || 1) * 4.0;
+      const multiplier = cardResponseTimeSec > 18.0 ? 2.2 : (cardResponseTimeSec <= 5.0 ? 4.5 : 4.0);
+      currentSrs.stability = (currentSrs.stability || 1) * multiplier;
       currentSrs.difficulty = Math.max(1, (currentSrs.difficulty || 5) - 0.5);
       addDays = Math.max(5, Math.round(currentSrs.stability * 1.5));
     }
@@ -469,6 +540,11 @@
 
   // --- RESUMO DA SESSÃO & ALERTA DE REVISÃO NO MESMO DIA ---
   function renderSessionSummary() {
+    if (cardTimerInterval) {
+      clearInterval(cardTimerInterval);
+      cardTimerInterval = null;
+    }
+
     const container = document.getElementById('reviewBodyContent');
     const counter = document.getElementById('mrhCounter');
     if (!container) return;
@@ -479,6 +555,22 @@
     const acertos = sessionStats.good + sessionStats.easy;
     const taxaAcerto = total > 0 ? Math.round((acertos / total) * 100) : 0;
     const isBelowAverage = taxaAcerto < 75; // Limite de 75%
+
+    // Estatísticas de tempo real
+    const totalTimeSec = sessionResponseTimes.reduce((acc, v) => acc + v, 0);
+    const avgTimeSec = sessionResponseTimes.length > 0 ? (totalTimeSec / sessionResponseTimes.length).toFixed(1) : '0.0';
+    const minTimeSec = sessionResponseTimes.length > 0 ? Math.min(...sessionResponseTimes).toFixed(1) : '0.0';
+    const maxTimeSec = sessionResponseTimes.length > 0 ? Math.max(...sessionResponseTimes).toFixed(1) : '0.0';
+    
+    const totalMin = Math.floor(totalTimeSec / 60);
+    const totalSecRemainder = Math.round(totalTimeSec % 60);
+    const totalFormatted = totalMin > 0 ? `${totalMin}m ${totalSecRemainder}s` : `${totalSecRemainder}s`;
+
+    // Formatar HH:MM:SS para registro no AVA
+    const logHours = String(Math.floor(totalTimeSec / 3600)).padStart(2, '0');
+    const logMins = String(Math.floor((totalTimeSec % 3600) / 60)).padStart(2, '0');
+    const logSecs = String(Math.round(totalTimeSec % 60)).padStart(2, '0');
+    const logTempoHMS = `${logHours}:${logMins}:${logSecs}`;
 
     // Salvar sessão no histórico geral do delta_estudos
     try {
@@ -492,10 +584,10 @@
         mat: 'RLM/REV',
         assunto: `Revisão Flashcards (${total} cards)`,
         categoria: 'Revisão',
-        tempo: Math.max(5, Math.round(total * 0.8)),
+        tempo: logTempoHMS,
         qts: total,
         acertos: acertos,
-        obs: `FSRS: ${sessionStats.easy} Fácil, ${sessionStats.good} Bom, ${sessionStats.hard} Difícil, ${sessionStats.again} Errei (${taxaAcerto}%)`
+        obs: `FSRS: ${sessionStats.easy} Fácil, ${sessionStats.good} Bom, ${sessionStats.hard} Difícil, ${sessionStats.again} Errei (${taxaAcerto}%) · Média: ${avgTimeSec}s/card`
       });
       localStorage.setItem('delta_estudos', JSON.stringify(logs));
     } catch (e) {
@@ -506,7 +598,7 @@
       <div class="rev-summary-box">
         <div class="rs-trophy">${isBelowAverage ? '⚠️' : '🎉'}</div>
         <h3 class="rs-title">${isBelowAverage ? 'Revisão Concluída com Alerta' : 'Excelente Rendimento!'}</h3>
-        <p class="rs-subtitle">Você revisou ${total} flashcards nesta sessão.</p>
+        <p class="rs-subtitle">Você revisou ${total} flashcards em <strong>${totalFormatted}</strong>.</p>
 
         <div class="rs-stats-row">
           <div class="rs-stat-item">
@@ -521,6 +613,16 @@
             <span class="rs-val" style="color:${isBelowAverage ? '#ef4444' : 'var(--green)'};">${taxaAcerto}%</span>
             <span class="rs-lbl">Aproveitamento</span>
           </div>
+          <div class="rs-stat-item">
+            <span class="rs-val" style="color:var(--brand);">${avgTimeSec}s</span>
+            <span class="rs-lbl">Média / Card</span>
+          </div>
+        </div>
+
+        <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--r-sm); padding:10px 14px; margin-bottom:18px; font-size:12px; color:var(--text-muted); display:flex; justify-content:space-around; font-family:var(--font-mono);">
+          <span>⏱️ Total: <strong>${totalFormatted}</strong></span>
+          <span>⚡ Mais Rápido: <strong style="color:var(--green);">${minTimeSec}s</strong></span>
+          <span>⏳ Mais Demorado: <strong style="color:var(--amber);">${maxTimeSec}s</strong></span>
         </div>
 
         ${isBelowAverage ? `
@@ -536,7 +638,7 @@
           </button>
         ` : `
           <div class="rs-alert-success">
-            ✨ Parabéns! Sua taxa de retenção foi de ${taxaAcerto}%. Seus intervalos foram expandidos com sucesso pelo algoritmo FSRS.
+            ✨ Parabéns! Sua taxa de retenção foi de ${taxaAcerto}%. Seus intervalos foram expandidos com calibração precisa de tempo de resposta pelo algoritmo FSRS.
           </div>
           <button class="btn-save" style="width:100%; margin-top:16px;" onclick="DeltaRevisoes.closeReviewModal()">
             Concluir e Voltar ao Painel
