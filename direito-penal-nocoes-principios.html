@@ -4,14 +4,14 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Delta · Direito Penal - Noções e Princípios · Delegado</title>
-<meta name="description" content="Painel Delta para Delegado (PC/PF): Direito Penal — noções e princípios (legalidade, lei penal no tempo, tempo e lugar do crime), com pegadinhas e jurisprudência STF/STJ."/>
+<meta name="description" content="Painel Delta para Delegado (PC/PF): Direito Penal — noções, evolução histórica, bem jurídico, princípios, lei penal no tempo, tempo e lugar do crime, com doutrina, pegadinhas, jurisprudência e discursivas."/>
 <meta name="author" content="Delta"/>
 <meta name="theme-color" content="#ff6b00"/>
 <meta property="og:type" content="website"/>
 <meta property="og:locale" content="pt_BR"/>
 <meta property="og:site_name" content="Delta · AVA Delegado"/>
 <meta property="og:title" content="Direito Penal · Noções e Princípios — Delta"/>
-<meta property="og:description" content="Legalidade, lei penal no tempo, tempo e lugar do crime — com pegadinhas e jurisprudência para Delegado."/>
+<meta property="og:description" content="Doutrina esquematizada, legalidade, lei penal no tempo, tempo e lugar do crime — com pegadinhas, jurisprudência e discursivas para Delegado."/>
 <meta name="twitter:card" content="summary"/>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚖️</text></svg>"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -59,7 +59,7 @@
     --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
   }
 
-  /* ── VARIÁVEIS - TEMA ESCURO (Padrão Dir Adm) ── */
+  /* ── VARIÁVEIS - TEMA ESCURO ── */
   body.dark-theme {
     --brand: #ff6b00;
     --brand-dim: #cc5500;
@@ -127,12 +127,8 @@
     padding:0 24px;
     transition: background-color 0.3s ease;
   }
-  body:not(.dark-theme) header {
-      background: rgba(255, 255, 255, 0.92);
-  }
-  body.dark-theme header {
-      background: rgba(11, 15, 26, 0.92);
-  }
+  body:not(.dark-theme) header { background: rgba(255, 255, 255, 0.92); }
+  body.dark-theme header { background: rgba(11, 15, 26, 0.92); }
 
   .header-inner{
     max-width:1100px;margin:0 auto;
@@ -181,6 +177,21 @@
   
   /* ── MAIN ────────────────────────────────── */
   main{max-width:1100px;margin:0 auto;padding:28px 20px 80px; position:relative; z-index:1;}
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--brand);
+    text-decoration: none;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    transition: transform .2s;
+  }
+  .back-link:hover { transform: translateX(-3px); }
 
   /* ── TABS ────────────────────────────────── */
   .tabs-nav{
@@ -268,7 +279,7 @@
     padding:0 18px;max-height:0;overflow:hidden;
     transition:max-height .4s ease, padding .4s ease;
   }
-  .card-body.open{max-height:2000px;padding:0 18px 18px;}
+  .card-body.open{max-height:3500px;padding:0 18px 18px;}
   
   /* ── BADGES & ELEMENTS ───────────────────── */
   .badge-tag{
@@ -280,6 +291,7 @@
   .bg-yellow { color: var(--yellow); background: var(--yellow-bg); border: 1px solid var(--yellow-border); }
   .bg-green { color: var(--green); background: var(--green-bg); border: 1px solid var(--green-border); }
   .bg-red { color: var(--red); background: var(--red-bg); border: 1px solid var(--red-border); }
+  .bg-purple { color: var(--purple); background: var(--purple-bg); border: 1px solid var(--purple-border); }
 
   .blockquote{
     font-family:'IBM Plex Mono',monospace;
@@ -371,6 +383,66 @@
       font-size: 16px;
   }
 
+  /* ── DOUTRINA & PANORAMA COMPONENTES ── */
+  .doctrine-narrative {
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+  .doctrine-narrative p { margin-bottom: 12px; }
+  .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    margin: 14px 0 18px;
+    border-radius: var(--r-sm);
+    border: 1px solid var(--border);
+  }
+  .delta-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    text-align: left;
+  }
+  .delta-table th {
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: .05em;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .delta-table td {
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+  .delta-table tr:last-child td { border-bottom: none; }
+  .synopsis-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 14px 0;
+  }
+  @media(max-width: 768px) { .synopsis-grid { grid-template-columns: 1fr; } }
+  .synopsis-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 14px;
+  }
+  .synopsis-box h4 {
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--brand);
+    margin-bottom: 8px;
+  }
+  .synopsis-box p { font-size: 13px; color: var(--text); line-height: 1.6; }
+
   /* ── FOOTER ──────────────────────────────── */
   footer{
     text-align:center;padding:28px;
@@ -397,7 +469,7 @@
     <div class="brand">⚖️ Delta</div>
     <div class="title-block">
       <h1>Direito Penal · Noções e Princípios</h1>
-      <span class="badge">Delegado PC · PF · Cebraspe</span>
+      <span class="badge">Delegado PC · PF · Cebraspe / Vunesp</span>
     </div>
     <div class="header-actions">
         <button class="theme-toggle-btn" id="themeToggle" onclick="toggleTheme()" title="Alternar Tema Claro/Escuro">
@@ -415,21 +487,251 @@
   <!-- SEARCH -->
   <div class="search-wrap">
     <span class="search-icon">🔍</span>
-    <input type="text" class="search-input" id="searchInput" placeholder="Buscar em todos os blocos..." oninput="handleSearch()" />
+    <input type="text" class="search-input" id="searchInput" placeholder="Buscar em todos os blocos de Direito Penal..." oninput="handleSearch()" />
     <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
   </div>
 
   <!-- TABS NAV -->
   <nav class="tabs-nav" role="tablist">
-    <button class="tab-btn active" onclick="showTab('literais',this)">📌 Literais</button>
+    <button class="tab-btn active" onclick="showTab('resumo',this)">📖 Doutrina & Panorama</button>
+    <button class="tab-btn" onclick="showTab('literais',this)">📌 Literais</button>
     <button class="tab-btn" onclick="showTab('pegadinhas',this)">🔥 Pegadinhas</button>
     <button class="tab-btn" onclick="showTab('juris',this)">🏛️ Jurisprudência</button>
     <button class="tab-btn" onclick="showTab('apostas',this)">🎯 Apostas 2026</button>
     <button class="tab-btn" onclick="showTab('discursivas',this)">✍️ Discursivas</button>
   </nav>
 
+  <!-- ════════ TAB 0: DOUTRINA & PANORAMA (NOVA ABA PRELIMINAR) ════════ -->
+  <div class="tab-panel active" id="tab-resumo">
+    <div class="sec-header">
+      <h2>Panorama Geral, Gênese Dogmática & Conexões Teóricas</h2>
+      <span class="tag">Síntese Estratégica para Delegado</span>
+    </div>
+
+    <!-- Módulo 1: Missão e Teoria do Bem Jurídico -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Evolução Dogmática</span>
+          <h3>1. Missão do Direito Penal & A Teoria do Bem Jurídico de Birnbaum</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge-tag bg-yellow">Fundacional</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="doctrine-narrative">
+          <p>O <strong>Direito Penal</strong> constitui o ramo do ordenamento jurídico dotado dos instrumentos sancionatórios mais severos e invasivos. A doutrina majoritária estabelece que a missão precípua do Direito Penal é a <strong>proteção subsidiária e fragmentária de bens jurídicos fundamentais</strong> para a coexistência pacífica e digna em sociedade (vida, integridade física, liberdade, patrimônio, incolumidade pública).</p>
+          <p>Historicamente, a concepção iluminista (Feuerbach) enxergava o crime como a <em>violação de um direito subjetivo</em>. Em 1834, o jurista alemão <strong>Johann Michael Birnbaum</strong> revolucionou a dogmática penal ao cunhar a <strong>Teoria do Bem Jurídico</strong>: demonstrou que o crime não atinge um mero direito subjetivo formal, mas sim um <em>bem material ou imaterial essencial</em> que o Estado tutela para garantir a ordem social.</p>
+        </div>
+
+        <div class="synopsis-grid">
+          <div class="synopsis-box">
+            <h4>🧠 Funcionalismo Teleológico / Moderado (Claus Roxin)</h4>
+            <p>A missão do Direito Penal é a <strong>exclusiva proteção de bens jurídicos</strong>. A pena tem finalidade preventiva (geral e especial) e a dogmática penal deve estar orientada por critérios de política criminal e direitos fundamentais.</p>
+          </div>
+          <div class="synopsis-box">
+            <h4>⚡ Funcionalismo Sistêmico / Radical (Günther Jakobs)</h4>
+            <p>A missão do Direito Penal é a <strong>estabilização da vigência da norma jurídica</strong>. A pena reafirma a autoridade do sistema violado e pune o autor que não oferece garantia de fidelidade normativa (Direito Penal do Inimigo).</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Módulo 2: Princípios Fundamentais -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Principiologia</span>
+          <h3>2. Princípios Penais Fundamentais: Legalidade, Intervenção Mínima & Lesividade</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge-tag bg-green">Alta Relevância</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="delta-table">
+            <thead>
+              <tr>
+                <th>Princípio</th>
+                <th>Desdobramentos Dogmáticos</th>
+                <th>Vedações Expressas no Direito Brasileiro</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Legalidade / Reserva Legal</strong><br>(Art. 1º CP e Art. 5º, XXXIX CF)</td>
+                <td>• <em>Lex praevia</em> (anterioridade da lei)<br>• <em>Lex scripta</em> (reserva de lei escrita)<br>• <em>Lex stricta</em> (vedação da analogia in malam partem)<br>• <em>Lex certa</em> (taxatividade/clareza típica)</td>
+                <td>Veda costumes incriminadores, medidas provisórias punitivas e tipos penais abertos ou indeterminados.</td>
+              </tr>
+              <tr>
+                <td><strong>Intervenção Mínima</strong><br>(<em>Ultima Ratio</em>)</td>
+                <td>• <strong>Fragmentariedade:</strong> o Direito Penal só tutela os bens mais vitais.<br>• <strong>Subsidiariedade:</strong> o Direito Penal só atua quando os demais ramos (Civil, Adm.) falharem.</td>
+                <td>Veda o uso do Direito Penal como primeira opção de gestão social ou política de segurança meramente simbólica.</td>
+              </tr>
+              <tr>
+                <td><strong>Lesividade / Ofensividade</strong><br>(<em>Nullum crimen sine injuria</em>)</td>
+                <td>Exige efetiva lesão ou perigo concreto de lesão a bem jurídico de terceiro.</td>
+                <td>Veda a punição de: a) meras atitudes internas/cogitação; b) condutas inofensivas; c) <strong>autolesão</strong> e tentativa de suicídio.</td>
+              </tr>
+              <tr>
+                <td><strong>Culpabilidade & Responsabilidade Subjetiva</strong></td>
+                <td><em>Nulla poena sine culpa</em>. A imputação penal exige dolo ou culpa comprovados.</td>
+                <td>Veda a <strong>responsabilidade penal objetiva</strong> no direito brasileiro (salvo debates sobre a PJ em crimes ambientais).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Módulo 3: Insignificância e Bagatela -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Insignificância</span>
+          <h3>3. Princípio da Insignificância / Bagatela: Requisitos e Súmulas Restritivas</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge-tag bg-purple">Jurisprudência STF/STJ</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="doctrine-narrative">
+          <p>O princípio da insignificância, derivado da intervenção mínima e da lesividade, opera a <strong>exclusão da tipicidade material</strong> do fato, tornando a conduta formalmente prevista em lei um indiferente penal. Não afasta a ilicitude nem a culpabilidade: afasta o próprio fato típico.</p>
+        </div>
+
+        <div class="synopsis-grid">
+          <div class="synopsis-box">
+            <h4>🔑 Requisitos Objetivos Cumulativos do STF (MARI)</h4>
+            <p>• <strong>M</strong>ínima ofensividade da conduta do agente;<br>
+            • <strong>A</strong>usência de periculosidade social da ação;<br>
+            • <strong>R</strong>eduzidíssimo grau de reprovabilidade do comportamento;<br>
+            • <strong>I</strong>nexpressividade da lesão jurídica provocada.</p>
+          </div>
+          <div class="synopsis-box">
+            <h4>⚖️ Bagatela Própria vs. Imprópria</h4>
+            <p>• <strong>Própria:</strong> O fato nasce atípico materialmente em razão do desvalor irrisório da conduta/resultado (exclui a tipicidade).<br>
+            • <strong>Imprópria:</strong> O fato nasce típico e ilícito, mas a aplicação da pena torna-se desnecessária no caso concreto (perdão judicial / extintiva de punibilidade).</p>
+          </div>
+        </div>
+
+        <div class="stmt-box">
+          <strong>🚫 Vedações Sumuladas do STJ (Súmulas 589 e 599):</strong><br>
+          • <strong>Súmula 599-STJ:</strong> O princípio da insignificância é <mark class="r">inaplicável aos crimes contra a Administração Pública</mark> (a moralidade administrativa é tutelada independentemente do valor). <em>Exceção STF/STJ:</em> Descaminho com tributo sonegado de até R$ 20.000,00 (Portaria MF 130/2012).<br>
+          • <strong>Súmula 589-STJ:</strong> É <mark class="r">inaplicável o princípio da insignificância aos crimes e contravenções penais praticados com violência ou grave ameaça contra a mulher no âmbito doméstico</mark>.
+        </div>
+      </div>
+    </div>
+
+    <!-- Módulo 4: Lei Penal no Tempo -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Sucessão de Leis</span>
+          <h3>4. A Lei Penal no Tempo: Retroatividade Benigna, Abolitio Criminis & Súmula 711 STF</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge-tag bg-yellow">Crítico para Delegado</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="doctrine-narrative">
+          <p>A regra geral no Direito Penal é a aplicação da lei vigente ao tempo da conduta (<em>tempus regit actum</em>). Como garantia fundamental (Art. 5º, XL da CF/88), a lei penal <strong>não retroagirá, salvo para beneficiar o réu</strong>.</p>
+        </div>
+
+        <div class="table-responsive">
+          <table class="delta-table">
+            <thead>
+              <tr>
+                <th>Hipótese de Sucessão</th>
+                <th>Consequência Jurídica</th>
+                <th>Efeitos Práticos & Súmulas</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Novatio Legis Incriminadora</strong></td>
+                <td><mark class="r">Irretroativa</mark></td>
+                <td>Fato atípico passa a ser crime. Aplica-se apenas aos fatos praticados após o início da vigência.</td>
+              </tr>
+              <tr>
+                <td><strong>Novatio Legis in Pejus</strong></td>
+                <td><mark class="r">Irretroativa</mark></td>
+                <td>Lei nova agrava a pena ou impõe regime mais severo. Aplica-se a lei anterior (ultratividade da lei mais benéfica).</td>
+              </tr>
+              <tr>
+                <td><strong>Novatio Legis in Mellius</strong></td>
+                <td><mark class="g">Retroativa</mark></td>
+                <td>Lei nova beneficia o réu (diminui pena, altera regime). Retroage mesmo após o trânsito em julgado (competência da Execução Penal - Súmula 611 STF).</td>
+              </tr>
+              <tr>
+                <td><strong>Abolitio Criminis (Art. 2º CP)</strong></td>
+                <td><mark class="g">Retroativa Extintiva</mark></td>
+                <td>Fato deixa de ser crime. Cessa a execução e os <mark class="r">efeitos penais</mark> (primários e secundários), mas <strong>persistem os efeitos civis</strong> (reparação do dano).</td>
+              </tr>
+              <tr>
+                <td><strong>Vedação à Lex Tertia (Súmula 501 STJ)</strong></td>
+                <td><mark class="r">Proibida a combinação</mark></td>
+                <td>É vedada a combinação de leis pelo juiz (extrair a parte boa da lei velha e a boa da nova), pois violaria a separação de poderes. Aplica-se a lei integralmente.</td>
+              </tr>
+              <tr>
+                <td><strong>Leis Excepcionais / Temporárias (Art. 3º)</strong></td>
+                <td><mark class="b">Ultratividade Gravosa</mark></td>
+                <td>Ainda que revogadas após o período ou emergência, continuam a ser aplicadas aos fatos praticados durante sua vigência.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="stmt-box">
+          <strong>🚨 Súmula 711 do STF (Crimes Permanentes e Continuados):</strong><br>
+          "A lei penal mais grave aplica-se ao crime continuado ou ao crime permanente, se a sua vigência é anterior à cessação da continuidade ou da permanência." Se uma lei nova mais gravosa entra em vigor enquanto o sequestro (permanente) ou os delitos em série (continuados) ainda estão em andamento, aplica-se a lei mais dura.
+        </div>
+      </div>
+    </div>
+
+    <!-- Módulo 5: Tempo e Lugar do Crime -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Tempo & Lugar</span>
+          <h3>5. Tempo e Lugar do Crime: A Matriz do Mnemônico LUTA</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge-tag bg-blue">Conceitual</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="synopsis-grid">
+          <div class="synopsis-box">
+            <h4>⏰ Tempo do Crime — Art. 4º CP</h4>
+            <p><strong>Teoria da Atividade:</strong> Considera-se praticado o crime no momento da <strong>ação ou omissão</strong>, ainda que outro seja o momento do resultado.<br>
+            <em>Exemplo:</em> O agente que atira aos 17 anos e 364 dias comete ato infracional (imputável pela idade da conduta), mesmo que a vítima venha a falecer após ele completar 18 anos.</p>
+          </div>
+          <div class="synopsis-box">
+            <h4>📍 Lugar do Crime — Art. 6º CP</h4>
+            <p><strong>Teoria da Ubiquidade (ou Mista):</strong> Considera-se praticado o crime no lugar em que ocorreu a <strong>ação ou omissão</strong>, no todo ou em parte, bem como onde se produziu ou <strong>deveria produzir-se o resultado</strong>.<br>
+            <em>Aplicação:</em> Resolve crimes à distância e conflitos de soberania internacional.</p>
+          </div>
+        </div>
+
+        <div class="blockquote" style="text-align:center; font-weight:bold;">
+          🧠 Mnemônico Universal: <mark class="y">L</mark>ugar = <mark class="y">U</mark>biquidade &nbsp;|&nbsp; <mark class="y">T</mark>empo = <mark class="y">A</mark>tividade &nbsp;👉&nbsp; <strong>L.U.T.A.</strong>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /tab-resumo -->
+
   <!-- ═══ TAB 1: LITERAIS ═══════════════════════ -->
-  <div class="tab-panel active" id="tab-literais">
+  <div class="tab-panel" id="tab-literais">
     <div class="sec-header">
       <h2>Textos Literais Críticos</h2>
       <span class="tag">Princípios e Fontes</span>
@@ -657,10 +959,8 @@ function toggleTheme() {
     const body = document.body;
     const btn = document.getElementById('themeToggle');
     
-    // Toggle class
     body.classList.toggle('dark-theme');
     
-    // Save to local storage and update icon
     if (body.classList.contains('dark-theme')) {
         localStorage.setItem('delta-theme', 'dark');
         btn.textContent = '🌙';
@@ -677,10 +977,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (savedTheme === 'dark') {
         document.body.classList.add('dark-theme');
-        btn.textContent = '🌙';
+        if (btn) btn.textContent = '🌙';
     } else {
-        // Default is light (no class needed)
-        btn.textContent = '☀️';
+        if (btn) btn.textContent = '☀️';
     }
 });
 
@@ -688,8 +987,9 @@ document.addEventListener('DOMContentLoaded', () => {
 function showTab(id, btn) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-' + id).classList.add('active');
-  btn.classList.add('active');
+  const target = document.getElementById('tab-' + id);
+  if (target) target.classList.add('active');
+  if (btn) btn.classList.add('active');
 }
 
 // ─── ACCORDION ────────────────────────────────

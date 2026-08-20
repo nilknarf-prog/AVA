@@ -4,21 +4,21 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Delta · Direito Constitucional - Teoria · Delegado</title>
-<meta name="description" content="Painel Delta para Delegado (PC/PF): Direito Constitucional — teoria, com literais, pegadinhas de banca, jurisprudência STF e apostas 2026."/>
+<meta name="description" content="Painel Delta para Delegado (PC/PF): Direito Constitucional — teoria da constituição, sentidos, classificações, poder constituinte, aplicabilidade e hermenêutica, com literais, pegadinhas, jurisprudência e discursivas."/>
 <meta name="author" content="Delta"/>
 <meta name="theme-color" content="#ff6b00"/>
 <meta property="og:type" content="website"/>
 <meta property="og:locale" content="pt_BR"/>
 <meta property="og:site_name" content="Delta · AVA Delegado"/>
 <meta property="og:title" content="Direito Constitucional · Teoria — Delta"/>
-<meta property="og:description" content="Literais, pegadinhas, jurisprudência STF e apostas 2026 para o concurso de Delegado."/>
+<meta property="og:description" content="Doutrina esquematizada, classificações, poder constituinte, eficácia das normas e hermenêutica — com pegadinhas, jurisprudência e discursivas para Delegado."/>
 <meta name="twitter:card" content="summary"/>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚖️</text></svg>"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link rel="stylesheet" href="./assets/stopwatch.css"/>
 <style>
-  /* ── VARIÁVEIS - TEMA CLARO (Padrão Index) ── */
+  /* ── VARIÁVEIS - TEMA CLARO ── */
   :root {
     --brand: #ff6b00;
     --brand-dim: #cc5500;
@@ -33,7 +33,6 @@
     --text-muted: #475569;
     --text-dim: #94a3b8;
     
-    /* Cores Semânticas */
     --yellow: #f59e0b;
     --yellow-bg: rgba(245, 158, 11, 0.12);
     --yellow-border: rgba(245, 158, 11, 0.25);
@@ -59,7 +58,7 @@
     --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
   }
 
-  /* ── VARIÁVEIS - TEMA ESCURO (Padrão Dir Adm) ── */
+  /* ── VARIÁVEIS - TEMA ESCURO ── */
   body.dark-theme {
     --brand: #ff6b00;
     --brand-dim: #cc5500;
@@ -109,7 +108,6 @@
     transition: background-color 0.3s ease, color 0.3s ease;
   }
 
-  /* BG texture */
   body::before{
     content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
     background:
@@ -127,12 +125,8 @@
     padding:0 24px;
     transition: background-color 0.3s ease;
   }
-  body:not(.dark-theme) header {
-      background: rgba(255, 255, 255, 0.92);
-  }
-  body.dark-theme header {
-      background: rgba(11, 15, 26, 0.92);
-  }
+  body:not(.dark-theme) header { background: rgba(255, 255, 255, 0.92); }
+  body.dark-theme header { background: rgba(11, 15, 26, 0.92); }
 
   .header-inner{
     max-width:1100px;margin:0 auto;
@@ -181,6 +175,21 @@
   
   /* ── MAIN ────────────────────────────────── */
   main{max-width:1100px;margin:0 auto;padding:28px 20px 80px; position:relative; z-index:1;}
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--brand);
+    text-decoration: none;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    transition: transform .2s;
+  }
+  .back-link:hover { transform: translateX(-3px); }
 
   /* ── TABS ────────────────────────────────── */
   .tabs-nav{
@@ -244,7 +253,7 @@
     padding:2px 8px;border-radius:20px;
   }
 
-  /* ── CARDS (Genéricos) ───────────────────── */
+  /* ── CARDS ───────────────────────────────── */
   .info-card{
     background:var(--surface);border:1px solid var(--border);
     border-radius:var(--r);
@@ -268,7 +277,7 @@
     padding:0 18px;max-height:0;overflow:hidden;
     transition:max-height .4s ease, padding .4s ease;
   }
-  .card-body.open{max-height:2000px;padding:0 18px 18px;}
+  .card-body.open{max-height:3500px;padding:0 18px 18px;}
   
   /* ── BADGES & ELEMENTS ───────────────────── */
   .badge-tag{
@@ -280,6 +289,7 @@
   .bg-yellow { color: var(--yellow); background: var(--yellow-bg); border: 1px solid var(--yellow-border); }
   .bg-green { color: var(--green); background: var(--green-bg); border: 1px solid var(--green-border); }
   .bg-red { color: var(--red); background: var(--red-bg); border: 1px solid var(--red-border); }
+  .bg-purple { color: var(--purple); background: var(--purple-bg); border: 1px solid var(--purple-border); }
 
   .blockquote{
     font-family:'IBM Plex Mono',monospace;
@@ -320,12 +330,13 @@
   .false-stmt::before{content:'❝ ';font-style:normal;opacity:.6;}
   
   .stmt-box{
-    font-size:13px;font-style:italic;
-    color:var(--yellow);
-    background:var(--yellow-bg);
-    border:1px solid var(--yellow-border);
+    font-size:13px;
+    color:var(--text);
+    background:var(--surface2);
+    border:1px solid var(--border);
+    border-left:4px solid var(--yellow);
     border-radius:var(--r-sm);
-    padding:10px 13px;margin-top:8px;
+    padding:10px 14px;margin-top:8px;
     line-height:1.6;
   }
   
@@ -342,15 +353,6 @@
     font-style:italic;line-height:1.6;margin-bottom:12px;
   }
 
-  .fonte-tag{
-    font-size:11px;color:var(--brand);
-    background:var(--brand-glow);
-    border:1px solid rgba(255,107,0,.2);
-    padding:2px 8px;border-radius:20px;
-    display:inline-block;margin-top:10px;
-  }
-  
-  /* Discursivas Specific */
   .skeleton-list {
       list-style: none;
       margin-top: 10px;
@@ -370,6 +372,66 @@
       font-weight: bold;
       font-size: 16px;
   }
+
+  /* ── DOUTRINA & PANORAMA COMPONENTES ── */
+  .doctrine-narrative {
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+  .doctrine-narrative p { margin-bottom: 12px; }
+  .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    margin: 14px 0 18px;
+    border-radius: var(--r-sm);
+    border: 1px solid var(--border);
+  }
+  .delta-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    text-align: left;
+  }
+  .delta-table th {
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: .05em;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .delta-table td {
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+  .delta-table tr:last-child td { border-bottom: none; }
+  .synopsis-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 14px 0;
+  }
+  @media(max-width: 768px) { .synopsis-grid { grid-template-columns: 1fr; } }
+  .synopsis-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 14px;
+  }
+  .synopsis-box h4 {
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--brand);
+    margin-bottom: 8px;
+  }
+  .synopsis-box p { font-size: 13px; color: var(--text); line-height: 1.6; }
 
   /* ── FOOTER ──────────────────────────────── */
   footer{
@@ -396,8 +458,8 @@
   <div class="header-inner">
     <div class="brand">⚖️ Delta</div>
     <div class="title-block">
-      <h1>Direito Constitucional · Teoria</h1>
-      <span class="badge">Delegado PC · PF · Cebraspe</span>
+      <h1>Direito Constitucional · Teoria da Constituição</h1>
+      <span class="badge">Delegado PC · PF · Cebraspe / Vunesp</span>
     </div>
     <div class="header-actions">
         <button class="theme-toggle-btn" id="themeToggle" onclick="toggleTheme()" title="Alternar Tema Claro/Escuro">
@@ -415,21 +477,195 @@
   <!-- SEARCH -->
   <div class="search-wrap">
     <span class="search-icon">🔍</span>
-    <input type="text" class="search-input" id="searchInput" placeholder="Buscar em todos os blocos..." oninput="handleSearch()" />
+    <input type="text" class="search-input" id="searchInput" placeholder="Buscar em todos os blocos de Constitucional..." oninput="handleSearch()" />
     <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
   </div>
 
   <!-- TABS NAV -->
   <nav class="tabs-nav" role="tablist">
-    <button class="tab-btn active" onclick="showTab('literais',this)">📌 Literais</button>
+    <button class="tab-btn active" onclick="showTab('resumo',this)">📖 Doutrina & Panorama</button>
+    <button class="tab-btn" onclick="showTab('literais',this)">📌 Literais</button>
     <button class="tab-btn" onclick="showTab('pegadinhas',this)">🔥 Pegadinhas</button>
     <button class="tab-btn" onclick="showTab('juris',this)">🏛️ Jurisprudência</button>
     <button class="tab-btn" onclick="showTab('apostas',this)">🎯 Apostas 2026</button>
     <button class="tab-btn" onclick="showTab('discursivas',this)">✍️ Discursivas</button>
   </nav>
 
+  <!-- ════════ TAB 0: DOUTRINA & PANORAMA ════════ -->
+  <div class="tab-panel active" id="tab-resumo">
+    <div class="sec-header">
+      <h2>Panorama Geral & Teoria da Constituição</h2>
+      <span class="tag">Conexões Estruturais para Delegado</span>
+    </div>
+
+    <!-- Módulo 1: Sentidos de Constituição -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Concepções</span>
+          <h3>1. Conceito e Concepções Teóricas de Constituição</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge-tag bg-yellow">Fundacional</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="delta-table">
+            <thead>
+              <tr>
+                <th>Concepção / Autor</th>
+                <th>Núcleo Teórico & Obra</th>
+                <th>Definição de Constituição</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Sociológica</strong><br>(Ferdinand Lassalle)</td>
+                <td><em>"A Essência da Constituição"</em> (1862)</td>
+                <td>A Constituição real e efetiva é a <mark class="y">soma dos fatores reais do poder</mark> que regem uma nação. A constituição escrita não passa de uma <strong>mera "folha de papel"</strong> (<em>ein Stück Papier</em>) sem força se colidir com os poderes fáticos.</td>
+              </tr>
+              <tr>
+                <td><strong>Política</strong><br>(Carl Schmitt)</td>
+                <td><em>"Teoria da Constituição"</em> (1928)</td>
+                <td>Constituição é a <strong>decisão política fundamental</strong> do titular do poder soberano. Diferencia <em>Constituição</em> (núcleo essencial: direitos fundamentais e organização do Estado) de <em>Leis Constitucionais</em> (dispositivos formais secundários no texto).</td>
+              </tr>
+              <tr>
+                <td><strong>Jurídica</strong><br>(Hans Kelsen)</td>
+                <td><em>"Teoria Pura do Direito"</em> (1934)</td>
+                <td>Norma jurídica pura, ápice da pirâmide (Grundnorm). No <strong>sentido lógico-jurídico</strong> = norma hipotética fundamental; no <strong>sentido jurídico-positivo</strong> = a norma posta no topo do escalonamento normativo.</td>
+              </tr>
+              <tr>
+                <td><strong>Força Normativa</strong><br>(Konrad Hesse)</td>
+                <td><em>"A Força Normativa da Constituição"</em> (1959)</td>
+                <td>Supera Lassalle: a Constituição escrita tem <strong>força normativa autônoma</strong> para conformar a realidade política e social, impulsionada pela <em>"vontade de constituição"</em> (Wille zur Verfassung).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Módulo 2: Classificação das Constituições -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Classificações</span>
+          <h3>2. Classificação das Constituições & A CF/88</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge-tag bg-green">Alta Relevância</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="synopsis-grid">
+          <div class="synopsis-box">
+            <h4>🗳️ Origem das Constituições</h4>
+            <p>• <strong>Promulgada (Democrática/Popular):</strong> Elaborada por Assembleia Constituinte eleita pelo povo (ex: CF/88, CF/1934, CF/1946).<br>
+            • <strong>Outorgada:</strong> Imposta unilateralmente por autocrata sem voto (ex: CF/1824, CF/1937, CF/1967).<br>
+            • <strong>Cesarista (Bonapartista):</strong> Redigida pelo ditador e submetida a plebiscito/referendo para mera ratificação sem debate.<br>
+            • <strong>Pactuada:</strong> Fruto de acordo solene entre duas forças políticas rivais (ex: Magna Carta de 1215).</p>
+          </div>
+          <div class="synopsis-box">
+            <h4>📐 Estabilidade & Extensão</h4>
+            <p>• <strong>Rígida (CF/88):</strong> Alterável apenas por processo legislativo mais solene e dificultoso (Art. 60 CF: 2 turnos, 3/5 em cada casa).<br>
+            • <strong>Super-rígida (Alexandre de Moraes):</strong> Rígida em regra + núcleo imutável (cláusulas pétreas).<br>
+            • <strong>Analítica (Dirigente):</strong> Extensa, minuciosa, traça programas e metas estatais para o futuro (CF/88).<br>
+            • <strong>Sintética (Garantia):</strong> Breve, enuncia apenas princípios estruturais e liberdades negativas (ex: CF dos EUA de 1787).</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Módulo 3: Poder Constituinte -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Poder Constituinte</span>
+          <h3>3. Teoria do Poder Constituinte & Seus Limites</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge-tag bg-blue">Estruturante</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="doctrine-narrative">
+          <p>Teorizado pelo Abade <strong>Emmanuel Joseph Sieyès</strong> em <em>"O que é o Terceiro Estado?"</em> (1789). Divide-se em:</p>
+        </div>
+
+        <div class="synopsis-grid">
+          <div class="synopsis-box">
+            <h4>⚡ Poder Constituinte Originário</h4>
+            <p>• <strong>Inicial:</strong> Inaugura a ordem jurídica rompendo com a anterior.<br>
+            • <strong>Autônomo / Ilimitado:</strong> Não se subordina ao direito positivo pretérito.<br>
+            • <strong>Incondicionado:</strong> Não segue forma pré-fixada.<br>
+            • <strong>Permanente:</strong> Não se esgota com a promulgação do texto.</p>
+          </div>
+          <div class="synopsis-box">
+            <h4>🛡️ Poder Constituinte Derivado Reformador</h4>
+            <p>• <strong>Derivado e Condicionado:</strong> Subordina-se à CF/88.<br>
+            • <strong>Limitações Circunstanciais (Art. 60, §1º):</strong> Vedada emenda sob <em>intervenção federal, estado de defesa ou estado de sítio</em>.<br>
+            • <strong>Limitações Materiais (Art. 60, §4º):</strong> Cláusulas pétreas (Federação, Voto direto/secreto/universal/periódico, Separação de Poderes e Direitos Fundamentais).</p>
+          </div>
+        </div>
+
+        <div class="stmt-box">
+          <strong>🔄 Poder Constituinte Derivado Difuso (Mutação Constitucional):</strong> Processo informal de alteração do <em>sentido interpretativo</em> da norma constitucional, sem alteração textual, acompanhando a evolução dos costumes e da sociedade (ex: união estável homoafetiva no STF).
+        </div>
+      </div>
+    </div>
+
+    <!-- Módulo 4: Aplicabilidade e Eficácia -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Eficácia das Normas</span>
+          <h3>4. Aplicabilidade e Eficácia das Normas Constitucionais (José Afonso da Silva)</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge-tag bg-purple">Despenca em Prova</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="delta-table">
+            <thead>
+              <tr>
+                <th>Classificação</th>
+                <th>Características de Aplicação</th>
+                <th>Exemplos Típicos na CF/88</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Normas de Eficácia Plena</strong></td>
+                <td>Aplicabilidade <strong>direta, imediata e integral</strong>. Produzem todos os efeitos desde a promulgação, sem necessidade de regulamentação infraconstitucional.</td>
+                <td>Art. 5º, II (Legalidade); Art. 5º, III (Vedação de tortura); Art. 1º, caput.</td>
+              </tr>
+              <tr>
+                <td><strong>Normas de Eficácia Contida (Redutível)</strong></td>
+                <td>Aplicabilidade <strong>direta, imediata, mas não integral</strong>. São autoaplicáveis desde logo, mas admitem que a lei posterior restrinja o seu alcance originário.</td>
+                <td>Art. 5º, XIII ("É livre o exercício de qualquer trabalho, <em>atendidas as qualificações que a lei estabelecer</em>"); Art. 5º, LX (sigilo processual).</td>
+              </tr>
+              <tr>
+                <td><strong>Normas de Eficácia Limitada</strong></td>
+                <td>Aplicabilidade <strong>indireta, mediata e diferida</strong>. Dependem de lei integradora para produzir seus efeitos principais. Dividem-se em <em>princípios institutivos</em> e <em>programáticos</em>.</td>
+                <td>Art. 37, VII (Greve no serviço público); Art. 7º, XI (Participação nos lucros); Art. 227 (Proteção à infância e juventude).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /tab-resumo -->
+
   <!-- ═══ TAB 1: LITERAIS ═══════════════════════ -->
-  <div class="tab-panel active" id="tab-literais">
+  <div class="tab-panel" id="tab-literais">
     <div class="sec-header">
       <h2>Textos Literais Críticos</h2>
       <span class="tag">Poder Constituinte</span>
@@ -587,10 +823,8 @@ function toggleTheme() {
     const body = document.body;
     const btn = document.getElementById('themeToggle');
     
-    // Toggle class
     body.classList.toggle('dark-theme');
     
-    // Save to local storage and update icon
     if (body.classList.contains('dark-theme')) {
         localStorage.setItem('delta-theme', 'dark');
         btn.textContent = '🌙';
@@ -607,10 +841,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (savedTheme === 'dark') {
         document.body.classList.add('dark-theme');
-        btn.textContent = '🌙';
+        if (btn) btn.textContent = '🌙';
     } else {
-        // Default is light (no class needed)
-        btn.textContent = '☀️';
+        if (btn) btn.textContent = '☀️';
     }
 });
 
@@ -618,8 +851,9 @@ document.addEventListener('DOMContentLoaded', () => {
 function showTab(id, btn) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-' + id).classList.add('active');
-  btn.classList.add('active');
+  const target = document.getElementById('tab-' + id);
+  if (target) target.classList.add('active');
+  if (btn) btn.classList.add('active');
 }
 
 // ─── ACCORDION ────────────────────────────────
