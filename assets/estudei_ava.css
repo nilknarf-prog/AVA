@@ -3,18 +3,6 @@
    ============================================================ */
 
 /* ── TOP ACTION BAR NO HEADER ────────────────────────── */
-.header-plan-select {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  color: var(--text);
-  font-size: 12px;
-  font-weight: 600;
-  padding: 6px 12px;
-  border-radius: 20px;
-  outline: none;
-  cursor: pointer;
-  max-width: 220px;
-}
 .btn-quick-add {
   background: var(--brand);
   color: #ffffff;
