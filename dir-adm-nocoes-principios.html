@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Delta · Direito Administrativo - Noções Iniciais e Princípios · Delegado</title>
+<meta name="description" content="Painel Delta para Delegado (PC/PF): Direito Administrativo — noções iniciais, origens, sentidos da administração, fontes, regime jurídico-administrativo e princípios (LIMPE e implícitos), com pegadinhas, jurisprudência STF/STJ e discursivas."/>
+<meta name="author" content="Delta"/>
+<meta name="theme-color" content="#ff6b00"/>
+<meta property="og:type" content="website"/>
+<meta property="og:locale" content="pt_BR"/>
+<meta property="og:site_name" content="Delta · AVA Delegado"/>
+<meta property="og:title" content="Direito Administrativo · Noções Iniciais e Princípios — Delta"/>
+<meta property="og:description" content="Origens, sentidos, fontes, regime jurídico-administrativo e princípios fundamentais — com pegadinhas, jurisprudência e discursivas para Delegado."/>
+<meta name="twitter:card" content="summary"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚖️</text></svg>"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="stylesheet" href="./assets/stopwatch.css"/>
+<style>
+  /* ── VARIÁVEIS - TEMA CLARO (Padrão Index) ── */
+  :root {
+    --brand: #ff6b00;
+    --brand-dim: #cc5500;
+    --brand-glow: rgba(255,107,0,0.10);
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --surface2: #f1f5f9;
+    --surface3: #e2e8f0;
+    --border: #e2e8f0;
+    --border-hot: #ff6b00;
+    --text: #0f172a;
+    --text-muted: #475569;
+    --text-dim: #94a3b8;
+    
+    /* Cores Semânticas */
+    --yellow: #f59e0b;
+    --yellow-bg: rgba(245, 158, 11, 0.12);
+    --yellow-border: rgba(245, 158, 11, 0.25);
+    
+    --red: #ef4444;
+    --red-bg: rgba(239, 68, 68, 0.12);
+    --red-border: rgba(239, 68, 68, 0.25);
+    
+    --blue: #3b82f6;
+    --blue-bg: rgba(59, 130, 246, 0.12);
+    --blue-border: rgba(59, 130, 246, 0.25);
+    
+    --green: #10b981;
+    --green-bg: rgba(16, 185, 129, 0.12);
+    --green-border: rgba(16, 185, 129, 0.25);
+    
+    --purple: #8b5cf6;
+    --purple-bg: rgba(139, 92, 246, 0.12);
+    --purple-border: rgba(139, 92, 246, 0.25);
+    
+    --r: 8px;
+    --r-sm: 5px;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  }
+
+  /* ── VARIÁVEIS - TEMA ESCURO (Padrão Dark) ── */
+  body.dark-theme {
+    --brand: #ff6b00;
+    --brand-dim: #cc5500;
+    --brand-glow: rgba(255,107,0,0.18);
+    --bg: #0b0f1a;
+    --surface: #131929;
+    --surface2: #1a2235;
+    --surface3: #1f2a3c;
+    --border: rgba(255,255,255,0.08);
+    --border-hot: rgba(255,107,0,0.35);
+    --text: #e8eaf0;
+    --text-muted: #8a93a8;
+    --text-dim: #5a6478;
+
+    --yellow: #fbbf24;
+    --yellow-bg: rgba(251, 191, 36, 0.12);
+    --yellow-border: rgba(251, 191, 36, 0.25);
+
+    --red: #f87171;
+    --red-bg: rgba(248, 113, 113, 0.12);
+    --red-border: rgba(248, 113, 113, 0.25);
+
+    --blue: #60a5fa;
+    --blue-bg: rgba(96, 165, 250, 0.12);
+    --blue-border: rgba(96, 165, 250, 0.25);
+
+    --green: #4ade80;
+    --green-bg: rgba(74, 222, 128, 0.12);
+    --green-border: rgba(74, 222, 128, 0.25);
+
+    --purple: #c084fc;
+    --purple-bg: rgba(192, 132, 252, 0.12);
+    --purple-border: rgba(192, 132, 252, 0.25);
+
+    --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+  }
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Inter',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    line-height:1.65;
+    font-size:15px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* BG texture */
+  body::before{
+    content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(ellipse 80% 50% at 10% 10%, var(--brand-glow) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 90% 80%, rgba(255,107,0,0.04) 0%, transparent 60%);
+    transition: background 0.3s ease;
+  }
+
+  /* ── HEADER ─────────────────────────────── */
+  header{
+    position:sticky;top:0;z-index:100;
+    background:var(--surface);
+    backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--border-hot);
+    padding:0 24px;
+    transition: background-color 0.3s ease;
+  }
+  body:not(.dark-theme) header {
+      background: rgba(255, 255, 255, 0.92);
+  }
+  body.dark-theme header {
+      background: rgba(11, 15, 26, 0.92);
+  }
+
+  .header-inner{
+    max-width:1100px;margin:0 auto;
+    display:flex;align-items:center;justify-content:space-between;
+    height:60px;gap:16px;
+  }
+  .brand{
+    font-size:13px;font-weight:800;letter-spacing:.12em;
+    color:var(--brand);text-transform:uppercase;white-space:nowrap;
+  }
+  .title-block{flex:1;min-width:0;}
+  .title-block h1{
+    font-size:14px;font-weight:700;
+    color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .title-block .badge{
+    display:inline-block;margin-top:2px;
+    font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;
+    color:var(--brand);background:var(--brand-glow);
+    border:1px solid rgba(255,107,0,0.3);
+    padding:1px 7px;border-radius:20px;
+  }
+  .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+  }
+  .theme-toggle-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 50%;
+      width: 34px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.2s;
+  }
+  .theme-toggle-btn:hover {
+      background: var(--surface2);
+      color: var(--text);
+  }
+  
+  /* ── MAIN ────────────────────────────────── */
+  main{max-width:1100px;margin:0 auto;padding:28px 20px 80px; position:relative; z-index:1;}
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--brand);
+    text-decoration: none;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    transition: transform .2s;
+  }
+  .back-link:hover {
+    transform: translateX(-3px);
+  }
+
+  /* ── TABS ────────────────────────────────── */
+  .tabs-nav{
+    display:flex;gap:4px;
+    border-bottom:1px solid var(--border);
+    margin-bottom:28px;
+    overflow-x:auto;
+    scrollbar-width:none;
+  }
+  .tabs-nav::-webkit-scrollbar{display:none;}
+  .tab-btn{
+    flex-shrink:0;
+    padding:10px 18px;
+    font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--text-muted);background:transparent;border:none;cursor:pointer;
+    border-bottom:2px solid transparent;
+    transition:all .2s;
+  }
+  .tab-btn:hover{color:var(--text);}
+  .tab-btn.active{color:var(--brand);border-bottom-color:var(--brand);}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;animation:fadeIn .25s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+  /* ── SEARCH ──────────────────────────────── */
+  .search-wrap{margin-bottom:22px;position:relative;}
+  .search-input{
+    width:100%;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--r);
+    padding:10px 14px 10px 40px;
+    color:var(--text);
+    font-family:'Inter',sans-serif;font-size:14px;
+    outline:none;transition:border-color .2s;
+    box-shadow: var(--shadow);
+  }
+  .search-input:focus{border-color:var(--border-hot);}
+  .search-icon{
+    position:absolute;left:13px;top:50%;transform:translateY(-50%);
+    color:var(--text-dim);font-size:15px;pointer-events:none;
+  }
+  .search-clear{
+    position:absolute;right:12px;top:50%;transform:translateY(-50%);
+    color:var(--text-dim);background:none;border:none;cursor:pointer;
+    font-size:16px;padding:4px;display:none;
+  }
+
+  /* ── SECTION HEADING ─────────────────────── */
+  .sec-header{
+    display:flex;align-items:center;gap:10px;
+    margin-bottom:18px;
+  }
+  .sec-header h2{
+    font-size:16px;font-weight:800;letter-spacing:-.01em;color:var(--text);
+  }
+  .sec-header .tag{
+    font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--brand);background:var(--brand-glow);
+    border:1px solid rgba(255,107,0,.3);
+    padding:2px 8px;border-radius:20px;
+  }
+
+  /* ── CARDS (Genéricos) ───────────────────── */
+  .info-card{
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--r);
+    margin-bottom:14px;overflow:hidden;
+    transition:border-color .2s, box-shadow 0.2s;
+    box-shadow: var(--shadow);
+  }
+  .info-card:hover{border-color:var(--border-hot);}
+  .card-head{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 18px;cursor:pointer;gap:12px;
+    user-select:none;
+  }
+  .card-head-left{display:flex;align-items:center;gap:12px;flex:1;min-width:0;}
+  .card-head h3{
+      font-size:14px;font-weight:700;color:var(--text);
+      overflow:hidden;text-overflow:ellipsis;
+  }
+  .chevron{color:var(--text-dim);transition:transform .25s;font-size:12px;flex-shrink:0;}
+  .card-body{
+    padding:0 18px;max-height:0;overflow:hidden;
+    transition:max-height .4s ease, padding .4s ease;
+  }
+  .card-body.open{max-height:2500px;padding:0 18px 18px;}
+  
+  /* ── BADGES & ELEMENTS ───────────────────── */
+  .badge-tag{
+    font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    padding:3px 9px;border-radius:20px;flex-shrink:0;
+  }
+  .bg-brand { color: var(--brand); background: var(--brand-glow); border: 1px solid rgba(255,107,0,.3); }
+  .bg-blue { color: var(--blue); background: var(--blue-bg); border: 1px solid var(--blue-border); }
+  .bg-yellow { color: var(--yellow); background: var(--yellow-bg); border: 1px solid var(--yellow-border); }
+  .bg-green { color: var(--green); background: var(--green-bg); border: 1px solid var(--green-border); }
+  .bg-red { color: var(--red); background: var(--red-bg); border: 1px solid var(--red-border); }
+  .bg-purple { color: var(--purple); background: var(--purple-bg); border: 1px solid var(--purple-border); }
+
+  .blockquote{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;line-height:1.7;
+    color:var(--text); 
+    background:var(--surface2);
+    border-left:4px solid var(--brand);
+    border-radius:0 var(--r-sm) var(--r-sm) 0;
+    padding:12px 16px;
+    margin-bottom:14px;
+  }
+  
+  .detail-row{
+    display:flex;gap:10px;align-items:flex-start;
+    padding:10px 0;border-top:1px solid var(--border);
+    font-size:13.5px;
+  }
+  .detail-row:first-of-type{border-top:none;}
+  .detail-icon{font-size:15px;flex-shrink:0;margin-top:2px;}
+  .detail-label{font-weight:700;color:var(--text-muted);margin-right:4px;}
+  .detail-text{color:var(--text);flex:1;}
+  
+  mark.y{background:var(--yellow-bg);color:var(--yellow);border-radius:2px;padding:0 2px;}
+  mark.r{background:var(--red-bg);color:var(--red);border-radius:2px;padding:0 2px;}
+  mark.b{background:var(--blue-bg);color:var(--blue);border-radius:2px;padding:0 2px;}
+  mark.g{background:var(--green-bg);color:var(--green);border-radius:2px;padding:0 2px;}
+
+  .false-stmt{
+    font-size:13.5px;font-style:italic;
+    color:var(--red);
+    background:var(--red-bg);
+    border:1px solid var(--red-border);
+    border-radius:var(--r-sm);
+    padding:10px 14px;
+    margin-bottom:14px;
+    line-height:1.6;
+  }
+  .false-stmt::before{content:'❝ ';font-style:normal;opacity:.6;}
+  
+  .stmt-box{
+    font-size:13px;font-style:italic;
+    color:var(--yellow);
+    background:var(--yellow-bg);
+    border:1px solid var(--yellow-border);
+    border-radius:var(--r-sm);
+    padding:10px 13px;margin-top:8px;
+    line-height:1.6;
+  }
+  
+  .simulado-box{
+    background:var(--surface2);border:1px solid var(--border);
+    border-radius:var(--r-sm);padding:14px 16px;margin-top:12px;
+  }
+  .simulado-label{
+    font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--text-dim);margin-bottom:10px;
+  }
+  .simulado-q{
+    font-size:13.5px;color:var(--text-muted);
+    font-style:italic;line-height:1.6;margin-bottom:12px;
+  }
+
+  .fonte-tag{
+    font-size:11px;color:var(--brand);
+    background:var(--brand-glow);
+    border:1px solid rgba(255,107,0,.2);
+    padding:2px 8px;border-radius:20px;
+    display:inline-block;margin-top:10px;
+  }
+  
+  /* Discursivas Specific */
+  .skeleton-list {
+      list-style: none;
+      margin-top: 10px;
+  }
+  .skeleton-list li {
+      position: relative;
+      padding-left: 20px;
+      margin-bottom: 10px;
+      font-size: 13.5px;
+      color: var(--text);
+  }
+  .skeleton-list li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: var(--brand);
+      font-weight: bold;
+      font-size: 16px;
+  }
+
+  /* ── FOOTER ──────────────────────────────── */
+  footer{
+    text-align:center;padding:28px;
+    font-size:12px;color:var(--text-dim);
+    border-top:1px solid var(--border);
+  }
+  footer span{color:var(--brand); font-weight: 600;}
+
+  /* ── RESPONSIVE ──────────────────────────── */
+  @media(max-width:600px){
+    .header-inner{padding:0 4px;}
+    main{padding:20px 12px 60px;}
+    .tab-btn{padding:9px 12px;font-size:11px;}
+    .card-head h3{font-size:13px;}
+  }
+</style>
+<link rel="stylesheet" href="./assets/tokens.css"/>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══════════════════════════════ -->
+<header>
+  <div class="header-inner">
+    <div class="brand">⚖️ Delta</div>
+    <div class="title-block">
+      <h1>Direito Administrativo · Noções Iniciais e Princípios</h1>
+      <span class="badge">Delegado PC · PF · Cebraspe / Vunesp</span>
+    </div>
+    <div class="header-actions">
+        <button class="theme-toggle-btn" id="themeToggle" onclick="toggleTheme()" title="Alternar Tema Claro/Escuro">
+            ☀️
+        </button>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ MAIN ══════════════════════════════════ -->
+<main>
+
+  <a href="./index.html" class="back-link">← Voltar ao índice</a>
+
+  <!-- SEARCH -->
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" class="search-input" id="searchInput" placeholder="Buscar em todos os blocos de Direito Administrativo..." oninput="handleSearch()" />
+    <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
+  </div>
+
+  <!-- TABS NAV -->
+  <nav class="tabs-nav" role="tablist">
+    <button class="tab-btn active" onclick="showTab('literais',this)">📌 Literais</button>
+    <button class="tab-btn" onclick="showTab('pegadinhas',this)">🔥 Pegadinhas</button>
+    <button class="tab-btn" onclick="showTab('juris',this)">🏛️ Jurisprudência</button>
+    <button class="tab-btn" onclick="showTab('apostas',this)">🎯 Apostas 2026</button>
+    <button class="tab-btn" onclick="showTab('discursivas',this)">✍️ Discursivas</button>
+  </nav>
+
+  <!-- ═══ TAB 1: LITERAIS ═══════════════════════ -->
+  <div class="tab-panel active" id="tab-literais">
+    <div class="sec-header">
+      <h2>Textos Literais Críticos & Dispositivos Essenciais</h2>
+      <span class="tag">CF/88 · Leis 9.784 · 8.987 · 14.133 · 14.129 · LINDB</span>
+    </div>
+
+    <!-- Art. 37, caput CF -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Art. 37, caput CF/88</span>
+          <h3>Princípios Constitucionais Expressos (LIMPE)</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge-tag bg-yellow">Altíssima</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="blockquote">"A administração pública direta e indireta de qualquer dos Poderes da União, dos Estados, do Distrito Federal e dos Municípios obedecerá aos princípios de legalidade, impessoalidade, moralidade, publicidade e eficiência..."</div>
+        <div class="detail-row">
+          <span class="detail-icon">🔑</span>
+          <div><span class="detail-label">Mnemônico LIMPE:</span><span class="detail-text">
+            <strong>L</strong>egalidade, <strong>I</strong>mpessoalidade, <strong>M</strong>oralidade, <strong>P</strong>ublicidade e <strong>E</strong>ficiência (este último acrescentado pela EC 19/1998 — Reforma Gerencial).
+          </span></div>
+        </div>
+        <div class="detail-row">
+          <span class="detail-icon">⚖️</span>
+          <div><span class="detail-label">Alcance Subjetivo:</span><span class="detail-text">
+            Aplica-se de forma cogente e direta a <mark class="b">todos os Poderes</mark> (Executivo, Legislativo e Judiciário), a <mark class="b">todas as esferas federativas</mark> (União, Estados, DF e Municípios) e a toda a <mark class="b">Administração Direta e Indireta</mark> (autarquias, fundações, empresas públicas e sociedades de economia mista).
+          </span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Art. 37, § 1º CF -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Art. 37, § 1º CF/88</span>
+          <h3>Vedação à Promoção Pessoal na Publicidade Oficial</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge-tag bg-red">Despenca</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="blockquote">"A publicidade dos atos, programas, obras, serviços e campanhas dos órgãos públicos deverá ter caráter educativo, informativo ou de orientação social, dela não podendo constar nomes, símbolos ou imagens que caracterizem promoção pessoal de autoridades ou servidores públicos."</div>
+        <div class="detail-row">
+          <span class="detail-icon">⚠️</span>
+          <div><span class="detail-label">Desdobramento da Impessoalidade:</span><span class="detail-text">
+            A publicidade estatal é instrumental e visa o controle social e a transparência democrática. É <mark class="r">terminantemente vedada a vinculação de símbolos, nomes, cores partidárias ou slogans</mark> que associem obras ou programas estatais a governantes ou servidores.
+          </span></div>
+        </div>
+        <div class="detail-row">
+          <span class="detail-icon">🏛️</span>
+          <div><span class="detail-label">Inflexibilidade (STF ADI 6522/DF):</span><span class="detail-text">
+            O § 1º do art. 37 da CF <mark class="r">não admite flexibilização por norma infraconstitucional ou regimental local</mark>. Norma distrital/estadual que autorize divulgação pessoal com verba pública é formal e materialmente inconstitucional.
+          </span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Art. 37, V CF -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Art. 37, V CF/88</span>
+          <h3>Cargos em Comissão x Funções de Confiança</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge-tag bg-green">Alta</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="blockquote">"As funções de confiança, exercidas exclusivamente por servidores ocupantes de cargo efetivo, e os cargos em comissão, a serem preenchidos por servidores de carreira nos casos, condições e percentuais mínimos previstos em lei, destinam-se apenas às atribuições de direção, chefia e assessoramento."</div>
+        <div class="detail-row">
+          <span class="detail-icon">📌</span>
+          <div><span class="detail-label">Funções de Confiança:</span><span class="detail-text">Exercidas <mark class="y">EXCLUSIVAMENTE por servidores efetivos</mark> (titulares de cargo de carreira).</span></div>
+        </div>
+        <div class="detail-row">
+          <span class="detail-icon">📌</span>
+          <div><span class="detail-label">Cargos em Comissão:</span><span class="detail-text">De livre nomeação e livre exoneração (<em>ad nutum</em>). Podem ser ocupados por pessoas sem vínculo prévio, mas a lei DEVE reservar um percentual mínimo para servidores de carreira.</span></div>
+        </div>
+        <div class="detail-row">
+          <span class="detail-icon">🚫</span>
+          <div><span class="detail-label">Atribuições Exclusivas (DCA):</span><span class="detail-text">Ambos destinam-se <strong>apenas</strong> a atividades de <mark class="b">Direção, Chefia e Assessoramento</mark>. É inconstitucional criar cargos comissionados para atividades técnicas, braçais ou operacionais.</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Art. 53 e 54 da Lei 9.784/99 -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Arts. 53 e 54 Lei 9.784/99</span>
+          <h3>Autotutela Administrativa e Prazo Decadencial Quinquenal</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge-tag bg-yellow">Altíssima</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="blockquote">"Art. 53. A Administração deve anular seus próprios atos, quando eivados de vício de legalidade, e pode revogá-los por motivo de conveniência ou oportunidade, respeitados os direitos adquiridos."<br><br>
+        "Art. 54. O direito da Administração de anular os atos administrativos de que decorram efeitos favoráveis para os destinatários decai em cinco anos, contados da data em que foram praticados, salvo comprovada má-fé."</div>
+        <div class="detail-row">
+          <span class="detail-icon">⚖️</span>
+          <div><span class="detail-label">Anulação vs. Revogação:</span><span class="detail-text">
+            <strong>Anulação</strong> = ato ilegal (dever da Administração, efeitos retroativos <em>ex tunc</em>).<br>
+            <strong>Revogação</strong> = ato válido, mas inoportuno ou inconveniente (faculdade da Administração, efeitos prospectivos <em>ex nunc</em>, respeitados direitos adquiridos).
+          </span></div>
+        </div>
+        <div class="detail-row">
+          <span class="detail-icon">⏳</span>
+          <div><span class="detail-label">Decadência de 5 anos (Súmula 633-STJ):</span><span class="detail-text">
+            O prazo decadencial quinquenal do art. 54 aplica-se de forma subsidiária a <strong>Estados e Municípios</strong> que não tenham legislação específica sobre processo administrativo.
+          </span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Art. 6º da Lei 8.987/95 -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Art. 6º Lei 8.987/95</span>
+          <h3>Princípio da Continuidade do Serviço Público & Hipóteses de Corte</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge-tag bg-green">Alta</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="blockquote">"Art. 6º, § 3º Não se caracteriza como descontinuidade do serviço a sua interrupção em situação de emergência ou após prévio aviso, quando:<br>
+        I - motivada por razões de ordem técnica ou de segurança das instalações; e,<br>
+        II - por inadimplemento do usuário, considerado o interesse da coletividade.<br>
+        § 4º A interrupção do serviço na hipótese prevista no inciso II do § 3º deste artigo não poderá iniciar-se na sexta-feira, no sábado ou no domingo, nem em feriado ou no dia anterior a feriado. (Lei 14.015/2020)"</div>
+        <div class="detail-row">
+          <span class="detail-icon">⚠️</span>
+          <div><span class="detail-label">Regra do Corte:</span><span class="detail-text">
+            Corte por inadimplemento <strong>exige prévio aviso específico</strong>. É expressamente proibido efetuar o corte em finais de semana, feriados ou na véspera (para garantir ao cidadão meios de pagamento/religação imediata).
+          </span></div>
+        </div>
+        <div class="detail-row">
+          <span class="detail-icon">🚫</span>
+          <div><span class="detail-label">Serviços Essenciais:</span><span class="detail-text">
+            Não se admite corte por inadimplemento em unidades que prestam serviços públicos de saúde indispensáveis à vida (hospitais, prontos-socorros). A cobrança deve ocorrer pelas vias ordinárias.
+          </span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Art. 137 e 104 da Lei 14.133/21 -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Arts. 104, V e 137 Lei 14.133/21</span>
+          <h3>Continuidade nos Contratos Administrativos (Nova NLLC)</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge-tag bg-blue">Média</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="blockquote">"Art. 137, § 2º, IV — O contratado terá direito à extinção do contrato ou à suspensão do cumprimento de suas obrigações até que seja normalizada a situação nas seguintes hipóteses: (...) atraso superior a 2 (dois) meses, contado da emissão da nota fiscal, dos pagamentos ou de parcelas de pagamentos devidos pela Administração..."</div>
+        <div class="detail-row">
+          <span class="detail-icon">💡</span>
+          <div><span class="detail-label">Mitigação da Exceptio Non Adimpleti Contractus:</span><span class="detail-text">
+            Diferente do direito privado (onde a exceção do contrato não cumprido é imediata), no regime administrativo o particular contratado é obrigado a suportar até <mark class="y">2 (dois) meses de inadimplência estatal</mark> antes de poder paralisar a execução do contrato (na revogada Lei 8.666/93 o prazo era de 90 dias).
+          </span></div>
+        </div>
+        <div class="detail-row">
+          <span class="detail-icon">🛡️</span>
+          <div><span class="detail-label">Ocupação Provisória (Art. 104, V):</span><span class="detail-text">
+            A Administração tem a prerrogativa de ocupar provisoriamente bens móveis, imóveis e utilizar pessoal da contratada na iminência de paralisação de serviços essenciais.
+          </span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Art. 30 LINDB -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Art. 30 da LINDB</span>
+          <h3>Precedentes Administrativos & Segurança Jurídica</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge-tag bg-blue">Média</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="blockquote">"Art. 30. As autoridades públicas devem atuar para aumentar a segurança jurídica na aplicação das normas, inclusive por meio de regulamentos, súmulas administrativas e respostas a consultas.<br>
+        Parágrafo único. Os instrumentos previstos no caput deste artigo terão caráter vinculante em relação ao órgão ou entidade a que se destinam, até ulterior revisão."</div>
+        <div class="detail-row">
+          <span class="detail-icon">🔒</span>
+          <div><span class="detail-label">Efeito Vinculante:</span><span class="detail-text">
+            Súmulas administrativas e consultas formalmente respondidas vinculam os órgãos sob a mesma competência institucional, impedindo oscilações arbitrárias de orientação contra o administrado.
+          </span></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /tab-literais -->
+
+  <!-- ═══ TAB 2: PEGADINHAS ═════════════════════ -->
+  <div class="tab-panel" id="tab-pegadinhas">
+    <div class="sec-header">
+      <h2>Pegadinhas & Distratores de Banca</h2>
+      <span class="tag">Cebraspe · Vunesp · FGV · FCC</span>
+    </div>
+
+    <!-- Pegadinha 1: Sentidos da Administração -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-red">Sentidos da Adm.</span>
+          <h3>Administração Pública em Sentido Estrito vs. Amplo</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="false-stmt">A Administração Pública em sentido material estrito compreende a formulação das políticas públicas de governo e a execução das atividades administrativas.</div>
+        <div class="detail-row">
+          <span class="detail-icon">❌</span>
+          <div><span class="detail-label">Por que está errado?</span><span class="detail-text">
+            Em sentido <strong>estrito</strong>, a Administração Pública compreende <mark class="r">apenas a função administrativa (execução)</mark>, excluindo os atos de governo. A formulação de políticas gerais e diretrizes políticas integra o conceito de Administração Pública em <strong>sentido amplo</strong> (função política + função administrativa).
+          </span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pegadinha 2: Critério do Poder Executivo -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-red">Conceituação</span>
+          <h3>Critério do Poder Executivo (Subjetivista)</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="false-stmt">O Direito Administrativo pode ser conceituado como o complexo de normas que disciplina com exclusividade a atuação do Poder Executivo na gestão dos negócios públicos.</div>
+        <div class="detail-row">
+          <span class="detail-icon">❌</span>
+          <div><span class="detail-label">Por que está errado?</span><span class="detail-text">
+            Essa teoria (critério do Poder Executivo/italiano) é rejeitada porque: 1) <mark class="r">Todos os Poderes exercem função administrativa</mark> de forma atípica (concursos no Judiciário, licitações no Legislativo); 2) No âmbito do próprio Executivo existem atos puramente políticos (função de governo), regidos pelo Direito Constitucional. O critério moderno é o <strong>Funcional</strong> (rege a função administrativa, independentemente do Poder que a exerça).
+          </span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pegadinha 3: Legalidade Pública vs. Privada -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-red">Legalidade</span>
+          <h3>Autonomia da Vontade e Atos Inominados no Direito Público</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="false-stmt">Em decorrência do princípio da legalidade, tanto o particular quanto o administrador público podem praticar quaisquer atos que não sejam expressamente proibidos pelo ordenamento.</div>
+        <div class="detail-row">
+          <span class="detail-icon">❌</span>
+          <div><span class="detail-label">Por que está errado?</span><span class="detail-text">
+            O particular goza de legalidade em sentido amplo/privada (autonomia da vontade: faz tudo o que a lei não proíbe). O administrador público subordina-se à <strong>vinculação positiva à lei (<em>positive Bindung</em>)</strong>: <mark class="r">só pode fazer aquilo que a lei autoriza ou determina</mark>. Na Administração Pública é <strong>vedada a prática de atos inominados</strong>.
+          </span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pegadinha 4: Nepotismo em Cargos Políticos -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-red">Súmula Vinculante 13</span>
+          <h3>Nomeação de Parentes para Cargos Políticos (Secretários / Ministros)</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="false-stmt">A Súmula Vinculante 13 veda de forma irrestrita e automática a nomeação de parentes de qualquer autoridade pública para cargos de Secretário Municipal ou Estadual.</div>
+        <div class="detail-row">
+          <span class="detail-icon">❌</span>
+          <div><span class="detail-label">Por que está errado?</span><span class="detail-text">
+            Segundo o STF, a SV 13 <mark class="y">em regra NÃO se aplica aos cargos públicos de natureza política</mark> (Ministros, Secretários Estaduais e Municipais). A vedação aos cargos políticos é <strong>excepcional</strong> e só ocorre se ficar demonstrada: 1) <mark class="r">manifesta ausência de qualificação técnica ou inidoneidade moral</mark>; 2) <mark class="r">fraude à lei / nepotismo cruzado</mark> (STF Rcl 28024 AgR e Rcl 29033 AgR).
+          </span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pegadinha 5: Autotutela x Tutela x Autoexecutoriedade -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-red">Conceitos</span>
+          <h3>Confusão entre Autotutela, Tutela e Autoexecutoriedade</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="false-stmt">O controle finalístico e a supervisão ministerial exercida pela União sobre as autarquias federais decorre diretamente do princípio da autotutela.</div>
+        <div class="detail-row">
+          <span class="detail-icon">❌</span>
+          <div><span class="detail-label">Por que está errado?</span><span class="detail-text">
+            O controle exercido pela Administração Direta sobre a Indireta (supervisão ministerial) decorre do <mark class="b">princípio da Tutela Administrativa</mark> (controle finalístico). A <strong>Autotutela</strong> é o poder interno da Administração de anular seus próprios atos ilegais e revogar os inoportunos. Já a <strong>Autoexecutoriedade</strong> é o atributo pelo qual o ato é executado diretamente sem chancela prévia do Judiciário.
+          </span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pegadinha 6: Corte de Energia e Débitos Pretéritos -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-red">Serviços Públicos</span>
+          <h3>Corte de Energia por Dívida Antiga ou do Proprietário Anterior</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="false-stmt">A concessionária pode suspender o fornecimento de energia elétrica do imóvel caso o novo inquilino se recuse a pagar faturas pendentes deixadas pelo antigo morador.</div>
+        <div class="detail-row">
+          <span class="detail-icon">❌</span>
+          <div><span class="detail-label">Por que está errado?</span><span class="detail-text">
+            O débito de serviço público essencial tem <strong>natureza pessoal (<em>propter personam</em>)</strong> e não acompanha o imóvel (não é <em>propter rem</em>). É <mark class="r">ilegítimo o corte por dívida de usuário anterior</mark>, bem como o corte decorrente de <mark class="r">débitos pretéritos</mark> (o corte só cabe para a fatura regular e atual de consumo).
+          </span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pegadinha 7: Teoria dos Motivos Determinantes e Exoneração -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-red">Motivação</span>
+          <h3>Teoria dos Motivos Determinantes em Cargos Comissionados</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="false-stmt">Como a exoneração de cargo em comissão é ad nutum e não exige motivação, a alegação de motivo falso no decreto exoneratório não contamina a validade do ato.</div>
+        <div class="detail-row">
+          <span class="detail-icon">❌</span>
+          <div><span class="detail-label">Por que está errado?</span><span class="detail-text">
+            Pela <strong>Teoria dos Motivos Determinantes</strong>, mesmo quando a lei dispensar a motivação, se o administrador optar voluntariamente por motivar o ato, a sua validade ficará indissociavelmente <mark class="r">vinculada à existência e veracidade dos motivos externados</mark>. Se o motivo alegado for falso, inexistente ou juridicamente inadequado, o ato será <strong>NULO</strong>.
+          </span></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /tab-pegadinhas -->
+
+  <!-- ═══ TAB 3: JURISPRUDÊNCIA ═════════════════ -->
+  <div class="tab-panel" id="tab-juris">
+    <div class="sec-header">
+      <h2>Jurisprudência em Destaque & Súmulas dos Tribunais Superiores</h2>
+      <span class="tag">STF · STJ · Súmulas Vinculantes · Informativos Recentes</span>
+    </div>
+
+    <!-- Súmula Vinculante 13 STF -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-purple">Súmula Vinculante 13 STF</span>
+          <h3>Nepotismo Direto e Cruzado na Administração Pública</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="blockquote">"A nomeação de cônjuge, companheiro ou parente em linha reta, colateral ou por afinidade, até o terceiro grau, inclusive, da autoridade nomeante ou de servidor da mesma pessoa jurídica investido em cargo de direção, chefia ou assessoramento, para o exercício de cargo em comissão ou de confiança ou, ainda, de função gratificada na administração pública direta e indireta em qualquer dos poderes da União, dos Estados, do Distrito Federal e dos Municípios, compreendido o ajuste mediante designações recíprocas, viola a Constituição Federal."</div>
+        <div class="detail-row">
+          <span class="detail-icon">📌</span>
+          <div><span class="detail-label">Grau de Parentesco:</span><span class="detail-text">Até o <mark class="y">3º grau</mark> (pais/filhos = 1º; avós/netos/irmãos = 2º; tios/sobrinhos/bisavós = 3º; primos são de 4º grau e NÃO entram na vedação da súmula).</span></div>
+        </div>
+        <div class="detail-row">
+          <span class="detail-icon">🔄</span>
+          <div><span class="detail-label">Nepotismo Cruzado:</span><span class="detail-text">Ajuste mediante designações recíprocas (ex.: Prefeito A nomeia parente do Vereador B, e o Vereador B nomeia parente do Prefeito A na Câmara). É expressamente nulo e inconstitucional.</span></div>
+        </div>
+        <div class="detail-row">
+          <span class="detail-icon">⚖️</span>
+          <div><span class="detail-label">Cargos Efetivos (STF Info 815 e Delegado RN):</span><span class="detail-text">Não há nepotismo se o servidor concursado (efetivo) apenas tiver parente no órgão sem que este exerça influência hierárquica na sua designação. Normas inibitórias de nepotismo <mark class="g">não incidem sobre a aprovação em cargos efetivos</mark> (preservação do concurso público).</span></div>
+        </div>
+        <div class="detail-row">
+          <span class="detail-icon">📜</span>
+          <div><span class="detail-label">Lei 14.230/21 (LIA):</span><span class="detail-text">O art. 11, XI da Lei de Improbidade Administrativa tipificou expressamente o nepotismo como ato doloso de improbidade que atenta contra os princípios da administração pública.</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Súmulas 473 STF e 633 STJ -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-purple">STF & STJ</span>
+          <h3>Autotutela, Decadência e Limites Temporais</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="detail-row">
+          <span class="detail-icon">🏛️</span>
+          <div><span class="detail-label">Súmula 473-STF:</span><span class="detail-text">A administração pode anular seus próprios atos quando eivados de vícios que os tornam ilegais (efeito <em>ex tunc</em>), porque deles não se originam direitos; ou revogá-los por conveniência/oportunidade (efeito <em>ex nunc</em>), respeitados os direitos adquiridos e a apreciação judicial.</span></div>
+        </div>
+        <div class="detail-row">
+          <span class="detail-icon">🏛️</span>
+          <div><span class="detail-label">Súmula 633-STJ:</span><span class="detail-text">A Lei nº 9.784/99 (especialmente o prazo decadencial de 5 anos do art. 54) aplica-se subsidiariamente aos Estados e Municípios na omissão de norma local específica.</span></div>
+        </div>
+        <div class="detail-row">
+          <span class="detail-icon">⚖️</span>
+          <div><span class="detail-label">STF ADI 6019/SP (Info 1012):</span><span class="detail-text">É <strong>inconstitucional</strong> lei estadual que estabeleça prazo decadencial de 10 (dez) anos para anulação de atos pela Administração, por violação aos princípios da isonomia e da segurança jurídica (o padrão nacional é de 5 anos).</span></div>
+        </div>
+        <div class="detail-row">
+          <span class="detail-icon">🛡️</span>
+          <div><span class="detail-label">Atos Inconstitucionais NÃO decaem:</span><span class="detail-text">O prazo decadencial de 5 anos <strong>não se aplica</strong> a atos que afrontem diretamente a Constituição da República (ex.: titularidade de cartório sem concurso público — STF MS 26860; anistia política concedida sem perseguição — STF Tema 839).</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Súmula 665 STJ -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-purple">Súmula 665 STJ (12/2023)</span>
+          <h3>Controle Jurisdicional do Processo Administrativo Disciplinar (PAD)</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="blockquote">"O controle jurisdicional do processo administrativo disciplinar restringe-se ao exame da regularidade do procedimento e da legalidade do ato, à luz dos princípios do contraditório, da ampla defesa e do devido processo legal, não sendo possível incursão no mérito administrativo, ressalvadas as hipóteses de flagrante ilegalidade, teratologia ou manifesta desproporcionalidade da sanção aplicada."</div>
+        <div class="detail-row">
+          <span class="detail-icon">🎯</span>
+          <div><span class="detail-label">Aplicação Prática:</span><span class="detail-text">
+            O Judiciário não substitui o juízo discricionário da comissão processante nem da autoridade julgadora quanto à conveniência da punição, exceto quando houver <mark class="r">teratologia (decisão absurda), ilegalidade manifesta ou flagrante desproporcionalidade</mark> (ex.: demissão aplicada a falta leve).
+          </span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Súmula Vinculante 3 STF -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-purple">Súmula Vinculante 3 STF</span>
+          <h3>Contraditório e Ampla Defesa no Tribunal de Contas</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="blockquote">"Nos processos perante o Tribunal de Contas da União asseguram-se o contraditório e a ampla defesa quando da decisão puder resultar anulação ou revogação de ato administrativo que beneficie o interessado, excetuada a apreciação da legalidade do ato de concessão inicial de aposentadoria, reforma e pensão."</div>
+        <div class="detail-row">
+          <span class="detail-icon">⚠️</span>
+          <div><span class="detail-label">Exceção da Exceção (STF Tema 445):</span><span class="detail-text">
+            Em se tratando de ato complexo de concessão de aposentadoria, o TCU tem <strong>5 anos</strong> a contar da chegada do processo à Corte de Contas para julgar a legalidade sem necessidade de contraditório prévio. <mark class="y">Decorrido o prazo de 5 anos sem julgamento definitivo</mark>, passa a ser obrigatória a concessão de contraditório e ampla defesa ao beneficiário.
+          </span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STF: ARE 654432 (Greve Policial) -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-purple">STF ARE 654432 (Tema 860)</span>
+          <h3>Vedação Absoluta ao Direito de Greve para Policiais Civis e Segurança</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="blockquote">"O exercício do direito de greve, sob qualquer forma ou modalidade, é vedado aos policiais civis e a todos os servidores públicos que atuem diretamente na área de segurança pública." (STF Plenário, Min. Alexandre de Moraes).</div>
+        <div class="detail-row">
+          <span class="detail-icon">🛡️</span>
+          <div><span class="detail-label">Ratio Decidendi:</span><span class="detail-text">
+            O Estado detém o monopólio legítimo da força armada. A atividade de segurança pública é <strong>indelegável, insubstituível</strong> por particulares e vital para a manutenção da ordem pública e da paz social. O interesse social prepondera sobre o direito de greve da categoria.
+          </span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Súmula 615 STJ & Intranscendência Subjetiva -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-purple">STF & STJ</span>
+          <h3>Princípio da Intranscendência Subjetiva das Sanções</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="detail-row">
+          <span class="detail-icon">🏛️</span>
+          <div><span class="detail-label">Súmula 615-STJ (Gestão Sucessora):</span><span class="detail-text">
+            Não pode ocorrer ou permanecer a inscrição do município em cadastros restritivos (CAUC, SIAFI, CADIN) fundada em irregularidades da <strong>gestão anterior</strong>, quando a gestão sucessora tiver adotado as providências cabíveis de apuração e reparação dos danos.
+          </span></div>
+        </div>
+        <div class="detail-row">
+          <span class="detail-icon">⚖️</span>
+          <div><span class="detail-label">Órgãos Autônomos e Entidades (STF ACO 3072 e 1848):</span><span class="detail-text">
+            O Poder Executivo estadual/municipal não pode sofrer sanções ou bloqueio de repasses por descumprimento de limites fiscais praticados pelo <strong>Ministério Público, Poder Judiciário ou Autarquias</strong>, pois estes possuem autonomia institucional e financeira própria.
+          </span></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /tab-juris -->
+
+  <!-- ═══ TAB 4: APOSTAS 2026 ═══════════════════ -->
+  <div class="tab-panel" id="tab-apostas">
+    <div class="sec-header">
+      <h2>Apostas & Tendências Doutrinárias 2026</h2>
+      <span class="tag">Doutrina de Ponta · Provas Cebraspe / Delegado</span>
+    </div>
+
+    <!-- Aposta 1: Transadministrativismo -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Doutrina Avançada</span>
+          <h3>Transadministrativismo & Direito Administrativo Global</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="stmt-box">
+          Conceito cunhado por Diogo de Figueiredo Moreira Neto: o transadministrativismo é a disciplina jurídica das relações assimétricas de poder que se institucionalizam consensualmente fora e além do Estado. Representa uma espécie do gênero direito administrativo global.
+        </div>
+        <div class="detail-row">
+          <span class="detail-icon">🎯</span>
+          <div><span class="detail-label">Como cai em prova:</span><span class="detail-text">
+            "O fenômeno que estuda os centros normativos transestatais surgidos de necessidades ordinatórias não providas pelos Estados soberanos é denominado transadministrativismo." → <strong>Correto</strong>. Trata-se do correlato administrativo ao transconstitucionalismo.
+          </span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Aposta 2: Administração Dialógica -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Consensualismo</span>
+          <h3>Administração Pública Dialógica (Ronny Charles)</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="stmt-box">
+          A Administração Pública Dialógica reflete a tendência contemporânea de substituição dos atos estatais unilaterais e impositivos por mecanismos de diálogo prévio, concertação e cooperação com os administrados nas decisões regulatórias, prestação de serviços públicos e grandes empreendimentos.
+        </div>
+        <div class="detail-row">
+          <span class="detail-icon">🎯</span>
+          <div><span class="detail-label">Como cai em prova:</span><span class="detail-text">
+            Associa-se à busca pela legitimidade democrática procedimental da Administração Pública por meio de audiências públicas com devolutiva fundamentada, acordos substitutivos e consultas participativas.
+          </span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Aposta 3: Desconstrução da Supremacia do Interesse Público -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Pós-Positivismo</span>
+          <h3>"Desconstrução" da Supremacia do Interesse Público em Abstrato</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="stmt-box">
+          A doutrina administrativista contemporânea (Daniel Sarmento, Gustavo Binenbojm, Rafael Oliveira) critica a primazia apriorística e abstrata do interesse público sobre os direitos individuais. Propõe-se a substituição pela noção de Princípio da Finalidade Pública e ponderação concreta de direitos fundamentais.
+        </div>
+        <div class="detail-row">
+          <span class="detail-icon">🎯</span>
+          <div><span class="detail-label">Como cai em prova:</span><span class="detail-text">
+            O interesse público não é um conceito absoluto e autárquico contra o indivíduo. Em colisões no caso concreto, a atuação estatal deve ser balizada pela proporcionalidade e máxima eficácia de todos os direitos em jogo, e não pela aniquilação automática do interesse privado.
+          </span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Aposta 4: Princípio da Responsividade e Governo Digital -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Inovação</span>
+          <h3>Princípio da Responsividade & Lei do Governo Digital (Lei 14.129/21)</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="stmt-box">
+          Responsividade (Diogo de Figueiredo): dever jurídico de o administrador, ao exercer o poder discricionário, atender com legitimidade e eficiência aos anseios da sociedade. A Lei 14.129/21 institucionalizou o Governo Digital com foco no autosserviço, interoperabilidade e CPF/CNPJ como chave universal de identificação.
+        </div>
+        <div class="detail-row">
+          <span class="detail-icon">🎯</span>
+          <div><span class="detail-label">Como cai em prova:</span><span class="detail-text">
+            A Lei do Governo Digital aplica-se aos três Poderes das três esferas federativas, mas <mark class="r">NÃO se aplica a empresas públicas e sociedades de economia mista que explorem atividade econômica em concorrência</mark>.
+          </span></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /tab-apostas -->
+
+  <!-- ═══ TAB 5: DISCURSIVAS ════════════════════ -->
+  <div class="tab-panel" id="tab-discursivas">
+    <div class="sec-header">
+      <h2>Preparação para Prova Discursiva & Peças Técnicas</h2>
+      <span class="tag">Enunciados Simulados · Espelho Padrão Cebraspe</span>
+    </div>
+
+    <!-- Questão Discursiva 1 -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-blue">Discursiva 01</span>
+          <h3>Princípio da Legalidade Tradicional vs. Princípio da Juridicidade</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="simulado-box">
+          <div class="simulado-label">Proposta de Questão Discursiva (Cebraspe · Delegado de Polícia)</div>
+          <div class="simulado-q">
+            "Discorra sobre a superação do conceito tradicional de princípio da legalidade administrativa pelo princípio da juridicidade sob o prisma do neoconstitucionalismo. Em seu texto, aborde: (1) o conceito de bloco de legalidade; (2) a vinculação positiva do administrador; e (3) os reflexos no controle judicial dos atos administrativos."
+          </div>
+          <strong>💡 Esqueleto de Resposta (Padrão de Correção):</strong>
+          <ul class="skeleton-list">
+            <li><strong>Legalidade Tradicional vs. Juridicidade:</strong> A legalidade clássica exigia a conformação da conduta administrativa estritamente à lei formal votada pelo Parlamento. Sob o neoconstitucionalismo, surge a <em>juridicidade</em>, segundo a qual o administrador deve subordinação não apenas à lei em sentido estrito, mas a todo o ordenamento jurídico, com primazia da Constituição.</li>
+            <li><strong>Bloco de Legalidade (ou de Constitucionalidade):</strong> Conjunto normativo formado pela CF/88, princípios implícitos e explícitos, tratados internacionais de direitos humanos, leis e regulamentos. A atuação administrativa que contraria um princípio constitucional é ilícita, ainda que aparente amparo em lei infraconstitucional.</li>
+            <li><strong>Vinculação Positiva (<em>Positive Bindung</em>):</strong> O gestor público somente pode agir se houver autorização ou imposição do ordenamento jurídico (ao contrário do particular, que atua pela autonomia privada onde tudo o que não é proibido é permitido).</li>
+            <li><strong>Reflexos no Controle Jurisdicional:</strong> O Poder Judiciário passa a exercer um controle substancial de legitimidade e moralidade dos atos administrativos (inclusive discricionários), aferindo a proporcionalidade, a razoabilidade e a proteção à confiança legítima, sem que isso configure invasão indevida no mérito administrativo.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Questão Discursiva 2 -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-blue">Discursiva 02</span>
+          <h3>Direito de Greve nas Carreiras de Segurança Pública (STF ARE 654432)</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="simulado-box">
+          <div class="simulado-label">Proposta de Questão Discursiva (Cebraspe · Delegado de Polícia)</div>
+          <div class="simulado-q">
+            "Analise a constitucionalidade do exercício do direito de greve pelos integrantes das carreiras da Polícia Civil, explicitando a tese fixada pelo Supremo Tribunal Federal em sede de repercussão geral e a fundamentação dogmática que a sustenta."
+          </div>
+          <strong>💡 Esqueleto de Resposta (Padrão de Correção):</strong>
+          <ul class="skeleton-list">
+            <li><strong>Posicionamento do STF (Tema 860 - ARE 654432):</strong> O exercício do direito de greve, sob qualquer forma ou modalidade, é expressamente <mark class="r">vedado aos policiais civis e a todos os servidores que atuem diretamente na segurança pública</mark>.</li>
+            <li><strong>Monopólio da Força e Indelegabilidade:</strong> A carreira policial constitui o braço armado do Estado na garantia da ordem e preservação da vida e do patrimônio. Trata-se de serviço público indelegável e intransferível à iniciativa privada.</li>
+            <li><strong>Ponderação de Interesses e Segurança Pública:</strong> A proibição não decorre unicamente do princípio da continuidade do serviço público, mas da prevalência absoluta da segurança pública, da paz social e da ordem pública sobre o interesse corporativo da categoria.</li>
+            <li><strong>Paralisação em Cadeia do Sistema de Justiça:</strong> A paralisação da polícia civil inviabiliza as atividades persecutórias penais do Ministério Público e a própria prestação jurisdicional criminal, gerando risco intolerável à sociedade.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Questão Discursiva 3 -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-blue">Discursiva 03</span>
+          <h3>Poder de Autotutela, Devido Processo e Limites Decadenciais</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="simulado-box">
+          <div class="simulado-label">Proposta de Questão Discursiva (Cebraspe · Delegado de Polícia)</div>
+          <div class="simulado-q">
+            "Com base nas Súmulas 346 e 473 do STF e na Lei nº 9.784/99, diferencie anulação de revogação de ato administrativo e esclareça se a Administração pode anular de ofício um ato com efeitos favoráveis ao particular sem oportunizar prévio contraditório, apontando a disciplina do prazo decadencial."
+          </div>
+          <strong>💡 Esqueleto de Resposta (Padrão de Correção):</strong>
+          <ul class="skeleton-list">
+            <li><strong>Distinção Dogmática:</strong> Anulação incide sobre atos inválidos/ilegais (vício de legalidade), opera efeitos retroativos (<em>ex tunc</em>) e é poder-dever da Administração; Revogação incide sobre atos válidos e discricionários por juízo de conveniência/oportunidade, opera efeitos prospectivos (<em>ex nunc</em>) e respeita direitos adquiridos.</li>
+            <li><strong>Necessidade de Contraditório Prévio (STF Info 763):</strong> A despeito do poder de autotutela, se a invalidação do ato repercutir na esfera jurídica de terceiros com efeitos concretos favoráveis, a Administração é <mark class="r">obrigada a instaurar procedimento administrativo prévio com contraditório e ampla defesa</mark>.</li>
+            <li><strong>Prazo Decadencial Quinquenal (Art. 54 Lei 9.784/99):</strong> O direito da Administração de anular atos que produzam efeitos favoráveis ao administrado decai em <strong>5 (cinco) anos</strong>, contados da prática do ato, salvo comprovada má-fé do beneficiário.</li>
+            <li><strong>Inaplicabilidade aos Atos Flagrantemente Inconstitucionais:</strong> Conforme tese do STF (MS 26860 e Tema 839), o prazo decadencial de 5 anos não incide sobre atos praticados em manifesta e direta afronta à Constituição (ex.: efetivação em cartório sem concurso público).</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /tab-discursivas -->
+
+</main>
+
+<footer>
+  Biblioteca de Estudos <span>Delta</span> · Direito Administrativo - Noções Iniciais e Princípios
+</footer>
+
+<script>
+// ─── THEME TOGGLE (Claro / Escuro) ────────────
+function toggleTheme() {
+    const body = document.body;
+    const btn = document.getElementById('themeToggle');
+    
+    // Toggle class
+    body.classList.toggle('dark-theme');
+    
+    // Save to local storage and update icon
+    if (body.classList.contains('dark-theme')) {
+        localStorage.setItem('delta-theme', 'dark');
+        btn.textContent = '🌙';
+    } else {
+        localStorage.setItem('delta-theme', 'light');
+        btn.textContent = '☀️';
+    }
+}
+
+// Check saved theme on load
+document.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = localStorage.getItem('delta-theme');
+    const btn = document.getElementById('themeToggle');
+    
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-theme');
+        if (btn) btn.textContent = '🌙';
+    } else {
+        if (btn) btn.textContent = '☀️';
+    }
+});
+
+// ─── TABS ─────────────────────────────────────
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  const target = document.getElementById('tab-' + id);
+  if (target) target.classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+// ─── ACCORDION ────────────────────────────────
+function toggle(head) {
+  const body = head.nextElementSibling;
+  const chevron = head.querySelector('.chevron');
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  if (chevron) chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
+}
+
+// ─── SEARCH ───────────────────────────────────
+function handleSearch() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  const clear = document.getElementById('searchClear');
+  clear.style.display = q ? 'block' : 'none';
+  if (!q) {
+    document.querySelectorAll('.searchable').forEach(c => c.style.display = '');
+    return;
+  }
+  
+  document.querySelectorAll('.searchable').forEach(card => {
+    const text = card.innerText.toLowerCase();
+    card.style.display = text.includes(q) ? '' : 'none';
+  });
+}
+
+function clearSearch() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchClear').style.display = 'none';
+  document.querySelectorAll('.searchable').forEach(c => c.style.display = '');
+}
+
+// ─── AUTO-OPEN FIRST ITEM ON EACH TAB ─────────
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.tab-panel').forEach(panel => {
+    const first = panel.querySelector('.card-head');
+    if (first) {
+      const body = first.nextElementSibling;
+      const chevron = first.querySelector('.chevron');
+      if (body) body.classList.add('open');
+      if (chevron) chevron.style.transform = 'rotate(180deg)';
+    }
+  });
+});
+</script>
+<script src="./assets/base.js" defer></script>
+<script src="./assets/stopwatch.js" defer></script>
+</body>
+</html>
