@@ -4,14 +4,14 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Delta · Direito Administrativo - Noções Iniciais e Princípios · Delegado</title>
-<meta name="description" content="Painel Delta para Delegado (PC/PF): Direito Administrativo — noções iniciais, origens, sentidos da administração, fontes, regime jurídico-administrativo e princípios (LIMPE e implícitos), com pegadinhas, jurisprudência STF/STJ e discursivas."/>
+<meta name="description" content="Painel Delta para Delegado (PC/PF): Direito Administrativo — noções iniciais, origens, modelos de estado, sentidos da administração, fontes, sistemas de controle, regime jurídico-administrativo e princípios fundamentais."/>
 <meta name="author" content="Delta"/>
 <meta name="theme-color" content="#ff6b00"/>
 <meta property="og:type" content="website"/>
 <meta property="og:locale" content="pt_BR"/>
 <meta property="og:site_name" content="Delta · AVA Delegado"/>
 <meta property="og:title" content="Direito Administrativo · Noções Iniciais e Princípios — Delta"/>
-<meta property="og:description" content="Origens, sentidos, fontes, regime jurídico-administrativo e princípios fundamentais — com pegadinhas, jurisprudência e discursivas para Delegado."/>
+<meta property="og:description" content="Panorama doutrinário aprofundado, textos literais, pegadinhas, jurisprudência STF/STJ, apostas e questões discursivas para Delegado."/>
 <meta name="twitter:card" content="summary"/>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚖️</text></svg>"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -285,7 +285,7 @@
     padding:0 18px;max-height:0;overflow:hidden;
     transition:max-height .4s ease, padding .4s ease;
   }
-  .card-body.open{max-height:2500px;padding:0 18px 18px;}
+  .card-body.open{max-height:3500px;padding:0 18px 18px;}
   
   /* ── BADGES & ELEMENTS ───────────────────── */
   .badge-tag{
@@ -338,13 +338,14 @@
   .false-stmt::before{content:'❝ ';font-style:normal;opacity:.6;}
   
   .stmt-box{
-    font-size:13px;font-style:italic;
-    color:var(--yellow);
-    background:var(--yellow-bg);
-    border:1px solid var(--yellow-border);
+    font-size:13.5px;
+    color:var(--text);
+    background:var(--surface2);
+    border:1px solid var(--border);
+    border-left:4px solid var(--yellow);
     border-radius:var(--r-sm);
-    padding:10px 13px;margin-top:8px;
-    line-height:1.6;
+    padding:12px 16px;margin:10px 0 14px;
+    line-height:1.7;
   }
   
   .simulado-box{
@@ -368,7 +369,7 @@
     display:inline-block;margin-top:10px;
   }
   
-  /* Discursivas Specific */
+  /* Discursivas & Listas Específicas */
   .skeleton-list {
       list-style: none;
       margin-top: 10px;
@@ -387,6 +388,76 @@
       color: var(--brand);
       font-weight: bold;
       font-size: 16px;
+  }
+
+  /* ── COMPONENTES EXCLUSIVOS DE DOUTRINA & PANORAMA ── */
+  .doctrine-narrative {
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+  .doctrine-narrative p {
+    margin-bottom: 12px;
+  }
+  .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    margin: 14px 0 18px;
+    border-radius: var(--r-sm);
+    border: 1px solid var(--border);
+  }
+  .delta-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    text-align: left;
+  }
+  .delta-table th {
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: .05em;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .delta-table td {
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+  .delta-table tr:last-child td {
+    border-bottom: none;
+  }
+  .synopsis-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 14px 0;
+  }
+  @media(max-width: 768px) {
+    .synopsis-grid { grid-template-columns: 1fr; }
+  }
+  .synopsis-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 14px;
+  }
+  .synopsis-box h4 {
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--brand);
+    margin-bottom: 8px;
+  }
+  .synopsis-box p {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.6;
   }
 
   /* ── FOOTER ──────────────────────────────── */
@@ -439,15 +510,373 @@
 
   <!-- TABS NAV -->
   <nav class="tabs-nav" role="tablist">
-    <button class="tab-btn active" onclick="showTab('literais',this)">📌 Literais</button>
+    <button class="tab-btn active" onclick="showTab('resumo',this)">📖 Doutrina & Panorama</button>
+    <button class="tab-btn" onclick="showTab('literais',this)">📌 Literais</button>
     <button class="tab-btn" onclick="showTab('pegadinhas',this)">🔥 Pegadinhas</button>
     <button class="tab-btn" onclick="showTab('juris',this)">🏛️ Jurisprudência</button>
     <button class="tab-btn" onclick="showTab('apostas',this)">🎯 Apostas 2026</button>
     <button class="tab-btn" onclick="showTab('discursivas',this)">✍️ Discursivas</button>
   </nav>
 
+  <!-- ════════ TAB 0: DOUTRINA & PANORAMA (NOVA ABA PRELIMINAR) ════════ -->
+  <div class="tab-panel active" id="tab-resumo">
+    <div class="sec-header">
+      <h2>Panorama Geral, Gênese Histórica & Conexões Doutrinárias</h2>
+      <span class="tag">Síntese Estratégica para Delegado</span>
+    </div>
+
+    <!-- Módulo 1: Gênese Histórica e Modelos de Estado -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Evolução Dogmática</span>
+          <h3>1. Gênese Histórica, Modelos de Administração & Tendências Pós-Modernas</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge-tag bg-yellow">Fundacional</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="doctrine-narrative">
+          <p>O <strong>Direito Administrativo</strong> não existiu desde sempre como ramo autônomo. No Estado Absolutista, vigorava o dogma da <em>irresponsabilidade régia</em> (<em>"The King can do no wrong"</em>), não havendo distinção entre o patrimônio pessoal do soberano e os recursos do Estado. A atuação estatal era discricionária no sentido mais puro da arbitrariedade.</p>
+          <p>O nascimento dogmático da disciplina ocorre na transição do <strong>século XVIII para o século XIX</strong>, atrelado à <strong>Revolução Francesa de 1789</strong> e ao advento do <strong>Estado de Direito</strong>. Três pilares revolucionários burgueses impulsionaram essa autonomia: a) a <mark class="b">Separação de Poderes</mark> (Montesquieu); b) o <mark class="b">Princípio da Legalidade</mark>; e c) a consagração dos <mark class="b">Direitos Fundamentais de 1ª Dimensão</mark> (Declaração dos Direitos do Homem e do Cidadão).</p>
+          <p>O marco jurisprudencial universal da autonomia é o célebre <strong>Arrêt Blanco (1873)</strong>, julgado pelo Tribunal de Conflitos da França: reconheceu-se que a responsabilidade do Estado por danos causados por seus serviços não pode ser regida pelas regras do Direito Civil comum (Código de Napoleão), mas sim por <em>regras especiais, derrogatórias e exorbitantes</em>, que equilibram o binômio <strong>Autoridade (prerrogativas) vs. Liberdade (sujeições)</strong>.</p>
+        </div>
+
+        <div class="table-responsive">
+          <table class="delta-table">
+            <thead>
+              <tr>
+                <th>Modelo</th>
+                <th>Características Centrais</th>
+                <th>Foco do Controle</th>
+                <th>Princípio Eixo</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Patrimonialista</strong></td>
+                <td>Confusão entre bens públicos e privados; prebendas, sincuras e cargos hereditários.</td>
+                <td>Sem controle objetivo</td>
+                <td>Vontade do Soberano</td>
+              </tr>
+              <tr>
+                <td><strong>Burocrático (Weberiano)</strong></td>
+                <td>Racional-legalidade, hierarquia rígida, carreiras estatais, combate à corrupção e nepotismo.</td>
+                <td>Controle prévio dos <em>meios e procedimentos</em> (a priori)</td>
+                <td>Impessoalidade e Legalidade Estrita</td>
+              </tr>
+              <tr>
+                <td><strong>Gerencial (Pós-1995 / EC 19)</strong></td>
+                <td>Superação da rigidez burocrática, foco no cidadão-usuário, autonomia, contratualização e agencificação.</td>
+                <td>Controle a posteriori dos <em>resultados</em> (indicadores)</td>
+                <td>Eficiência e Economicidade</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="stmt-box">
+          <strong>💡 Tendências Pós-Modernas de Prova:</strong><br>
+          • <strong>Administração Pública Dialógica (Ronny Charles):</strong> Substitui a unilateralidade impositiva do Estado pela consensualidade, diálogo com os administrados, audiências públicas com devolutiva fundamentada e acordos substitutivos.<br>
+          • <strong>Transadministrativismo (Diogo de Figueiredo Moreira Neto):</strong> Disciplina jurídica das relações assimétricas de poder que se institucionalizam consensualmente <em>fora e além do Estado</em> (direito administrativo global e centros normativos transestatais).
+        </div>
+      </div>
+    </div>
+
+    <!-- Módulo 2: Conceituação e Sentidos -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Critérios & Sentidos</span>
+          <h3>2. Conceituação Funcional e os Sentidos da Administração Pública</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge-tag bg-green">Alta Relevância</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="doctrine-narrative">
+          <p>Para conceituar o Direito Administrativo, a doutrina percorreu diversos critérios (Legalista, do Poder Executivo, das Relações Jurídicas, do Serviço Público de Duguit/Jèze, Teleológico e Negativista). A doutrina brasileira contemporânea consolidou o <strong>Critério Funcional</strong>, magistralmente sintetizado por <strong>Hely Lopes Meirelles</strong>:</p>
+        </div>
+
+        <div class="blockquote">
+          "Direito Administrativo é o conjunto harmônico de princípios jurídicos que regem os órgãos, os agentes e as atividades públicas tendentes a realizar a contento os fins desejados pelo Estado de forma DIRETA, CONCRETA e IMEDIATA."
+        </div>
+
+        <div class="synopsis-grid">
+          <div class="synopsis-box">
+            <h4>⚡ Tríplice Caracterização Funcional</h4>
+            <p>• <strong>Direta:</strong> Atua de ofício, por iniciativa própria (não depende de provocação, ao contrário da Jurisdição, que é inerte/indireta).<br>
+            • <strong>Concreta:</strong> Materializa-se em situações fáticas e individuais (ao contrário da Legislação, que é geral e abstrata).<br>
+            • <strong>Imediata:</strong> Realiza diretamente as necessidades coletivas (os fins são definidos pela Constituição).</p>
+          </div>
+          <div class="synopsis-box">
+            <h4>🏢 Sentidos Subjetivo vs. Objetivo</h4>
+            <p>• <strong>Formal / Orgânico / Subjetivo (QUEM):</strong> Conjunto de pessoas jurídicas, órgãos e agentes públicos. Grafado em maiúsculas: <em>Administração Pública</em>.<br>
+            • <strong>Material / Funcional / Objetivo (O QUÊ):</strong> A própria atividade administrativa (serviço público, polícia, fomento e intervenção). Grafado em minúsculas: <em>administração pública</em>.</p>
+          </div>
+        </div>
+
+        <div class="detail-row">
+          <span class="detail-icon">🔄</span>
+          <div><span class="detail-label">Administração Introversa vs. Extroversa (Diogo de Figueiredo):</span><span class="detail-text">
+            <strong>Introversa:</strong> Atividade-meio, instrumental, voltada às relações internas e com os servidores (interesse público secundário).<br>
+            <strong>Extroversa:</strong> Atividade-fim, finalística, atinge diretamente os cidadãos e a sociedade por meio de poderes estatais como a polícia administrativa (interesse público primário).
+          </span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Módulo 3: Fontes do Direito Administrativo -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Fontes & Precedentes</span>
+          <h3>3. Fontes do Direito Administrativo & Teoria dos Precedentes (LINDB)</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge-tag bg-blue">Estruturante</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="doctrine-narrative">
+          <p>O Direito Administrativo brasileiro é um ramo <strong>não codificado</strong> (inexiste um Código de Direito Administrativo único). Por isso, suas fontes assumem dinâmica própria de integração:</p>
+        </div>
+
+        <div class="table-responsive">
+          <table class="delta-table">
+            <thead>
+              <tr>
+                <th>Fonte</th>
+                <th>Natureza / Força Normativa</th>
+                <th>Particularidades e Aplicação Prática</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Lei (sentido amplo)</strong></td>
+                <td><mark class="g">Primária e Formal</mark></td>
+                <td>Inova na ordem jurídica. Abrange CF/88, leis ordinárias, complementares, tratados e atos normativos primários. Vinculação positiva.</td>
+              </tr>
+              <tr>
+                <td><strong>Jurisprudência</strong></td>
+                <td><mark class="b">Secundária (em regra)</mark></td>
+                <td>Reiteração de decisões judiciais. Adquire caráter primário/cogente quando se trata de <strong>Súmulas Vinculantes do STF</strong> ou decisões em controle concentrado.</td>
+              </tr>
+              <tr>
+                <td><strong>Doutrina</strong></td>
+                <td><mark class="b">Secundária / Cognitiva</mark></td>
+                <td>Arcabouço teórico que constrói conceitos, interpreta normas e direciona a aplicação do Direito pelos operadores.</td>
+              </tr>
+              <tr>
+                <td><strong>Costumes</strong></td>
+                <td><mark class="b">Secundária / Integrativa</mark></td>
+                <td>Práticas administrativas reiteradas. Admite-se o costume <em>secundum legem</em> (conforme a lei) e <em>praeter legem</em> (integrador de lacuna). <strong>Vedado o contra legem</strong> (desuso não revoga lei).</td>
+              </tr>
+              <tr>
+                <td><strong>Princípios Gerais</strong></td>
+                <td><mark class="b">Secundária / Informadora</mark></td>
+                <td>Postulados fundamentais que garantem coerência axiológica (ex: vedação ao enriquecimento sem causa, vedação da própria torpeza).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="stmt-box">
+          <strong>🔒 Precedentes Administrativos & Art. 30 da LINDB (Lei 13.655/18):</strong><br>
+          As autoridades devem atuar para aumentar a segurança jurídica na aplicação das normas, mediante regulamentos, súmulas administrativas e respostas formais a consultas. Estes instrumentos possuem <strong>caráter vinculante</strong> para o órgão até ulterior revisão. Havendo alteração de jurisprudência administrativa consolidada, impõe-se a aplicação da <em>Teoria do Prospective Overruling</em> (efeitos prospectivos com regime de transição para resguardar a confiança legítima).
+        </div>
+      </div>
+    </div>
+
+    <!-- Módulo 4: Sistemas de Controle -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Controle Estatal</span>
+          <h3>4. Sistemas de Controle: Francês vs. Inglês (Jurisdição Una)</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge-tag bg-purple">Comparativo</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="synopsis-grid">
+          <div class="synopsis-box">
+            <h4>🇫🇷 Sistema Francês (Contencioso Administrativo)</h4>
+            <p>• <strong>Dualidade de Jurisdição:</strong> Coexistem duas ordens judiciais independentes: a Justiça Comum (litígios entre particulares) e o Tribunal Administrativo / Conselho de Estado (litígios envolvendo a Administração).<br>
+            • O Poder Judiciário comum é proibido de apreciar e anular atos administrativos.</p>
+          </div>
+          <div class="synopsis-box">
+            <h4>🇬🇧 Sistema Inglês (Jurisdição Una — Brasil)</h4>
+            <p>• <strong>Monismo Jurisdicional:</strong> Todos os litígios (administrativos e cíveis) podem ser submetidos à apreciação e controle definitivo do Poder Judiciário comum.<br>
+            • Consagrado no <strong>Art. 5º, XXXV da CF/88</strong> (Princípio da Inafastabilidade da Tutela Jurisdicional).</p>
+          </div>
+        </div>
+
+        <div class="detail-row">
+          <span class="detail-icon">⚠️</span>
+          <div><span class="detail-label">Exceções Constitucionais Aparentes (Condicionamento de Acesso ao Judiciário):</span><span class="detail-text">
+            O princípio da jurisdição una não é absoluto no sentido de dispensar qualquer pressuposto. Em situações excepcionais e taxativas, a Constituição e a jurisprudência exigem o esgotamento ou provocação prévia na via administrativa:
+            <ul class="skeleton-list">
+              <li><strong>Justiça Desportiva (Art. 217, § 1º, CF):</strong> O Judiciário só conhecerá de ações relativas à disciplina e competições desportivas após esgotadas as instâncias da justiça desportiva (prazo máximo de 60 dias).</li>
+              <li><strong>Habeas Data (Súmula Vinculante 2 do STF):</strong> O ajuizamento de Habeas Data pressupõe a comprovação da recusa da autoridade administrativa ou do decurso do prazo legal sem resposta (10 dias na LAI).</li>
+              <li><strong>Reclamação contra descumprimento de Súmula Vinculante (Art. 7º, § 1º, Lei 11.417/06):</strong> Exige o esgotamento prévio das vias administrativas caso a violação seja perpetrada por ato administrativo.</li>
+              <li><strong>Impeachment do Presidente / Ministros:</strong> Julgamento político privativo do Senado Federal (Art. 52, I e II da CF), sendo vedado ao Judiciário reexaminar o mérito político.</li>
+            </ul>
+          </span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Módulo 5: Regime Jurídico-Administrativo -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Regime Bipartite</span>
+          <h3>5. O Regime Jurídico-Administrativo: Pedras de Toque e a Desconstrução Contemporânea</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge-tag bg-yellow">Doutrina Clássica vs. Moderna</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="doctrine-narrative">
+          <p>O <strong>Regime Jurídico-Administrativo</strong> é o conjunto de regras e princípios que diferenciam o Direito Público do Direito Privado. Para a doutrina clássica de <strong>Celso Antônio Bandeira de Mello</strong>, esse regime assenta-se sobre dois pilares mestres denominados <strong>"Pedras de Toque"</strong>:</p>
+        </div>
+
+        <div class="synopsis-grid">
+          <div class="synopsis-box">
+            <h4>⚔️ 1. Prerrogativas Estatais</h4>
+            <p><strong>Supremacia do Interesse Público sobre o Privado:</strong> Garante ao Estado posição de verticalidade e privilégios para defesa do bem comum (presunção de legitimidade, autoexecutoriedade, prazos processuais diferenciados, cláusulas exorbitantes nos contratos, desapropriação).</p>
+          </div>
+          <div class="synopsis-box">
+            <h4>🛡️ 2. Sujeições Estatais</h4>
+            <p><strong>Indisponibilidade do Interesse Público:</strong> O interesse coletivo pertence ao povo, e não ao administrador. Impõe restrições severas ao Estado (dever de licitar, concurso público, prestação de contas, dever de motivar atos, publicidade e probidade).</p>
+          </div>
+        </div>
+
+        <div class="detail-row">
+          <span class="detail-icon">⚖️</span>
+          <div><span class="detail-label">Interesse Público Primário vs. Secundário:</span><span class="detail-text">
+            • <strong>Primário:</strong> O verdadeiro interesse da coletividade (saúde, segurança, dignidade humana). Goza de primazia e reflete a atividade-fim.<br>
+            • <strong>Secundário:</strong> O interesse patrimonial/financeiro da Fazenda Pública enquanto pessoa jurídica (arrecadação, economia fiscal). O interesse secundário <mark class="r">só é legítimo quando coincide e instrumentaliza o interesse primário</mark>.
+          </span></div>
+        </div>
+
+        <div class="stmt-box">
+          <strong>⚡ O Debate da "Desconstrução" da Supremacia (Daniel Sarmento, Gustavo Binenbojm, Rafael Carvalho):</strong><br>
+          A doutrina neoconstitucionalista moderna contesta a existência de uma supremacia <em>apriorística e abstrata</em> do interesse público sobre os direitos fundamentais do indivíduo. Em colisões concretas entre interesses estatais e garantias individuais, não há prevalência automática do Estado. O modelo atual consagra o <strong>Princípio da Finalidade Pública</strong> e exige a aplicação da <mark class="b">ponderação de bens e do postulado da proporcionalidade</mark> no caso concreto.
+        </div>
+      </div>
+    </div>
+
+    <!-- Módulo 6: Matriz Sistemática dos Princípios -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Matriz Analítica</span>
+          <h3>6. Matriz Sistemática dos Princípios Expressos e Implícitos</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge-tag bg-red">Gabarito de Prova</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="delta-table">
+            <thead>
+              <tr>
+                <th>Princípio</th>
+                <th>Status</th>
+                <th>Conceito Nuclear & Fundamento</th>
+                <th>Vedações & Desdobramentos Críticos</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Legalidade / Juridicidade</strong></td>
+                <td><span class="badge-tag bg-brand">Expresso (Art. 37)</span></td>
+                <td><em>Positive Bindung</em>: o agente público só age onde a lei autoriza/determina. Submissão ao Bloco de Legalidade (CF + princípios).</td>
+                <td>Veda atos inominados e ampliação/restrição de direitos sem lei. Mitigações transitórias: Estado de Defesa, Sítio e Medida Provisória.</td>
+              </tr>
+              <tr>
+                <td><strong>Impessoalidade</strong></td>
+                <td><span class="badge-tag bg-brand">Expresso (Art. 37)</span></td>
+                <td>Isonomia de tratamento aos cidadãos + Teoria da Imputação Volitiva (o ato é do Estado, não do agente pessoa física).</td>
+                <td>Veda discriminações odiosas e perseguições. <strong>Art. 37, § 1º:</strong> Proíbe nomes, símbolos e imagens para promoção pessoal na publicidade oficial.</td>
+              </tr>
+              <tr>
+                <td><strong>Moralidade</strong></td>
+                <td><span class="badge-tag bg-brand">Expresso (Art. 37)</span></td>
+                <td>Atuação pautada pela boa-fé objetiva, lealdade, probidade, decoro e padrões éticos rigorosos.</td>
+                <td><strong>Súmula Vinculante 13:</strong> Veda nepotismo direto e cruzado até 3º grau. Configura ato de improbidade dolosa (Art. 11, XI da LIA).</td>
+              </tr>
+              <tr>
+                <td><strong>Publicidade</strong></td>
+                <td><span class="badge-tag bg-brand">Expresso (Art. 37)</span></td>
+                <td>Dever de transparência ativa/passiva e condição indispensável de eficácia dos atos administrativos.</td>
+                <td>Exceções: segurança do Estado/sociedade e intimidade. STF Info 782: legítima divulgação nominal de vencimentos. LAI (Lei 12.527) e Governo Digital (Lei 14.129).</td>
+              </tr>
+              <tr>
+                <td><strong>Eficiência</strong></td>
+                <td><span class="badge-tag bg-brand">Expresso (EC 19/98)</span></td>
+                <td>Exigência de presteza, perfeição técnica e rendimento funcional na prestação dos serviços.</td>
+                <td>Impõe avaliação especial para estabilidade (Art. 41, § 4º) e limites de despesa com pessoal (Art. 169).</td>
+              </tr>
+              <tr>
+                <td><strong>Autotutela (Sindicabilidade)</strong></td>
+                <td><span class="badge-tag bg-purple">Implícito</span></td>
+                <td>Poder-dever da Administração de rever seus próprios atos de ofício (Súmulas 346 e 473 do STF).</td>
+                <td>Anula atos ilegais (<em>ex tunc</em>) e revoga os inoportunos (<em>ex nunc</em>). Exige <strong>contraditório prévio</strong> se afetar terceiros (STF Info 763). Decadência de 5 anos (Súmula 633 STJ).</td>
+              </tr>
+              <tr>
+                <td><strong>Continuidade</strong></td>
+                <td><span class="badge-tag bg-purple">Implícito / Lei 8.987</span></td>
+                <td>Os serviços públicos não podem sofrer interrupção arbitrária por serem dever do Estado (Art. 175 CF).</td>
+                <td>Corte por inadimplemento exige prévio aviso e é <strong>vedado às sextas, fins de semana e feriados (Lei 14.015/20)</strong>. <strong>STF ARE 654432:</strong> Proibição absoluta de greve para policiais civis.</td>
+              </tr>
+              <tr>
+                <td><strong>Motivação</strong></td>
+                <td><span class="badge-tag bg-purple">Implícito / Lei 9.784</span></td>
+                <td>Dever de enunciar expressamente os fundamentos fáticos e jurídicos justificadores do ato (Art. 93, IX CF).</td>
+                <td><strong>Teoria dos Motivos Determinantes:</strong> se a autoridade motivar ato discricionário/<em>ad nutum</em>, ficará vinculada à veracidade do motivo alegado (motivo falso = ato nulo).</td>
+              </tr>
+              <tr>
+                <td><strong>Proporcionalidade</strong></td>
+                <td><span class="badge-tag bg-purple">Implícito (Devido Processo)</span></td>
+                <td>Vedação ao excesso e à proteção deficiente no exercício do poder discricionário.</td>
+                <td>Tríplice crivo: <strong>Adequação</strong> (meio apto ao fim), <strong>Necessidade</strong> (meio menos gravoso) e <strong>Proporcionalidade em Sentido Estrito</strong> (custo-benefício).</td>
+              </tr>
+              <tr>
+                <td><strong>Segurança Jurídica</strong></td>
+                <td><span class="badge-tag bg-purple">Implícito (Origem Alemã)</span></td>
+                <td>Proteção da estabilidade das relações jurídicas e vedação de surpresas retroativas contra o particular.</td>
+                <td>Vertente objetiva (direito adquirido/ato perfeito) vs. Vertente subjetiva (<strong>Proteção à Confiança Legítima</strong> do cidadão de boa-fé).</td>
+              </tr>
+              <tr>
+                <td><strong>Intranscendência das Sanções</strong></td>
+                <td><span class="badge-tag bg-purple">Implícito (Art. 5º, XLV)</span></td>
+                <td>As penalidades e restrições de crédito não podem ultrapassar a esfera jurídica do infrator originário.</td>
+                <td><strong>Súmula 615 STJ:</strong> Município não pode ser inscrito no CAUC por faltas da gestão anterior se a atual adotou medidas. O Executivo não responde por órgãos autônomos (STF ACO 3072).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /tab-resumo -->
+
   <!-- ═══ TAB 1: LITERAIS ═══════════════════════ -->
-  <div class="tab-panel active" id="tab-literais">
+  <div class="tab-panel" id="tab-literais">
     <div class="sec-header">
       <h2>Textos Literais Críticos & Dispositivos Essenciais</h2>
       <span class="tag">CF/88 · Leis 9.784 · 8.987 · 14.133 · 14.129 · LINDB</span>
