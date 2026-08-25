@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Delta · Direito Constitucional - Direitos e Garantias Fundamentais · Delegado</title>
+<meta name="description" content="Painel Delta para Delegado (PC/PF): Direitos e Garantias Fundamentais — Teoria geral, dimensões, características, eficácia vertical/horizontal/diagonal, Art. 5º em espécie, remédios e jurisprudência STF/STJ."/>
+<meta name="author" content="Delta"/>
+<meta name="theme-color" content="#ff6b00"/>
+<meta property="og:type" content="website"/>
+<meta property="og:locale" content="pt_BR"/>
+<meta property="og:site_name" content="Delta · AVA Delegado"/>
+<meta property="og:title" content="Direito Constitucional · Direitos e Garantias Fundamentais — Delta"/>
+<meta property="og:description" content="Doutrina esquematizada, dimensões dos direitos, limites dos limites, eficácia horizontal, Art. 5º detalhado, pegadinhas, jurisprudência e discursivas para Delegado."/>
+<meta name="twitter:card" content="summary"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚖️</text></svg>"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="stylesheet" href="./assets/stopwatch.css"/>
+<style>
+  /* ── VARIÁVEIS - TEMA CLARO ── */
+  :root {
+    --brand: #ff6b00;
+    --brand-dim: #cc5500;
+    --brand-glow: rgba(255,107,0,0.10);
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --surface2: #f1f5f9;
+    --surface3: #e2e8f0;
+    --border: #e2e8f0;
+    --border-hot: #ff6b00;
+    --text: #0f172a;
+    --text-muted: #475569;
+    --text-dim: #94a3b8;
+    
+    --yellow: #f59e0b;
+    --yellow-bg: rgba(245, 158, 11, 0.12);
+    --yellow-border: rgba(245, 158, 11, 0.25);
+    
+    --red: #ef4444;
+    --red-bg: rgba(239, 68, 68, 0.12);
+    --red-border: rgba(239, 68, 68, 0.25);
+    
+    --blue: #3b82f6;
+    --blue-bg: rgba(59, 130, 246, 0.12);
+    --blue-border: rgba(59, 130, 246, 0.25);
+    
+    --green: #10b981;
+    --green-bg: rgba(16, 185, 129, 0.12);
+    --green-border: rgba(16, 185, 129, 0.25);
+    
+    --purple: #8b5cf6;
+    --purple-bg: rgba(139, 92, 246, 0.12);
+    --purple-border: rgba(139, 92, 246, 0.25);
+    
+    --r: 8px;
+    --r-sm: 5px;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  }
+
+  /* ── VARIÁVEIS - TEMA ESCURO ── */
+  body.dark-theme {
+    --brand: #ff6b00;
+    --brand-dim: #cc5500;
+    --brand-glow: rgba(255,107,0,0.18);
+    --bg: #0b0f1a;
+    --surface: #131929;
+    --surface2: #1a2235;
+    --surface3: #1f2a3c;
+    --border: rgba(255,255,255,0.08);
+    --border-hot: rgba(255,107,0,0.35);
+    --text: #e8eaf0;
+    --text-muted: #8a93a8;
+    --text-dim: #5a6478;
+
+    --yellow: #fbbf24;
+    --yellow-bg: rgba(251, 191, 36, 0.12);
+    --yellow-border: rgba(251, 191, 36, 0.25);
+
+    --red: #f87171;
+    --red-bg: rgba(248, 113, 113, 0.12);
+    --red-border: rgba(248, 113, 113, 0.25);
+
+    --blue: #60a5fa;
+    --blue-bg: rgba(96, 165, 250, 0.12);
+    --blue-border: rgba(96, 165, 250, 0.25);
+
+    --green: #4ade80;
+    --green-bg: rgba(74, 222, 128, 0.12);
+    --green-border: rgba(74, 222, 128, 0.25);
+
+    --purple: #c084fc;
+    --purple-bg: rgba(192, 132, 252, 0.12);
+    --purple-border: rgba(192, 132, 252, 0.25);
+
+    --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+  }
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Inter',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    line-height:1.65;
+    font-size:15px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  body::before{
+    content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(ellipse 80% 50% at 10% 10%, var(--brand-glow) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 90% 80%, rgba(255,107,0,0.04) 0%, transparent 60%);
+    transition: background 0.3s ease;
+  }
+
+  /* ── HEADER ─────────────────────────────── */
+  header{
+    position:sticky;top:0;z-index:100;
+    background:var(--surface);
+    backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--border-hot);
+    padding:0 24px;
+    transition: background-color 0.3s ease;
+  }
+  body:not(.dark-theme) header { background: rgba(255, 255, 255, 0.92); }
+  body.dark-theme header { background: rgba(11, 15, 26, 0.92); }
+
+  .header-inner{
+    max-width:1100px;margin:0 auto;
+    display:flex;align-items:center;justify-content:space-between;
+    height:60px;gap:16px;
+  }
+  .brand{
+    font-size:13px;font-weight:800;letter-spacing:.12em;
+    color:var(--brand);text-transform:uppercase;white-space:nowrap;
+  }
+  .title-block{flex:1;min-width:0;}
+  .title-block h1{
+    font-size:14px;font-weight:700;
+    color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .title-block .badge{
+    display:inline-block;margin-top:2px;
+    font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;
+    color:var(--brand);background:var(--brand-glow);
+    border:1px solid rgba(255,107,0,0.3);
+    padding:1px 7px;border-radius:20px;
+  }
+  .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+  }
+  .theme-toggle-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 50%;
+      width: 34px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.2s;
+  }
+  .theme-toggle-btn:hover {
+      background: var(--surface2);
+      color: var(--text);
+  }
+  
+  /* ── MAIN ────────────────────────────────── */
+  main{max-width:1100px;margin:0 auto;padding:28px 20px 80px; position:relative; z-index:1;}
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--brand);
+    text-decoration: none;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    transition: transform .2s;
+  }
+  .back-link:hover { transform: translateX(-3px); }
+
+  /* ── TABS ────────────────────────────────── */
+  .tabs-nav{
+    display:flex;gap:4px;
+    border-bottom:1px solid var(--border);
+    margin-bottom:28px;
+    overflow-x:auto;
+    scrollbar-width:none;
+  }
+  .tabs-nav::-webkit-scrollbar{display:none;}
+  .tab-btn{
+    flex-shrink:0;
+    padding:10px 18px;
+    font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--text-muted);background:transparent;border:none;cursor:pointer;
+    border-bottom:2px solid transparent;
+    transition:all .2s;
+  }
+  .tab-btn:hover{color:var(--text);}
+  .tab-btn.active{color:var(--brand);border-bottom-color:var(--brand);}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;animation:fadeIn .25s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+  /* ── SEARCH ──────────────────────────────── */
+  .search-wrap{margin-bottom:22px;position:relative;}
+  .search-input{
+    width:100%;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--r);
+    padding:10px 14px 10px 40px;
+    color:var(--text);
+    font-family:'Inter',sans-serif;font-size:14px;
+    outline:none;transition:border-color .2s;
+    box-shadow: var(--shadow);
+  }
+  .search-input:focus{border-color:var(--border-hot);}
+  .search-icon{
+    position:absolute;left:13px;top:50%;transform:translateY(-50%);
+    color:var(--text-dim);font-size:15px;pointer-events:none;
+  }
+  .search-clear{
+    position:absolute;right:12px;top:50%;transform:translateY(-50%);
+    color:var(--text-dim);background:none;border:none;cursor:pointer;
+    font-size:16px;padding:4px;display:none;
+  }
+
+  /* ── SECTION HEADING ─────────────────────── */
+  .sec-header{
+    display:flex;align-items:center;gap:10px;
+    margin-bottom:18px;
+  }
+  .sec-header h2{
+    font-size:16px;font-weight:800;letter-spacing:-.01em;color:var(--text);
+  }
+  .sec-header .tag{
+    font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--brand);background:var(--brand-glow);
+    border:1px solid rgba(255,107,0,.3);
+    padding:2px 8px;border-radius:20px;
+  }
+
+  /* ── CARDS ───────────────────────────────── */
+  .info-card{
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--r);
+    margin-bottom:14px;overflow:hidden;
+    transition:border-color .2s, box-shadow 0.2s;
+    box-shadow: var(--shadow);
+  }
+  .info-card:hover{border-color:var(--border-hot);}
+  .card-head{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 18px;cursor:pointer;gap:12px;
+    user-select:none;
+  }
+  .card-head-left{display:flex;align-items:center;gap:12px;flex:1;min-width:0;}
+  .card-head h3{
+      font-size:14px;font-weight:700;color:var(--text);
+      overflow:hidden;text-overflow:ellipsis;
+  }
+  .chevron{color:var(--text-dim);transition:transform .25s;font-size:12px;flex-shrink:0;}
+  .card-body{
+    padding:0 18px;max-height:0;overflow:hidden;
+    transition:max-height .4s ease, padding .4s ease;
+  }
+  .card-body.open{max-height:4500px;padding:0 18px 18px;}
+  
+  /* ── BADGES & ELEMENTS ───────────────────── */
+  .badge-tag{
+    font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    padding:3px 9px;border-radius:20px;flex-shrink:0;
+  }
+  .bg-brand { color: var(--brand); background: var(--brand-glow); border: 1px solid rgba(255,107,0,.3); }
+  .bg-blue { color: var(--blue); background: var(--blue-bg); border: 1px solid var(--blue-border); }
+  .bg-yellow { color: var(--yellow); background: var(--yellow-bg); border: 1px solid var(--yellow-border); }
+  .bg-green { color: var(--green); background: var(--green-bg); border: 1px solid var(--green-border); }
+  .bg-red { color: var(--red); background: var(--red-bg); border: 1px solid var(--red-border); }
+  .bg-purple { color: var(--purple); background: var(--purple-bg); border: 1px solid var(--purple-border); }
+
+  .blockquote{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;line-height:1.7;
+    color:var(--text); 
+    background:var(--surface2);
+    border-left:4px solid var(--brand);
+    border-radius:0 var(--r-sm) var(--r-sm) 0;
+    padding:12px 16px;
+    margin-bottom:14px;
+  }
+  
+  .detail-row{
+    display:flex;gap:10px;align-items:flex-start;
+    padding:10px 0;border-top:1px solid var(--border);
+    font-size:13.5px;
+  }
+  .detail-row:first-of-type{border-top:none;}
+  .detail-icon{font-size:15px;flex-shrink:0;margin-top:2px;}
+  .detail-label{font-weight:700;color:var(--text-muted);margin-right:4px;}
+  .detail-text{color:var(--text);flex:1;}
+  
+  mark.y{background:var(--yellow-bg);color:var(--yellow);border-radius:2px;padding:0 2px;}
+  mark.r{background:var(--red-bg);color:var(--red);border-radius:2px;padding:0 2px;}
+  mark.b{background:var(--blue-bg);color:var(--blue);border-radius:2px;padding:0 2px;}
+  mark.g{background:var(--green-bg);color:var(--green);border-radius:2px;padding:0 2px;}
+  mark.p{background:var(--purple-bg);color:var(--purple);border-radius:2px;padding:0 2px;}
+
+  .false-stmt{
+    font-size:13.5px;font-style:italic;
+    color:var(--red);
+    background:var(--red-bg);
+    border:1px solid var(--red-border);
+    border-radius:var(--r-sm);
+    padding:10px 14px;
+    margin-bottom:14px;
+    line-height:1.6;
+  }
+  .false-stmt::before{content:'❝ ';font-style:normal;opacity:.6;}
+  
+  .stmt-box{
+    font-size:13px;
+    color:var(--text);
+    background:var(--surface2);
+    border:1px solid var(--border);
+    border-left:4px solid var(--yellow);
+    border-radius:var(--r-sm);
+    padding:10px 14px;margin-top:8px;
+    line-height:1.6;
+  }
+  
+  .simulado-box{
+    background:var(--surface2);border:1px solid var(--border);
+    border-radius:var(--r-sm);padding:14px 16px;margin-top:12px;
+  }
+  .simulado-label{
+    font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--text-dim);margin-bottom:10px;
+  }
+  .simulado-q{
+    font-size:13.5px;color:var(--text-muted);
+    font-style:italic;line-height:1.6;margin-bottom:12px;
+  }
+
+  .skeleton-list {
+      list-style: none;
+      margin-top: 10px;
+  }
+  .skeleton-list li {
+      position: relative;
+      padding-left: 20px;
+      margin-bottom: 8px;
+      font-size: 13.5px;
+      color: var(--text);
+  }
+  .skeleton-list li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: var(--brand);
+      font-weight: bold;
+      font-size: 16px;
+  }
+
+  /* ── DOUTRINA & PANORAMA COMPONENTES ── */
+  .doctrine-narrative {
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+  .doctrine-narrative p { margin-bottom: 12px; }
+  .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    margin: 14px 0 18px;
+    border-radius: var(--r-sm);
+    border: 1px solid var(--border);
+  }
+  .delta-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    text-align: left;
+  }
+  .delta-table th {
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: .05em;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .delta-table td {
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+  .delta-table tr:last-child td { border-bottom: none; }
+  .synopsis-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 14px 0;
+  }
+  @media(max-width: 768px) { .synopsis-grid { grid-template-columns: 1fr; } }
+  .synopsis-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 14px;
+  }
+  .synopsis-box h4 {
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--brand);
+    margin-bottom: 8px;
+  }
+  .synopsis-box p { font-size: 13px; color: var(--text); line-height: 1.6; }
+
+  /* ── FOOTER ──────────────────────────────── */
+  footer{
+    text-align:center;padding:28px;
+    font-size:12px;color:var(--text-dim);
+    border-top:1px solid var(--border);
+  }
+  footer span{color:var(--brand); font-weight: 600;}
+
+  /* ── RESPONSIVE ──────────────────────────── */
+  @media(max-width:600px){
+    .header-inner{padding:0 4px;}
+    main{padding:20px 12px 60px;}
+    .tab-btn{padding:9px 12px;font-size:11px;}
+    .card-head h3{font-size:13px;}
+  }
+</style>
+<link rel="stylesheet" href="./assets/tokens.css"/>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══════════════════════════════ -->
+<header>
+  <div class="header-inner">
+    <div class="brand">⚖️ Delta</div>
+    <div class="title-block">
+      <h1>Direito Constitucional · Direitos Fundamentais</h1>
+      <span class="badge">Delegado PC · PF · Cebraspe / Vunesp</span>
+    </div>
+    <div class="header-actions">
+        <button class="theme-toggle-btn" id="themeToggle" onclick="toggleTheme()" title="Alternar Tema Claro/Escuro">
+            ☀️
+        </button>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ MAIN ══════════════════════════════════ -->
+<main>
+
+  <a href="./index.html" class="back-link">← Voltar ao índice</a>
+
+  <!-- SEARCH -->
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" class="search-input" id="searchInput" placeholder="Buscar em todos os blocos de Direitos Fundamentais..." oninput="handleSearch()" />
+    <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
+  </div>
+
+  <!-- TABS NAV -->
+  <nav class="tabs-nav" role="tablist">
+    <button class="tab-btn active" onclick="showTab('resumo',this)">📖 Doutrina & Panorama</button>
+    <button class="tab-btn" onclick="showTab('literais',this)">📌 Literais</button>
+    <button class="tab-btn" onclick="showTab('pegadinhas',this)">🔥 Pegadinhas</button>
+    <button class="tab-btn" onclick="showTab('juris',this)">🏛️ Jurisprudência</button>
+    <button class="tab-btn" onclick="showTab('apostas',this)">🎯 Apostas 2026</button>
+    <button class="tab-btn" onclick="showTab('discursivas',this)">✍️ Discursivas</button>
+  </nav>
+
+  <!-- ════════ TAB 0: DOUTRINA & PANORAMA ════════ -->
+  <div class="tab-panel active" id="tab-resumo">
+    <div class="sec-header">
+      <h2>Panorama Geral & Teoria Geral dos Direitos Fundamentais</h2>
+      <span class="tag">Conexões Estruturais para Delegado</span>
+    </div>
+
+    <!-- Módulo 1: Preâmbulo e Conceitos Fundamentais -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Teoria Geral</span>
+          <h3>1. Natureza do Preâmbulo, Direitos Fundamentais vs. Direitos Humanos & Garantias</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge-tag bg-yellow">Fundacional</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="doctrine-narrative">
+          <p>O <strong>Preâmbulo Constitucional</strong> gerou clássica divergência doutrinária com 3 correntes: 1) <em>Tese da Irrelevância Jurídica / Ideológica</em> (Kelsen, Bonavides e STF ADI 2.076: mera diretriz política sem força de parâmetro de controle de constitucionalidade); 2) <em>Tese da Relevância Indireta / Hermenêutica</em>; 3) <em>Tese Normativa Direta</em> (doutrina francesa e Min. Cármen Lúcia na ADI 2.649).</p>
+        </div>
+
+        <div class="synopsis-grid">
+          <div class="synopsis-box">
+            <h4>🌐 Direitos Fundamentais vs. Direitos Humanos</h4>
+            <p>• <strong>Direitos Fundamentais:</strong> Direitos reconhecidos e positivados no plano constitucional interno de um Estado soberano (passíveis de cobrança judicial direta).<br>
+            • <strong>Direitos Humanos:</strong> Reconhecidos no plano internacional (tratados, declarações da ONU/OEA), universais e transnacionais.</p>
+          </div>
+          <div class="synopsis-box">
+            <h4>🛡️ Direitos vs. Garantias vs. Remédios</h4>
+            <p>• <strong>Direitos:</strong> Normas de conteúdo <em>declaratório</em> de vantagens/bens (valor intrínseco: vida, liberdade, propriedade).<br>
+            • <strong>Garantias:</strong> Normas de conteúdo <em>assecuratório / instrumental</em> para proteger o direito violado.<br>
+            • <strong>Remédios Constitucionais:</strong> Ações judiciais/writs específicos (HC, MS, HD, MI, AP) como espécies de garantias.</p>
+          </div>
+        </div>
+
+        <div class="stmt-box">
+          <strong>📜 Cláusula Materialmente Aberta (Art. 5º, § 2º da CF):</strong> Os direitos expressos na CF não excluem outros decorrentes dos princípios e tratados. Por isso, o rol do Art. 5º é <strong>meramente exemplificativo</strong>, distinguindo-se direitos <em>formalmente fundamentais</em> (no catálogo da CF) e <em>materialmente fundamentais</em> (pelo conteúdo substancial ligado à dignidade humana).
+        </div>
+      </div>
+    </div>
+
+    <!-- Módulo 2: Gerações e Dimensões -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Evolução Histórica</span>
+          <h3>2. Gerações / Dimensões dos Direitos Fundamentais (Karel Vasak & Paulo Bonavides)</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge-tag bg-green">Alta Relevância</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="doctrine-narrative">
+          <p>A doutrina moderna prefere o termo <strong>dimensões</strong> a <em>gerações</em>, pois os direitos fundamentais não se substituem no tempo, mas se <strong>acumulam e fortalecem mutuamente</strong> (indivisibilidade e interdependência):</p>
+        </div>
+
+        <div class="table-responsive">
+          <table class="delta-table">
+            <thead>
+              <tr>
+                <th>Dimensão</th>
+                <th>Lema / Valor</th>
+                <th>Contexto & Marcos</th>
+                <th>Conteúdo & Papel do Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>1ª Dimensão</strong></td>
+                <td><strong>Liberdade</strong><br>(Igualdade Formal)</td>
+                <td>Revoluções Liberais / Burguesas (Magna Carta 1215, Declaração EUA 1776, Rev. Francesa 1789).</td>
+                <td><strong>Direitos Civis e Políticos:</strong> Liberdades negativas (direitos de defesa/abstenção do Estado). Vida, propriedade, locomoção, legalidade.</td>
+              </tr>
+              <tr>
+                <td><strong>2ª Dimensão</strong></td>
+                <td><strong>Igualdade</strong><br>(Igualdade Material)</td>
+                <td>Constitucionalismo Social (Constituição Mexicana 1917, Weimar 1919, Brasil 1934).</td>
+                <td><strong>Direitos Sociais, Econômicos e Culturais:</strong> Liberdades positivas (prestações estatais: saúde, educação, trabalho, moradia). Efeito Cliquet (vedação ao retrocesso).</td>
+              </tr>
+              <tr>
+                <td><strong>3ª Dimensão</strong></td>
+                <td><strong>Fraternidade</strong><br>(Solidariedade)</td>
+                <td>Pós-Segunda Guerra Mundial (DUDH 1948, proteção ambiental e consumo).</td>
+                <td><strong>Direitos Transindividuais (Difusos e Coletivos):</strong> Meio ambiente equilibrado, patrimônio comum da humanidade, autodeterminação dos povos.</td>
+              </tr>
+              <tr>
+                <td><strong>4ª Dimensão</strong></td>
+                <td><strong>Democracia & Informação</strong><br>(Paulo Bonavides)</td>
+                <td>Globalização institucional e avanço tecnológico pós-século XX.</td>
+                <td>Democracia participativa/direta (plebiscito, referendo), pluralismo e direito à informação. (<em>Para Bobbio:</em> Engenharia genética e bioética).</td>
+              </tr>
+              <tr>
+                <td><strong>5ª Dimensão</strong></td>
+                <td><strong>Paz</strong><br>(Paulo Bonavides)</td>
+                <td>Universalização do direito à paz perpétua da humanidade.</td>
+                <td>Direito fundamental e supremo à paz (Karel Vasak inseria a paz na 3ª dimensão).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Módulo 3: Eficácia Vertical, Horizontal e Diagonal -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Eficácia das Normas</span>
+          <h3>3. Dimensões Subjetiva/Objetiva, Limites dos Limites & Eficácia Horizontal/Diagonal</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge-tag bg-blue">Dogmática Avançada</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="synopsis-grid">
+          <div class="synopsis-box">
+            <h4>📐 Dimensão Objetiva & Efeito Irradiante</h4>
+            <p>• Os direitos fundamentais não são apenas direitos subjetivos de defesa, mas <strong>valores axiológicos supremos</strong> que irradiam sobre todo o ordenamento jurídico.<br>
+            • Impõem ao Estado o <em>dever de proteção (*Schutzpflichten*)</em> e a <strong>proibição da proteção deficiente (*Untermassverbot*)</strong>.</p>
+          </div>
+          <div class="synopsis-box">
+            <h4>🧱 Teoria dos Limites dos Limites (*Schranken-Schranken*)</h4>
+            <p>• Os direitos fundamentais são relativos, mas as restrições estatais encontram limites constitucionais intransponíveis.<br>
+            • Exige-se: <em>reserva de lei, proporcionalidade e proteção do núcleo essencial (*Wesensgehalt*)</em>.</p>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="delta-table">
+            <thead>
+              <tr>
+                <th>Tipo de Eficácia</th>
+                <th>Relação Jurídica</th>
+                <th>Precedentes Vinculantes do STF</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Eficácia Vertical</strong></td>
+                <td><strong>Estado x Particular</strong> (Subordinação e limitações do poder soberano).</td>
+                <td>Status de Jellinek (passivo, ativo, negativo e positivo).</td>
+              </tr>
+              <tr>
+                <td><strong>Eficácia Horizontal (Drittwirkung)</strong></td>
+                <td><strong>Particular x Particular</strong> (Incidência direta nas relações privadas).</td>
+                <td><strong>STF RE 160.222:</strong> Ilicitude de revista íntima em funcionárias de fábrica; <strong>STF RE 158.215:</strong> Devido processo legal obrigatório para expulsão de associado em entidade privada.</td>
+              </tr>
+              <tr>
+                <td><strong>Eficácia Diagonal</strong></td>
+                <td><strong>Particular Hipersuficiente x Particular Vulnerável</strong> (Teoria de Sérgio Gamonal).</td>
+                <td>Relações trabalhistas, de consumo e com grandes plataformas econômicas com grave assimetria fática.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Módulo 4: Hierarquia dos Tratados -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Tratados Internacionais</span>
+          <h3>4. Hierarquia dos Tratados de Direitos Humanos & Controle de Convencionalidade</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge-tag bg-purple">Tema Central STF</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="delta-table">
+            <thead>
+              <tr>
+                <th>Natureza do Tratado</th>
+                <th>Quórum & Procedimento de Aprovação</th>
+                <th>Status Normativo no Brasil</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Tratado de Direitos Humanos (Art. 5º, § 3º)</strong></td>
+                <td><strong>2 turnos, 3/5 em cada Casa</strong> do Congresso Nacional (rito de Emenda Constitucional).</td>
+                <td><mark class="g">Equivalente a Emenda Constitucional</mark> (integrante do bloco de constitucionalidade). Ex: Convenção sobre os Direitos das Pessoas com Deficiência.</td>
+              </tr>
+              <tr>
+                <td><strong>Tratado de Direitos Humanos (Rito Ordinário)</strong></td>
+                <td>Aprovado por maioria simples / rito ordinário (antes da EC 45/04 ou sem quórum de 3/5).</td>
+                <td><mark class="b">Status Supralegal</mark> (acima das leis ordinárias e abaixo da CF). Ex: Pacto de San José da Costa Rica (Súmula Vinculante 25 - vedação da prisão do depositário infiel).</td>
+              </tr>
+              <tr>
+                <td><strong>Tratados Comuns (Não DH)</strong></td>
+                <td>Rito ordinário de incorporação.</td>
+                <td>Status de <strong>Lei Ordinária Federal</strong> (sujeito a revogação por lei posterior).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Módulo 5: Art. 5º em Espécie para Delegado -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Direitos em Espécie</span>
+          <h3>5. Direitos Individuais em Espécie: Vida, Domicílio, Liberdades e Intranscendência</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge-tag bg-yellow">Essencial na Atividade Policial</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="synopsis-grid">
+          <div class="synopsis-box">
+            <h4>🏠 Inviolabilidade do Domicílio (Art. 5º, XI)</h4>
+            <p>• Conceito amplo de "casa": residência, quarto de hotel ocupado, escritório profissional, gabinete não aberto ao público.<br>
+            • <strong>Entrada sem mandado:</strong> Flagrante delito, desastre ou prestar socorro (dia ou noite).<br>
+            • <strong>Determinação judicial:</strong> <mark class="r">Apenas durante o dia</mark> (critério físico-astronômico / Lei de Abuso de Autoridade: 5h às 21h).<br>
+            • <strong>Tema 280 STF:</strong> A entrada forçada sem mandado exige <em>fundadas razões prévias</em> justificadas a posteriori. STJ (Info 800): o consentimento do morador deve ser gravado em áudio e vídeo.</p>
+          </div>
+          <div class="synopsis-box">
+            <h4>⛓️ Intranscendência & Individualização (Art. 5º, XLV e XLVI)</h4>
+            <p>• <strong>Pessoalidade da Pena:</strong> Nenhuma pena passará da pessoa do condenado. Reparação do dano e perdimento de bens estendem-se aos sucessores até o limite da herança transferida.<br>
+            • <strong>Súmula Vinculante 11 (Algemas):</strong> Excepcionalidade (Resistência, Fuga, Perigo). Em menores, exige relatório ao MP e Conselho Tutelar (Info 1136 STF).</p>
+          </div>
+        </div>
+
+        <div class="stmt-box">
+          <strong>🚨 Decisões Históricas do STF no Art. 5º:</strong><br>
+          • <strong>ADPF 54:</strong> Antecipação terapêutica de parto de feto anencéfalo não é aborto.<br>
+          • <strong>RE 635.659 (2024):</strong> Descriminalização do porte de maconha para uso pessoal (até 40g ou 6 plantas fêmeas) como ilícito administrativo.<br>
+          • <strong>Tema 786 STF:</strong> Incompatibilidade do "Direito ao Esquecimento" com a CF/88 no âmbito cível/imprensa.<br>
+          • <strong>Tema 855 STF:</strong> Liberdade de reunião não exige protocolo formal de aviso prévio como condição prévia de validade.
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /tab-resumo -->
+
+  <!-- ═══ TAB 1: LITERAIS ═══════════════════════ -->
+  <div class="tab-panel" id="tab-literais">
+    <div class="sec-header">
+      <h2>Textos Literais Mais Cobrados</h2>
+      <span class="tag">Dispositivos Constitucionais Cruciais</span>
+    </div>
+
+    <!-- Art. 5º, XI -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Art. 5º, XI CF</span>
+          <h3>Inviolabilidade Domiciliar</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge-tag bg-yellow">Altíssima</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="blockquote">"A casa é asilo inviolável do indivíduo, ninguém nela podendo penetrar sem consentimento do morador, salvo em caso de <strong>flagrante delito ou desastre</strong>, ou para <strong>prestar socorro</strong>, ou, <strong>durante o dia, por determinação judicial</strong>."</div>
+        <div class="detail-row">
+          <span class="detail-icon">⚠️</span>
+          <div><span class="detail-label">Pegadinha da Noite:</span><span class="detail-text">Com determinação judicial, o ingresso só pode ocorrer <mark class="r">DURANTE O DIA</mark>. Flagrante delito, desastre e socorro autorizam o ingresso a qualquer momento (dia ou noite).</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Art. 5º, XVI -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Art. 5º, XVI CF</span>
+          <h3>Direito de Reunião</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge-tag bg-green">Alta</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="blockquote">"Todos podem reunir-se pacificamente, sem armas, em locais abertos ao público, <strong>independentemente de autorização</strong>, desde que não frustrem outra reunião anteriormente convocada para o mesmo local, sendo apenas <strong>exigido prévio aviso</strong> à autoridade competente."</div>
+        <div class="detail-row">
+          <span class="detail-icon">🔄</span>
+          <div><span class="detail-label">Autorização vs. Aviso:</span><span class="detail-text">A Constituição <strong>dispensa autorização</strong> do Poder Público. O prévio aviso é para garantir a segurança e evitar conflito de locais (Tema 855 STF: sua ausência não torna a reunião ilícita se a administração tomou conhecimento prévio pelos meios de comunicação).</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Art. 5º, XIX -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Art. 5º, XIX CF</span>
+          <h3>Dissolução e Suspensão de Associações</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge-tag bg-blue">Recorrente</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="blockquote">"As associações só poderão ser compulsoriamente dissolvidas ou ter suas atividades suspensas por <strong>decisão judicial</strong>, exigindo-se, no primeiro caso, o <strong>trânsito em julgado</strong>."</div>
+        <div class="detail-row">
+          <span class="detail-icon">🔑</span>
+          <div><span class="detail-label">Regra dos Dois Graus:</span><span class="detail-text">
+            • <strong>Suspensão de atividades:</strong> Basta decisão judicial (mesmo liminar/cautelar).<br>
+            • <strong>Dissolvida compulsoriamente:</strong> Exige <mark class="r">decisão judicial com trânsito em julgado</mark>.
+          </span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Art. 5º, XLV -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Art. 5º, XLV CF</span>
+          <h3>Princípio da Intranscendência da Pena</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge-tag bg-purple">Garantia Penal</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="blockquote">"Nenhuma pena passará da pessoa do condenado, podendo a <strong>obrigação de reparar o dano</strong> e a <strong>decretação do perdimento de bens</strong> ser, nos termos da lei, estendidas aos sucessores e contra eles executadas, <strong>até o limite do valor do patrimônio transferido</strong>."</div>
+      </div>
+    </div>
+  </div><!-- /tab-literais -->
+
+  <!-- ═══ TAB 2: PEGADINHAS ═════════════════════ -->
+  <div class="tab-panel" id="tab-pegadinhas">
+    <div class="sec-header">
+      <h2>Pegadinhas de Banca — Cebraspe & Vunesp</h2>
+      <span class="tag">Armadilhas Clássicas</span>
+    </div>
+
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-red">Gerações vs Dimensões</span>
+          <h3>Sucessão de Gerações dos Direitos</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="false-stmt">A evolução dos direitos fundamentais opera-se em sucessão cronológica estanque, de modo que o advento dos direitos sociais suplantou e substituiu as garantias individuais liberais.</div>
+        <div class="detail-row">
+          <span class="detail-icon">❌</span>
+          <div><span class="detail-label">Por que está errado?</span><span class="detail-text">Os direitos fundamentais são <strong>indivisíveis, cumulativos e interdependentes</strong>. Uma nova dimensão não substitui a anterior, mas fortalece e expande o seu alcance protetivo (Princípio da Vedação do Retrocesso / Efeito Cliquet).</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-red">Domicílio</span>
+          <h3>Galpão Comercial e Domicílio</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="false-stmt">Qualquer imóvel comercial ou galpão de estoque de empresa privada enquadra-se no conceito constitucional de casa, sendo vedada a entrada policial em qualquer hipótese sem mandado.</div>
+        <div class="detail-row">
+          <span class="detail-icon">❌</span>
+          <div><span class="detail-label">Por que está errado?</span><span class="detail-text">Segundo o STJ (Info 798 / AgRg no HC 845.545-SP), galpão destinado estritamente a atividades comerciais ou estoques sem habitação <strong>não se enquadra no conceito de domicílio</strong> por extensão. O conceito protege locais habitados, aposentos de habitação coletiva ou compartimentos privados não abertos ao público onde alguém exerce profissão.</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-red">Greve na Segurança</span>
+          <h3>Direito de Greve dos Policiais Civis</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="false-stmt">Por serem servidores públicos civis regidos pelo Art. 37, VII da CF, os policiais civis têm direito de exercer greve de forma proporcional e com manutenção de escala mínima.</div>
+        <div class="detail-row">
+          <span class="detail-icon">❌</span>
+          <div><span class="detail-label">Por que está errado?</span><span class="detail-text">O STF pacificou no <strong>Tema 860 da Repercussão Geral (ARE 654.432/GO)</strong> que <mark class="r">é absolutamente VEDADO o direito de greve a policiais civis</mark> e a todos os servidores públicos que atuem diretamente na área de segurança pública. Em contrapartida, é obrigatória a participação do Poder Público em mediação com órgãos classistas.</span></div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /tab-pegadinhas -->
+
+  <!-- ═══ TAB 3: JURISPRUDÊNCIA ═════════════════ -->
+  <div class="tab-panel" id="tab-juris">
+    <div class="sec-header">
+      <h2>Jurisprudência em Destaque — STF & STJ</h2>
+      <span class="tag">Precedentes Vinculantes</span>
+    </div>
+
+    <!-- Tema 280 STF -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-purple">STF Tema 280</span>
+          <h3>Entrada Forçada em Domicílio sem Mandado Judicial</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="blockquote">"A entrada forçada em domicílio sem mandado judicial só é lícita, mesmo em período noturno, quando amparada em <strong>fundadas razões, devidamente justificadas a posteriori</strong>, que indiquem que dentro da casa ocorre situação de flagrante delito, sob pena de responsabilidade disciplinar, civil e penal do agente ou da autoridade e de nulidade dos atos praticados." (STF RE 603.616/RO).</div>
+        <div class="detail-row">
+          <span class="detail-icon">⚖️</span>
+          <div><span class="detail-label">Exigência Probatória STJ (Info 800):</span><span class="detail-text">O consentimento do morador deve ser comprovado pelo Estado e obrigatoriamente registrado em gravação de áudio e vídeo sob pena de nulidade da apreensão e do flagrante.</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Súmula Vinculante 11 -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-purple">STF SV 11</span>
+          <h3>Uso de Algemas & Requisitos Excepcionais</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="blockquote">"Só é lícito o uso de algemas em casos de <strong>resistência</strong> e de <strong>fundado receio de fuga</strong> ou de <strong>perigo à integridade física</strong> própria ou alheia, por parte do preso ou de terceiros, justificada a excepcionalidade por escrito, sob pena de responsabilidade disciplinar, civil e penal do agente ou da autoridade e de nulidade da prisão ou do ato processual a que se refere, sem prejuízo da responsabilidade civil do Estado."</div>
+      </div>
+    </div>
+
+    <!-- Estado de Coisas Inconstitucional -->
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-purple">STF ADPF 347</span>
+          <h3>Estado de Coisas Inconstitucional (Sistema Prisional)</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="doctrine-narrative">
+          <p>O STF declarou o sistema carcerário brasileiro em <strong>Estado de Coisas Inconstitucional (ECI)</strong> decorrente da violação massiva, reiterada e estrutural de direitos fundamentais dos detentos. Impôs a elaboração de planos integrados da União, Estados e DF para superação da superlotação e preservação do mínimo existencial.</p>
+        </div>
+      </div>
+    </div>
+  </div><!-- /tab-juris -->
+
+  <!-- ═══ TAB 4: APOSTAS 2026 ═══════════════════ -->
+  <div class="tab-panel" id="tab-apostas">
+    <div class="sec-header">
+      <h2>Apostas para Delegado 2026</h2>
+      <span class="tag">Tendências Cebraspe / Vunesp</span>
+    </div>
+
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Drogas & STF</span>
+          <h3>Descriminalização do Porte de Maconha (STF RE 635.659)</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="stmt-box">
+          Em 2024, o STF fixou que o porte de maconha para consumo pessoal (até 40g ou 6 plantas fêmeas) <strong>deixou de ter natureza de infração penal</strong>, convertendo-se em <strong>ilícito administrativo</strong>. O delegado de polícia deve apreender a substância e lavrar a notificação administrativa, não cabendo lavratura de TCO nem prisão em flagrante.
+        </div>
+      </div>
+    </div>
+
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-brand">Transfusão de Sangue</span>
+          <h3>Testemunhas de Jeová e Autonomia da Vontade (STF 2024)</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="stmt-box">
+          O STF fixou nos RE 979.742 e RE 1.212.272 que o paciente maior e capaz tem o <strong>direito de recusar transfusão de sangue por motivos religiosos</strong>, com base na dignidade humana como autonomia individual e diretivas antecipadas de vontade, cabendo ao SUS fornecer tratamentos alternativos disponíveis.
+        </div>
+      </div>
+    </div>
+  </div><!-- /tab-apostas -->
+
+  <!-- ═══ TAB 5: DISCURSIVAS ════════════════════ -->
+  <div class="tab-panel" id="tab-discursivas">
+    <div class="sec-header">
+      <h2>Preparação para Prova Discursiva</h2>
+      <span class="tag">Estruturação de Ideias</span>
+    </div>
+
+    <div class="info-card searchable">
+      <div class="card-head" onclick="toggle(this)">
+        <div class="card-head-left">
+          <span class="badge-tag bg-blue">Questão Aberta</span>
+          <h3>Eficácia Horizontal e Diagonal dos Direitos Fundamentais</h3>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="simulado-box">
+          <div class="simulado-label">Proposta de Questão Discursiva (Cebraspe / PC)</div>
+          <div class="simulado-q">"Explique a distinção entre a eficácia vertical, horizontal e diagonal dos direitos fundamentais, apontando a teoria adotada pelo Supremo Tribunal Federal na incidência dos direitos fundamentais nas relações privadas."</div>
+          <strong>💡 Esqueleto de Resposta (Pontos de Correção):</strong>
+          <ul class="skeleton-list">
+              <li><strong>Eficácia Vertical:</strong> É a relação clássica de subordinação entre o Estado e os particulares, visando coibir o arbítrio estatal e garantir liberdades fundamentais ao cidadão.</li>
+              <li><strong>Eficácia Horizontal (Drittwirkung):</strong> Aplicação dos direitos fundamentais nas relações entre particulares em situação de paridade formal. O STF adotou a <strong>Teoria da Eficácia Direta e Imediata</strong> (dispensa intermediação legislativa infraconstitucional), conforme julgados sobre revista íntima e ampla defesa em associações.</li>
+              <li><strong>Eficácia Diagonal:</strong> Teoria desenvolvida por Sérgio Gamonal que se aplica às relações privadas marcadas por manifesta hipossuficiência fática e poderio econômico de uma das partes (ex: relações de trabalho e consumo).</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div><!-- /tab-discursivas -->
+
+</main>
+
+<footer>
+  Biblioteca de Estudos <span>Delta</span> · Direito Constitucional - Direitos e Garantias Fundamentais
+</footer>
+
+<script>
+// ─── THEME TOGGLE (Claro / Escuro) ────────────
+function toggleTheme() {
+    const body = document.body;
+    const btn = document.getElementById('themeToggle');
+    
+    body.classList.toggle('dark-theme');
+    
+    if (body.classList.contains('dark-theme')) {
+        localStorage.setItem('delta-theme', 'dark');
+        btn.textContent = '🌙';
+    } else {
+        localStorage.setItem('delta-theme', 'light');
+        btn.textContent = '☀️';
+    }
+}
+
+// Check saved theme on load
+document.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = localStorage.getItem('delta-theme');
+    const btn = document.getElementById('themeToggle');
+    
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-theme');
+        btn.textContent = '🌙';
+    } else {
+        btn.textContent = '☀️';
+    }
+});
+
+// ─── TABS ─────────────────────────────────────
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  const target = document.getElementById('tab-' + id);
+  if (target) target.classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+// ─── ACCORDION ────────────────────────────────
+function toggle(head) {
+  const body = head.nextElementSibling;
+  const chevron = head.querySelector('.chevron');
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  if (chevron) chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
+}
+
+// ─── SEARCH ───────────────────────────────────
+function handleSearch() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  const clear = document.getElementById('searchClear');
+  clear.style.display = q ? 'block' : 'none';
+  if (!q) {
+    document.querySelectorAll('.searchable').forEach(c => c.style.display = '');
+    return;
+  }
+  
+  document.querySelectorAll('.searchable').forEach(card => {
+    const text = card.innerText.toLowerCase();
+    card.style.display = text.includes(q) ? '' : 'none';
+  });
+}
+
+function clearSearch() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchClear').style.display = 'none';
+  document.querySelectorAll('.searchable').forEach(c => c.style.display = '');
+}
+
+// ─── AUTO-OPEN FIRST ITEM ON EACH TAB ─────────
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.tab-panel').forEach(panel => {
+    const first = panel.querySelector('.card-head');
+    if (first) {
+      const body = first.nextElementSibling;
+      const chevron = first.querySelector('.chevron');
+      if (body) body.classList.add('open');
+      if (chevron) chevron.style.transform = 'rotate(180deg)';
+    }
+  });
+});
+</script>
+<script src="./assets/base.js" defer></script>
+<script src="./assets/stopwatch.js" defer></script>
+</body>
+</html>
