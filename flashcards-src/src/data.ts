@@ -1,5 +1,4 @@
-// --- FONTE ÚNICA DOS FLASHCARDS ATENA (61 cartões) ---
-// Editar aqui os baralhos/cartões; rodar `npm run build` para publicar.
+import type { FlagColor, TextAlignment } from './richText';
 
 export interface Card {
   id: string;
@@ -11,6 +10,12 @@ export interface Card {
   deckId?: string;
   isCustom?: boolean;
   createdAt?: string;
+  flag?: FlagColor | null;
+  tags?: string[];
+  imageUrl?: string;
+  align?: TextAlignment;
+  targetCloze?: number; // Para cartões desmembrados (ex: oculta c1 ou c2 ou c3)
+  clozeMode?: 'single_interactive' | 'multi_cards';
 }
 
 export interface Deck {

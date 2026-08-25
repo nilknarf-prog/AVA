@@ -36,10 +36,15 @@ function renderFormattedChunk(text: string, keyPrefix: string): React.ReactNode[
 
 /**
  * Renderiza a Frente do Cartão com Ocultação
- * Por padrão (targetCloze = 0), oculta TODOS os termos marcados (c1, c2, c3...).
- * Se especificado targetCloze > 0, oculta apenas aquele índice.
+ * - targetCloze = 0: modo normal ou interativo (oculta todos os clozes, a menos que estejam em revealedIndices)
+ * - targetCloze > 0: modo multi-cartão (oculta APENAS o targetCloze, e os outros aparecem visíveis como contexto)
  */
-export function renderClozeFront(text: string, targetCloze = 0): React.ReactNode {
+export function renderClozeFront(
+  text: string,
+  targetCloze = 0,
+  revealedIndices?: Set<number>,
+  onToggleReveal?: (clozeIndex: number) => void
+): React.ReactNode {
   if (!text) return null;
   const elements: React.ReactNode[] = [];
   let lastIndex = 0;
@@ -57,20 +62,46 @@ export function renderClozeFront(text: string, targetCloze = 0): React.ReactNode
       elements.push(...renderFormattedChunk(text.substring(lastIndex, matchStart), `front-pre-${matchStart}`));
     }
 
-    if (targetCloze === 0 || clozeIndex === targetCloze) {
-      // Ocultar este termo
+    const isTarget = targetCloze === 0 || clozeIndex === targetCloze;
+    const isRevealed = revealedIndices ? revealedIndices.has(clozeIndex) : false;
+
+    if (isTarget && !isRevealed) {
+      // Ocultar este termo como badge interativo (clique/toque para revelar)
       const label = hint ? `💡 ${hint}` : '...';
       elements.push(
-        <span
+        <button
           key={`cloze-front-${matchStart}`}
-          className="inline-flex items-center justify-center font-mono font-bold px-2 py-0.5 mx-1 rounded-md bg-[#ffe6d4] dark:bg-[#4a1d00] text-[#ff6b00] dark:text-[#ff944d] border border-[#ff6b00]/40 shadow-sm animate-pulse"
-          title={hint ? `Dica: ${hint}` : 'Termo oculto'}
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (onToggleReveal) onToggleReveal(clozeIndex);
+          }}
+          className="inline-flex items-center justify-center font-mono font-bold px-2.5 py-0.5 mx-1 rounded-xl bg-[#ffe6d4] dark:bg-[#4a1d00] text-[#ff6b00] dark:text-[#ff944d] border border-[#ff6b00]/40 shadow-sm hover:scale-105 active:scale-95 hover:bg-[#ffd4b8] dark:hover:bg-[#5e2500] transition cursor-pointer"
+          title={onToggleReveal ? "Clique ou toque para revelar este termo" : (hint ? `Dica: ${hint}` : 'Termo oculto')}
         >
-          [{label}]
+          <span>[{label}]</span>
+          {onToggleReveal && (
+            <span className="text-[9px] opacity-70 ml-1">👆</span>
+          )}
+        </button>
+      );
+    } else if (isTarget && isRevealed) {
+      // Termo revelado individualmente por clique no mesmo cartão
+      elements.push(
+        <span
+          key={`cloze-revealed-${matchStart}`}
+          className="inline-flex flex-col items-center font-bold px-2.5 py-0.5 mx-1 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-500/40 shadow-sm animate-fadeIn"
+        >
+          <span>{answer}</span>
+          {hint && (
+            <span className="text-[9px] font-normal text-emerald-700/70 dark:text-emerald-300/70 italic">
+              ({hint})
+            </span>
+          )}
         </span>
       );
     } else {
-      // Outros clozes exibem o texto normalmente
+      // Outros clozes (em modo multi-cartão) exibem o texto normalmente como contexto
       elements.push(...renderFormattedChunk(answer, `front-ans-${matchStart}`));
     }
 
@@ -86,7 +117,6 @@ export function renderClozeFront(text: string, targetCloze = 0): React.ReactNode
 
 /**
  * Renderiza o Verso do Cartão com o termo revelado em destaque
- * Por padrão (targetCloze = 0), revela TODOS os termos em destaque.
  */
 export function renderClozeBack(text: string, targetCloze = 0): React.ReactNode {
   if (!text) return null;
@@ -110,11 +140,11 @@ export function renderClozeBack(text: string, targetCloze = 0): React.ReactNode 
       elements.push(
         <span
           key={`cloze-back-${matchStart}`}
-          className="inline-flex flex-col items-center font-bold px-2 py-0.5 mx-1 rounded-md bg-[#10b981]/15 dark:bg-[#10b981]/25 text-[#059669] dark:text-[#34d399] border border-[#10b981]/40 shadow-sm"
+          className="inline-flex flex-col items-center font-bold px-2.5 py-0.5 mx-1 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-500/40 shadow-sm"
         >
           <span>{answer}</span>
           {hint && (
-            <span className="text-[10px] font-normal text-[#059669]/70 dark:text-[#34d399]/70 italic">
+            <span className="text-[10px] font-normal text-emerald-700/70 dark:text-emerald-300/70 italic">
               ({hint})
             </span>
           )}
