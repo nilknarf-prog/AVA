@@ -15,7 +15,7 @@ import {
 interface CardCreatorModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSaveCard: (card: Card | Card[], deckId: string) => void;
+  onSaveCard: (card: Card | Card[], deckId: string, closeModal?: boolean) => void;
   availableDecks: Deck[];
   editingCard?: { card: Card; deckId: string } | null;
 }
@@ -317,7 +317,7 @@ export const CardCreatorModal: React.FC<CardCreatorModalProps> = ({
           align,
         }));
 
-        onSaveCard(cardsToCreate, targetDeckId);
+        onSaveCard(cardsToCreate, targetDeckId, !createAnother);
       } else {
         // CASO B: Cartão Único com Revelação Interativa (ou edição)
         const singleCard: Card = {
@@ -338,7 +338,7 @@ export const CardCreatorModal: React.FC<CardCreatorModalProps> = ({
           align,
         };
 
-        onSaveCard(singleCard, targetDeckId);
+        onSaveCard(singleCard, targetDeckId, !createAnother);
       }
     } else {
       if (!frente.trim() || !verso.trim()) {
@@ -361,7 +361,7 @@ export const CardCreatorModal: React.FC<CardCreatorModalProps> = ({
         align,
       };
 
-      onSaveCard(basicCard, targetDeckId);
+      onSaveCard(basicCard, targetDeckId, !createAnother);
     }
 
     setSavedFeedback(true);

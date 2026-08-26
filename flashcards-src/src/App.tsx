@@ -572,7 +572,7 @@ export default function App() {
   };
 
   // Salvar ou Editar Card (Universal)
-  const handleSaveCard = (cardsToSave: Card | Card[], deckId: string) => {
+  const handleSaveCard = (cardsToSave: Card | Card[], deckId: string, closeModal = true) => {
     const list = Array.isArray(cardsToSave) ? cardsToSave : [cardsToSave];
     
     list.forEach(card => {
@@ -619,8 +619,10 @@ export default function App() {
       return updated ? { ...c, ...updated, deckId } : c;
     }));
 
-    setIsCreateModalOpen(false);
-    setEditingCard(null);
+    if (closeModal) {
+      setIsCreateModalOpen(false);
+      setEditingCard(null);
+    }
 
     // Auto-sync com a nuvem
     uploadAvaToCloud(supabaseUser);
