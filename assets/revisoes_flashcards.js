@@ -319,6 +319,7 @@
   let activeSessionCards = [];
   let currentCardIndex = 0;
   let sessionStats = { again: 0, hard: 0, good: 0, easy: 0, total: 0 };
+  let sessionStreak = 0;
   let isCardFlipped = false;
   let failedCardsInSession = [];
   
@@ -327,6 +328,15 @@
   let cardResponseTimeSec = 0;
   let cardTimerInterval = null;
   let sessionResponseTimes = [];
+
+  const FLAG_COLORS = [
+    { id: 'red', color: '#ef4444', label: 'Crítico' },
+    { id: 'orange', color: '#f97316', label: 'Atenção' },
+    { id: 'yellow', color: '#eab308', label: 'Médio' },
+    { id: 'green', color: '#22c55e', label: 'Dominado' },
+    { id: 'blue', color: '#3b82f6', label: 'Informativo' },
+    { id: 'purple', color: '#a855f7', label: 'Decoreba' }
+  ];
 
   function startReviewSession(filterSubj = null, shuffle = false) {
     let cards = getDueCards();
@@ -346,6 +356,7 @@
     activeSessionCards = cards;
     currentCardIndex = 0;
     sessionStats = { again: 0, hard: 0, good: 0, easy: 0, total: cards.length };
+    sessionStreak = 0;
     failedCardsInSession = [];
     sessionResponseTimes = [];
     isCardFlipped = false;
@@ -370,6 +381,7 @@
       activeSessionCards = [found];
       currentCardIndex = 0;
       sessionStats = { again: 0, hard: 0, good: 0, easy: 0, total: 1 };
+      sessionStreak = 0;
       failedCardsInSession = [];
       sessionResponseTimes = [];
       isCardFlipped = false;
@@ -385,27 +397,62 @@
       modal.id = 'modalReviewPlayer';
       modal.className = 'modal-overlay';
       modal.onclick = function(e) { if(e.target === modal) DeltaRevisoes.closeReviewModal(); };
-      modal.innerHTML = `
-        <div class="modal-content modal-review-box">
-          <div class="modal-header">
-            <div class="mrh-left">
-              <span class="mrh-icon">⚡</span>
-              <h2 id="mrhTitle">Revisão FSRS Atena</h2>
-            </div>
-            <div class="mrh-progress-wrap">
-              <span id="mrhCounter">1 / 10</span>
-              <button onclick="DeltaRevisoes.closeReviewModal()" class="btn-close">&times;</button>
-            </div>
-          </div>
-
-          <div class="modal-body modal-review-body" id="reviewBodyContent">
-            <!-- Conteúdo dinâmico do flashcard -->
-          </div>
-        </div>
-      `;
       document.body.appendChild(modal);
     }
+
+    const studyModeKey = localStorage.getItem('atena_study_mode') || 'pos_edital';
+    const modeNames = {
+      'pos_edital': 'Reta Final (Pós-Edital)',
+      'normal': 'Padrão (Pré-Edital)',
+      'gargalos': 'Foco em Gargalos',
+      'simulado': 'Simulado Direcionado'
+    };
+    const modeLabel = (modeNames[studyModeKey] || 'Pré-Edital').toUpperCase();
+
+    const flagDotsHtml = FLAG_COLORS.map(f => 
+      `<button class="flag-dot" style="background-color:${f.color};" title="Bandeira ${f.label}" onclick="DeltaRevisoes.setCardFlag('${f.id}')"></button>`
+    ).join('');
+
+    modal.innerHTML = `
+      <div class="modal-content modal-review-box">
+        <div class="mrh-header-top">
+          <div>
+            <div class="mrh-meta-mode" id="mrhModeLabel">REVISÕES DO DIA (${modeLabel})</div>
+            <h3 class="mrh-card-title" id="mrhCounter">Cartão 1 de ${activeSessionCards.length || 1}</h3>
+          </div>
+          <div class="mrh-right-controls">
+            <div class="mrh-flag-dots" id="mrhFlagDots">
+              ${flagDotsHtml}
+            </div>
+            <div class="fc-streak-pill" title="Sequência de acertos">
+              🔥 <span id="mrhStreak">${sessionStreak}</span>
+            </div>
+            <button onclick="DeltaRevisoes.closeReviewModal()" class="mrh-close-btn" title="Fechar">&times;</button>
+          </div>
+        </div>
+
+        <div class="modal-body modal-review-body" id="reviewBodyContent">
+          <!-- Conteúdo dinâmico do flashcard -->
+        </div>
+      </div>
+    `;
     modal.style.display = 'flex';
+  }
+
+  function setCardFlag(flagId) {
+    if (!activeSessionCards || activeSessionCards.length === 0) return;
+    const card = activeSessionCards[currentCardIndex];
+    if (!card) return;
+
+    try {
+      const fsrs = getFSRSData();
+      if (!fsrs[card.id]) {
+        fsrs[card.id] = { id: card.id, difficulty: 5.0, stability: 1.0, reps: 0, lapses: 0, state: 0, flag: flagId };
+      } else {
+        fsrs[card.id].flag = fsrs[card.id].flag === flagId ? null : flagId;
+      }
+      saveFSRSData(fsrs);
+    } catch(e) {}
   }
 
   function closeReviewModal() {
@@ -437,6 +484,7 @@
 
     const container = document.getElementById('reviewBodyContent');
     const counter = document.getElementById('mrhCounter');
+    const streakEl = document.getElementById('mrhStreak');
     if (!container) return;
 
     if (currentCardIndex >= activeSessionCards.length) {
@@ -445,72 +493,119 @@
     }
 
     const card = activeSessionCards[currentCardIndex];
-    if (counter) counter.innerText = `${currentCardIndex + 1} de ${activeSessionCards.length}`;
+    if (counter) counter.innerText = `Cartão ${currentCardIndex + 1} de ${activeSessionCards.length}`;
+    if (streakEl) streakEl.innerText = sessionStreak;
+
+    const fsrs = getFSRSData();
+    const cardSrs = fsrs[card.id];
+    let stateText = '🔵 Novo';
+    let stateClass = 'state-new';
+
+    if (cardSrs && cardSrs.reps > 0) {
+      if (cardSrs.state === 1) {
+        stateText = '🟠 Aprendizagem';
+        stateClass = 'state-learning';
+      } else if (cardSrs.state === 2) {
+        stateText = '🟢 Revisão';
+        stateClass = 'state-review';
+      } else {
+        stateText = '🟠 Aprendizagem';
+        stateClass = 'state-learning';
+      }
+    }
 
     isCardFlipped = false;
     cardStartTime = Date.now();
     cardResponseTimeSec = 0;
 
     container.innerHTML = `
-      <div class="fc-card-container ${isCardFlipped ? 'flipped' : ''}" onclick="DeltaRevisoes.flipCurrentCard()">
+      <div class="fc-card-container">
         <div class="fc-badge-top">
           <div class="fc-badge-left">
-            <span class="fc-tag-mat">${card.sigla || 'MAT'}</span>
-            <span class="fc-assunto-lbl">${card.assunto}</span>
+            <span class="fc-subject-pill">${(card.assunto || card.sigla || 'MAT').toUpperCase()}</span>
+            <span class="fc-state-pill ${stateClass}">${stateText}</span>
           </div>
-          <div class="fc-card-timer running" id="fcLiveTimerBox" title="Tempo de resposta">
-            <span class="fc-timer-dot"></span>
+          <div class="fc-live-latency-pill pill-fluente" id="fcLiveTimerBox" title="Tempo de resposta ao vivo">
+            <span>⏱️</span>
             <span id="fcCardLiveTimer">0.0s</span>
+            <span id="fcLatencyText" class="latency-lbl">· Fluente</span>
           </div>
         </div>
 
-        <div class="fc-front-box">
-          <div class="fc-prompt-label">Pergunta:</div>
+        <div class="fc-front-box" id="fcFrontBox">
           <div class="fc-question-text">${card.frente}</div>
-          <div class="fc-tap-hint">👆 Toque no cartão ou pressione [Espaço] para ver a resposta</div>
         </div>
 
         <div class="fc-back-box" id="fcBackBox" style="display:none;">
-          <div class="fc-divider-line"></div>
-          <div class="fc-answer-label">Resposta:</div>
+          <div class="fc-back-header">
+            <span class="fc-back-title">Gabarito & Fundamentação</span>
+            <span class="fc-back-latency" id="fcFinalLatency">⏱️ 0.0s</span>
+          </div>
           <div class="fc-answer-text">${highlightKeywords(card.verso)}</div>
+        </div>
+
+        <div class="fc-bottom-hint" id="fcBottomHint">
+          Pressione <strong>Espaço</strong> ou botão abaixo para gabarito
         </div>
       </div>
 
-      <!-- BOTÕES DE AVALIAÇÃO FSRS -->
+      <!-- BOTÃO DE REVELAR / AVALIAÇÃO FSRS -->
+      <div id="fcActionArea" style="width:100%; margin-top:6px;">
+        <button class="btn-reveal-orange" onclick="DeltaRevisoes.flipCurrentCard()">
+          Revelar Gabarito (Espaço)
+        </button>
+      </div>
+
       <div class="fc-rating-buttons-bar" id="fcRatingBar" style="display:none;">
         <button class="btn-rate btn-rate-again" onclick="DeltaRevisoes.rateCard(1)">
-          <span class="br-num">1</span>
-          <span class="br-label">Errei</span>
+          <span class="br-num">[1]</span>
+          <span class="br-label">🔴 Errei</span>
           <span class="br-sub">10 min</span>
         </button>
         <button class="btn-rate btn-rate-hard" onclick="DeltaRevisoes.rateCard(2)">
-          <span class="br-num">2</span>
-          <span class="br-label">Difícil</span>
-          <span class="br-sub">1 dia</span>
+          <span class="br-num">[2]</span>
+          <span class="br-label">🟡 Difícil</span>
+          <span class="br-sub">+1 dia</span>
         </button>
         <button class="btn-rate btn-rate-good" onclick="DeltaRevisoes.rateCard(3)">
-          <span class="br-num">3</span>
-          <span class="br-label">Bom</span>
-          <span class="br-sub">3 dias</span>
+          <span class="br-num">[3]</span>
+          <span class="br-label">🟢 Bom</span>
+          <span class="br-sub">+3 dias</span>
         </button>
         <button class="btn-rate btn-rate-easy" onclick="DeltaRevisoes.rateCard(4)">
-          <span class="br-num">4</span>
-          <span class="br-label">Fácil</span>
-          <span class="br-sub">7 dias</span>
+          <span class="br-num">[4]</span>
+          <span class="br-label">🔵 Fácil</span>
+          <span class="br-sub">+7 dias</span>
         </button>
       </div>
     `;
 
-    // Iniciar contagem do cronômetro por cartão
+    // Iniciar contagem do cronômetro em tempo real por cartão
     const timerLabel = document.getElementById('fcCardLiveTimer');
+    const timerBox = document.getElementById('fcLiveTimerBox');
+    const timerText = document.getElementById('fcLatencyText');
+
     cardTimerInterval = setInterval(() => {
       if (isCardFlipped) {
         clearInterval(cardTimerInterval);
         return;
       }
       const elapsed = ((Date.now() - cardStartTime) / 1000).toFixed(1);
+      const elapsedNum = parseFloat(elapsed);
       if (timerLabel) timerLabel.innerText = `${elapsed}s`;
+
+      if (timerBox && timerText) {
+        if (elapsedNum <= 6.0) {
+          timerBox.className = 'fc-live-latency-pill pill-fluente';
+          timerText.innerText = '· Fluente';
+        } else if (elapsedNum <= 15.0) {
+          timerBox.className = 'fc-live-latency-pill pill-normal';
+          timerText.innerText = '· Normal';
+        } else {
+          timerBox.className = 'fc-live-latency-pill pill-hesitacao';
+          timerText.innerText = '· Hesitação';
+        }
+      }
     }, 100);
   }
 
@@ -526,29 +621,19 @@
     cardResponseTimeSec = Math.max(0.3, parseFloat(((Date.now() - cardStartTime) / 1000).toFixed(1)));
     sessionResponseTimes.push(cardResponseTimeSec);
 
-    const cardEl = document.querySelector('.fc-card-container');
-    const tapHint = document.querySelector('.fc-tap-hint');
     const backBox = document.getElementById('fcBackBox');
+    const bottomHint = document.getElementById('fcBottomHint');
+    const actionArea = document.getElementById('fcActionArea');
     const ratingBar = document.getElementById('fcRatingBar');
-    const timerBox = document.getElementById('fcLiveTimerBox');
+    const finalLatency = document.getElementById('fcFinalLatency');
 
-    if (cardEl) cardEl.classList.add('flipped');
-    if (tapHint) tapHint.style.display = 'none';
     if (backBox) backBox.style.display = 'flex';
+    if (bottomHint) bottomHint.style.display = 'none';
+    if (actionArea) actionArea.style.display = 'none';
     if (ratingBar) ratingBar.style.display = 'grid';
+    if (finalLatency) finalLatency.innerText = `⏱️ ${cardResponseTimeSec}s`;
 
-    // Substituir cronômetro em tempo real pelo badge de latência
-    if (timerBox) {
-      if (cardResponseTimeSec <= 6.0) {
-        timerBox.outerHTML = `<span class="fc-latency-badge badge-fast" title="Recuperação fluida e automática">⚡ ${cardResponseTimeSec}s · Instantâneo</span>`;
-      } else if (cardResponseTimeSec <= 18.0) {
-        timerBox.outerHTML = `<span class="fc-latency-badge badge-medium" title="Recuperação com esforço moderado">💡 ${cardResponseTimeSec}s · Normal</span>`;
-      } else {
-        timerBox.outerHTML = `<span class="fc-latency-badge badge-slow" title="Alta hesitação e esforço cognitivo">⏳ ${cardResponseTimeSec}s · Hesitação</span>`;
-      }
-    }
-
-    // Rolar suavemente para exibir os botões de resposta se o cartão for longo
+    // Rolar suavemente para exibir a resposta
     setTimeout(() => {
       const reviewBody = document.getElementById('reviewBodyContent');
       if (reviewBody) {
@@ -588,32 +673,38 @@
     let addDays = 1;
     if (rating === 1) {
       sessionStats.again++;
+      sessionStreak = 0;
       currentSrs.lapses = (currentSrs.lapses || 0) + 1;
       currentSrs.stability = Math.max(0.4, (currentSrs.stability || 1) * 0.5);
       currentSrs.difficulty = Math.min(10, (currentSrs.difficulty || 5) + 1.0);
+      currentSrs.state = 1; // Learning
       addDays = 0; // revisar hoje ainda
       failedCardsInSession.push(card);
     } else if (rating === 2) {
       sessionStats.hard++;
+      sessionStreak = Math.max(0, sessionStreak);
       currentSrs.stability = (currentSrs.stability || 1) * 1.2;
       currentSrs.difficulty = Math.min(10, (currentSrs.difficulty || 5) + 0.5);
+      currentSrs.state = 2;
       addDays = 1;
-      failedCardsInSession.push(card); // entra na fila de reforço
+      failedCardsInSession.push(card);
     } else if (rating === 3) {
       sessionStats.good++;
-      // Calibração Inteligente FSRS por Latência:
-      // Se demorou mais de 18s para responder, a estabilidade cresce menos (evita esquecimento)
-      const multiplier = cardResponseTimeSec > 18.0 ? 1.5 : (cardResponseTimeSec <= 5.0 ? 2.8 : 2.5);
+      sessionStreak++;
+      const multiplier = cardResponseTimeSec > 15.0 ? 1.6 : (cardResponseTimeSec <= 6.0 ? 2.8 : 2.4);
       currentSrs.stability = (currentSrs.stability || 1) * multiplier;
-      if (cardResponseTimeSec > 18.0) {
+      currentSrs.state = 2; // Review
+      if (cardResponseTimeSec > 15.0) {
         currentSrs.difficulty = Math.min(10, (currentSrs.difficulty || 5) + 0.3);
       }
       addDays = Math.max(2, Math.round(currentSrs.stability));
     } else if (rating === 4) {
       sessionStats.easy++;
-      const multiplier = cardResponseTimeSec > 18.0 ? 2.2 : (cardResponseTimeSec <= 5.0 ? 4.5 : 4.0);
+      sessionStreak += 2;
+      const multiplier = cardResponseTimeSec > 15.0 ? 2.2 : (cardResponseTimeSec <= 6.0 ? 4.5 : 3.8);
       currentSrs.stability = (currentSrs.stability || 1) * multiplier;
       currentSrs.difficulty = Math.max(1, (currentSrs.difficulty || 5) - 0.5);
+      currentSrs.state = 2; // Review
       addDays = Math.max(5, Math.round(currentSrs.stability * 1.5));
     }
 
@@ -782,6 +873,7 @@
     closeReviewModal,
     flipCurrentCard,
     rateCard,
+    setCardFlag,
     restartFailedCardsSession
   };
 
