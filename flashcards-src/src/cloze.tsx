@@ -1,7 +1,7 @@
 import React from 'react';
 
-// Regex para capturar sintaxe Anki: {{c1::termo}} ou {{c1::termo::dica}}
-export const CLOZE_REGEX = /\{\{c(\d+)::([^}:]+)(?:::([^}]+))?\}\}/g;
+// Regex para capturar sintaxe Anki: {{c1::termo}} ou {{c1::termo::dica}} (Sem flag global para evitar bug de estado no test)
+export const CLOZE_REGEX = /\{\{c(\d+)::([^}:]+)(?:::([^}]+))?\}\}/;
 
 export function hasCloze(text: string): boolean {
   if (!text) return false;

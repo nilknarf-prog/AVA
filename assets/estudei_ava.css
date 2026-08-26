@@ -1933,3 +1933,38 @@
     gap: 8px;
   }
 }
+
+/* Flashcards Cloze Deletion Tags & Badges */
+.fc-cloze-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-family: var(--font-mono, monospace) !important;
+  font-weight: 700 !important;
+  font-size: 0.9em !important;
+  padding: 3px 10px !important;
+  margin: 0 4px !important;
+  border-radius: 12px !important;
+  background: rgba(255, 107, 0, 0.15) !important;
+  color: #ff8533 !important;
+  border: 1px solid rgba(255, 107, 0, 0.4) !important;
+  cursor: pointer !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+  transition: all 0.15s ease !important;
+  user-select: none !important;
+}
+.fc-cloze-badge:hover {
+  background: rgba(255, 107, 0, 0.28) !important;
+  transform: scale(1.05) !important;
+}
+.fc-cloze-badge.revealed {
+  background: rgba(16, 185, 129, 0.15) !important;
+  color: #10b981 !important;
+  border-color: rgba(16, 185, 129, 0.4) !important;
+}
+.fc-cloze-answer {
+  color: #ff8533 !important;
+  font-weight: 700 !important;
+  border-bottom: 2px solid #ff8533 !important;
+  padding: 0 2px !important;
+}

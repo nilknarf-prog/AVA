@@ -466,9 +466,29 @@
     if (window.renderDashboardEstudei) window.renderDashboardEstudei();
   }
 
+  function formatClozeFront(text) {
+    if (!text) return '';
+    if (!/\{\{c\d+::.+?\}\}/.test(text)) return text;
+    return text.replace(/\{\{c(\d+)::([^}:]+)(?:::([^}]+))?\}\}/g, function(match, num, answer, hint) {
+      const label = hint ? `💡 ${hint}` : '[...]';
+      const cleanAnswer = answer.trim();
+      return `<span class="fc-cloze-badge" data-label="${label}" data-answer="${encodeURIComponent(cleanAnswer)}" onclick="event.stopPropagation(); this.classList.toggle('revealed'); this.innerText = this.classList.contains('revealed') ? decodeURIComponent(this.dataset.answer) : this.dataset.label;" title="Clique para revelar o termo">${label}</span>`;
+    });
+  }
+
+  function formatClozeBack(text) {
+    if (!text) return '';
+    if (!/\{\{c\d+::.+?\}\}/.test(text)) return text;
+    return text.replace(/\{\{c(\d+)::([^}:]+)(?:::([^}]+))?\}\}/g, function(match, num, answer, hint) {
+      return `<span class="fc-cloze-answer">${answer.trim()}</span>`;
+    });
+  }
+
   function highlightKeywords(text) {
+    if (!text) return '';
+    const formatted = formatClozeBack(text);
     const KEYWORDS = ['Exceção', 'Súmula', 'Vedada', 'Proibida', 'Prazo', 'NÃO', 'INCONDICIONADA', 'GRAVE', 'SIM', 'SEMPRE', 'NUNCA', 'JAMAIS', 'APENAS', 'MAIOR', 'ROXIN', 'JAKOBS', 'EX TUNC', 'EX NUNC', 'DOLO ESPECÍFICO'];
-    let res = text;
+    let res = formatted;
     KEYWORDS.forEach(kw => {
       const reg = new RegExp(`\\b(${kw})\\b`, 'gi');
       res = res.replace(reg, `<span class="kw-highlight">$1</span>`);
@@ -533,7 +553,7 @@
         </div>
 
         <div class="fc-front-box" id="fcFrontBox">
-          <div class="fc-question-text">${card.frente}</div>
+          <div class="fc-question-text">${formatClozeFront(card.frente)}</div>
         </div>
 
         <div class="fc-back-box" id="fcBackBox" style="display:none;">

@@ -3,7 +3,7 @@ import {
   Scale, BookOpen, AlertTriangle, Lightbulb, ShieldAlert,
   ExternalLink, ZoomIn, X
 } from 'lucide-react';
-import { CLOZE_REGEX } from './cloze';
+import { CLOZE_REGEX, hasCloze } from './cloze';
 
 export type TextAlignment = 'left' | 'center' | 'right' | 'justify';
 
@@ -268,7 +268,7 @@ function renderInlineMarkdown(
   if (!text) return [];
 
   // Se houver tags Cloze, intercalar com o parser de Cloze
-  if (CLOZE_REGEX.test(text)) {
+  if (hasCloze(text)) {
     return renderClozeWithRichText(text, isBack, targetCloze, onImageClick, revealedIndices, onToggleReveal);
   }
 
