@@ -919,8 +919,25 @@
     `).join('');
   }
 
+  function reloadLogsFromStorage() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      logs = raw ? JSON.parse(raw) : [];
+    } catch(e) { logs = []; }
+  }
+
+  window.addEventListener('storage', () => {
+    reloadLogsFromStorage();
+    renderDashboardEstudei();
+  });
+  window.addEventListener('ava-cloud-synced', () => {
+    reloadLogsFromStorage();
+    renderDashboardEstudei();
+  });
+
   // --- RENDERIZAÇÃO DO DASHBOARD PRINCIPAL ---
   function renderDashboardEstudei() {
+    reloadLogsFromStorage();
     let totalSecs = 0;
     let totalQts = 0;
     let totalAcertos = 0;

@@ -1,6 +1,7 @@
 /**
  * Delta AVA — Global Supabase Cloud Sync Manager & Auth Modal
- * Design System: high-end-visual-design & impeccable (Doppelrand, Luxury Pill, Fluid Dynamics)
+ * Sincronização 100% Automática em Tempo Real (Estilo Estudei / AnkiWeb)
+ * Design System: high-end-visual-design & impeccable
  */
 (function() {
   'use strict';
@@ -12,7 +13,7 @@
   let currentUser = null;
   let activeTab = 'login';
 
-  // Injetar estilos do Modal e Botão de Nuvem Imediatamente
+  // Injetar estilos do Modal e Botão de Nuvem
   function injectSyncStyles() {
     if (document.getElementById('delta-cloud-sync-styles')) return;
     const style = document.createElement('style');
@@ -217,7 +218,6 @@
     document.head.appendChild(style);
   }
 
-  // Executa injeção de CSS imediatamente
   injectSyncStyles();
 
   // Carregar script do Supabase JS via CDN
@@ -247,6 +247,7 @@
         }
       });
 
+      // Verificar sessão atual e puxar dados automaticamente
       supabaseClient.auth.getUser().then(res => {
         currentUser = res.data ? res.data.user : null;
         updateHeaderButton();
@@ -267,7 +268,7 @@
     }
   }
 
-  // Coleta dados locais
+  // Coleta dados locais para sincronização
   function getLocalPayload() {
     let estudos = [], fsrs = {}, customCards = [], customDecks = [], cardOverrides = {};
     try { estudos = JSON.parse(localStorage.getItem('delta_estudos') || '[]'); } catch (e) {}
@@ -343,7 +344,10 @@
       }
 
       localStorage.setItem('delta_last_sync_timestamp', String(Date.now()));
+      
+      // Disparar eventos de sincronização para atualizar UI
       window.dispatchEvent(new Event('storage'));
+      window.dispatchEvent(new CustomEvent('ava-cloud-synced', { detail: remote }));
       
       if (window.renderDashboardEstudei) window.renderDashboardEstudei();
       if (window.DeltaRevisoes && window.DeltaRevisoes.renderRevisoesDashboard) {
@@ -356,7 +360,7 @@
     }
   }
 
-  // Push para nuvem
+  // Push para nuvem automático
   async function pushToCloud() {
     if (!supabaseClient || !currentUser) return;
     try {
@@ -373,7 +377,7 @@
     }
   }
 
-  // Pull da nuvem
+  // Pull da nuvem automático
   async function autoPullFromCloud() {
     if (!supabaseClient || !currentUser) return;
     try {
@@ -383,6 +387,7 @@
         if (remotePayload) {
           applyRemotePayload(remotePayload);
         } else {
+          // Primeiro upload caso o usuário tenha acabado de criar a conta
           pushToCloud();
         }
       }
@@ -390,6 +395,13 @@
       console.error('Erro ao sincronizar pull:', e);
     }
   }
+
+  // Atualização automática ao focar na janela / aba
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && currentUser) {
+      autoPullFromCloud();
+    }
+  });
 
   function updateHeaderButton() {
     let btn = document.getElementById('deltaCloudSyncBtn');
@@ -414,11 +426,11 @@
     if (currentUser) {
       btn.className = 'delta-cloud-btn is-synced';
       btn.innerHTML = `<span class="cloud-beacon"></span>${cloudSvg}<span class="cloud-btn-label">Sincronizado</span>`;
-      btn.title = `Conectado como ${currentUser.email} · Clique para gerenciar nuvem`;
+      btn.title = `Conectado como ${currentUser.email} · Clique para gerenciar conta`;
     } else {
       btn.className = 'delta-cloud-btn';
       btn.innerHTML = `<span class="cloud-beacon"></span>${cloudSvg}<span class="cloud-btn-label">Conectar Nuvem</span>`;
-      btn.title = `Clique para fazer login e sincronizar seus estudos entre PC e Tablet`;
+      btn.title = `Clique para entrar na sua conta e acessar seus estudos em qualquer aparelho`;
     }
   }
 
@@ -448,51 +460,50 @@
     const modal = document.getElementById('deltaSyncModal');
     if (!modal) return;
 
-    const rawLast = localStorage.getItem('delta_last_sync_timestamp');
-    const lastSync = rawLast ? new Date(parseInt(rawLast, 10)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' (' + new Date(parseInt(rawLast, 10)).toLocaleDateString() + ')' : 'Nunca';
-
     if (currentUser) {
       modal.innerHTML = `
         <div class="delta-sync-modal-box">
           <div class="delta-sync-header">
             <div style="display:flex; align-items:center; gap:10px;">
-              <div style="width:36px; height:36px; border-radius:12px; background:rgba(255,107,0,0.12); display:flex; align-items:center; justify-content:center; color:#ff8533;">
+              <div style="width:38px; height:38px; border-radius:12px; background:rgba(16,185,129,0.12); display:flex; align-items:center; justify-content:center; color:#10b981;">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path>
                 </svg>
               </div>
               <div>
-                <strong style="font-size:15px; font-weight:800;">Conta & Sincronização</strong>
-                <div style="font-size:11.5px; color:#10b981; font-weight:700; display:flex; align-items:center; gap:4px;">
-                  <span style="width:6px; height:6px; border-radius:50%; background:#10b981; display:inline-block;"></span>
-                  Conectado à Nuvem
+                <strong style="font-size:15px; font-weight:800; color:#e8eaf0;">Minha Conta AVA</strong>
+                <div style="font-size:11.5px; color:#10b981; font-weight:700; display:flex; align-items:center; gap:5px;">
+                  <span style="width:6px; height:6px; border-radius:50%; background:#10b981; display:inline-block; box-shadow:0 0 6px #10b981;"></span>
+                  Sincronização em Tempo Real Ativa
                 </div>
               </div>
             </div>
             <button onclick="window.AvaSync.closeModal()" style="background:none; border:none; color:#9aa5bb; font-size:22px; cursor:pointer; padding:4px;">&times;</button>
           </div>
 
-          <div style="background:#0b0f1a; padding:14px 16px; border-radius:16px; border:1px solid rgba(255,255,255,0.08); margin-bottom:16px;">
+          <div style="background:#0b0f1a; padding:16px; border-radius:16px; border:1px solid rgba(255,255,255,0.08); margin-bottom:16px;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-              <span style="font-size:12.5px; font-weight:700; color:#e8eaf0;">${currentUser.email}</span>
-              <button onclick="window.AvaSync.logout()" style="background:none; border:none; color:#ef4444; font-size:11.5px; font-weight:700; cursor:pointer; padding:4px 0;">Sair da Conta</button>
-            </div>
-            <div style="margin-top:8px; font-size:11.5px; color:#9aa5bb; font-family:var(--font-mono, monospace);">
-              Última sincronização: <strong style="color:#ff8533;">${lastSync}</strong>
+              <div>
+                <div style="font-size:10.5px; font-weight:700; text-transform:uppercase; color:#9aa5bb; letter-spacing:0.05em;">E-mail Conectado</div>
+                <div style="font-size:13px; font-weight:800; color:#e8eaf0; margin-top:2px;">${currentUser.email}</div>
+              </div>
+              <button onclick="window.AvaSync.logout()" style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.2); color:#ef4444; font-size:11px; font-weight:700; padding:6px 12px; border-radius:8px; cursor:pointer; transition:all 0.15s;">
+                Sair da Conta
+              </button>
             </div>
           </div>
 
-          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:16px;">
-            <button onclick="window.AvaSync.forcePush()" class="delta-sync-btn-primary" style="margin-top:0; background:#ff6b00; display:flex; align-items:center; justify-content:center; gap:6px;">
-              <span>⬆️</span> Enviar Dados (PC)
-            </button>
-            <button onclick="window.AvaSync.forcePull()" class="delta-sync-btn-primary" style="margin-top:0; background:#1a2235; border:1px solid rgba(255,255,255,0.1); color:#e8eaf0; display:flex; align-items:center; justify-content:center; gap:6px;">
-              <span>⬇️</span> Baixar Dados (Tablet)
-            </button>
+          <div style="background:rgba(16, 185, 129, 0.08); border:1px solid rgba(16, 185, 129, 0.25); padding:14px; border-radius:16px; font-size:12px; color:#9aa5bb; line-height:1.5; margin-bottom:16px;">
+            ☁️ <strong style="color:#e8eaf0;">Nuvem 100% Automática:</strong> Tudo o que você estuda neste computador, tablet ou celular é salvo e compartilhado em tempo real. Basta abrir o site e entrar com sua conta.
           </div>
 
-          <div style="background:rgba(16, 185, 129, 0.08); border:1px solid rgba(16, 185, 129, 0.25); padding:12px 14px; border-radius:14px; font-size:11.5px; color:#9aa5bb; line-height:1.5;">
-            🛡️ <strong style="color:#e8eaf0;">Sincronização Ativa:</strong> Todos os seus estudos e flashcards são automaticamente salvos na nuvem a cada sessão.
+          <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid rgba(255,255,255,0.08); padding-top:14px;">
+            <button onclick="window.AvaSync.exportBackup()" style="background:none; border:none; color:#9aa5bb; font-size:11.5px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:5px;">
+              💾 Exportar Backup (.json)
+            </button>
+            <button onclick="window.AvaSync.closeModal()" style="background:#1a2235; border:1px solid rgba(255,255,255,0.1); color:#e8eaf0; font-size:11.5px; font-weight:700; padding:6px 16px; border-radius:10px; cursor:pointer;">
+              Fechar
+            </button>
           </div>
         </div>
       `;
@@ -501,14 +512,14 @@
         <div class="delta-sync-modal-box">
           <div class="delta-sync-header">
             <div style="display:flex; align-items:center; gap:10px;">
-              <div style="width:36px; height:36px; border-radius:12px; background:rgba(255,107,0,0.12); display:flex; align-items:center; justify-content:center; color:#ff8533;">
+              <div style="width:38px; height:38px; border-radius:12px; background:rgba(255,107,0,0.12); display:flex; align-items:center; justify-content:center; color:#ff8533;">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path>
                 </svg>
               </div>
               <div>
-                <strong style="font-size:15px; font-weight:800;">Sincronização em Nuvem</strong>
-                <div style="font-size:11.5px; color:#9aa5bb;">Acesse seus estudos no PC, Tablet e Celular</div>
+                <strong style="font-size:15px; font-weight:800; color:#e8eaf0;">Acesse sua Conta AVA</strong>
+                <div style="font-size:11.5px; color:#9aa5bb;">Sincronização contínua no PC, Tablet e Celular</div>
               </div>
             </div>
             <button onclick="window.AvaSync.closeModal()" style="background:none; border:none; color:#9aa5bb; font-size:22px; cursor:pointer; padding:4px;">&times;</button>
@@ -531,12 +542,12 @@
 
             <div style="background:#0b0f1a; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,0.06); margin-bottom:14px; font-size:11px; color:#9aa5bb; line-height:1.4;">
               ${activeTab === 'login'
-                ? '💡 Ao entrar no Tablet, todos os seus flashcards e revisões feitas no PC serão baixados automaticamente.'
-                : '💡 Crie sua conta no Computador e seus dados atuais serão salvos na nuvem para acesso no Tablet.'}
+                ? '💡 Ao entrar, todos os seus flashcards e tempo de estudo serão carregados automaticamente.'
+                : '💡 Crie sua conta para manter seus estudos salvos e sincronizados para sempre.'}
             </div>
 
             <button type="submit" id="syncSubmitBtn" class="delta-sync-btn-primary">
-              ${activeTab === 'login' ? 'Entrar e Sincronizar' : 'Criar Conta e Salvar na Nuvem'}
+              ${activeTab === 'login' ? 'Entrar e Carregar Meus Estudos' : 'Criar Conta e Salvar na Nuvem'}
             </button>
           </form>
 
@@ -557,7 +568,7 @@
 
     if (!email || !password) return;
 
-    submitBtn.innerText = 'Processando...';
+    submitBtn.innerText = 'Autenticando...';
     submitBtn.disabled = true;
 
     try {
@@ -567,24 +578,30 @@
         currentUser = data.user;
         feedback.style.display = 'block';
         feedback.style.color = '#10b981';
-        feedback.innerText = '✅ Login realizado! Baixando seus dados da nuvem...';
+        feedback.innerText = '✅ Conectado com sucesso! Carregando seus estudos...';
         await autoPullFromCloud();
-        setTimeout(() => { renderModalContent(); updateHeaderButton(); }, 1200);
+        setTimeout(() => {
+          closeSyncModal();
+          updateHeaderButton();
+        }, 1000);
       } else {
         const { data, error } = await supabaseClient.auth.signUp({ email, password });
         if (error) throw error;
         currentUser = data.user;
         feedback.style.display = 'block';
         feedback.style.color = '#10b981';
-        feedback.innerText = '✅ Conta criada! Salvando seus dados atuais na nuvem...';
+        feedback.innerText = '✅ Conta criada com sucesso! Salvando seus estudos na nuvem...';
         await pushToCloud();
-        setTimeout(() => { renderModalContent(); updateHeaderButton(); }, 1200);
+        setTimeout(() => {
+          closeSyncModal();
+          updateHeaderButton();
+        }, 1000);
       }
     } catch (err) {
       feedback.style.display = 'block';
       feedback.style.color = '#ef4444';
       feedback.innerText = `❌ ${err.message || 'Falha na autenticação'}`;
-      submitBtn.innerText = activeTab === 'login' ? 'Entrar e Sincronizar' : 'Criar Conta e Salvar na Nuvem';
+      submitBtn.innerText = activeTab === 'login' ? 'Entrar e Carregar Meus Estudos' : 'Criar Conta e Salvar na Nuvem';
       submitBtn.disabled = false;
     }
   }
@@ -597,16 +614,19 @@
     renderModalContent();
   }
 
-  async function forcePush() {
-    await pushToCloud();
-    alert('Dados enviados para a nuvem com sucesso!');
-    renderModalContent();
-  }
-
-  async function forcePull() {
-    await autoPullFromCloud();
-    alert('Dados atualizados da nuvem com sucesso!');
-    renderModalContent();
+  function exportBackup() {
+    try {
+      const data = getLocalPayload();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `backup_ava_delta_${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error('Erro ao exportar backup:', e);
+    }
   }
 
   // Inicialização
@@ -622,8 +642,7 @@
     switchTab: (t) => { activeTab = t; renderModalContent(); },
     handleSubmit,
     logout,
-    forcePush,
-    forcePull,
+    exportBackup,
     pushToCloud,
     autoPullFromCloud
   };

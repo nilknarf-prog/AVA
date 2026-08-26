@@ -6,11 +6,9 @@ import {
   Mail,
   Lock,
   Download,
-  Upload,
   CheckCircle,
   AlertCircle,
   X,
-  User as UserIcon,
   ShieldCheck,
   Tablet,
   Laptop
@@ -29,9 +27,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSyncCom
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [syncing, setSyncing] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const [lastSyncStr, setLastSyncStr] = useState<string>('Nunca sincronizado');
 
   useEffect(() => {
     if (!isOpen) return;
@@ -39,26 +35,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSyncCom
     // Verificar sessão atual
     supabase.auth.getUser().then(({ data: { user } }) => {
       setCurrentUser(user);
-      updateLastSyncText();
     });
 
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       setCurrentUser(session?.user || null);
-      updateLastSyncText();
     });
 
     return () => {
       authListener.subscription.unsubscribe();
     };
   }, [isOpen]);
-
-  const updateLastSyncText = () => {
-    const raw = localStorage.getItem('delta_last_sync_timestamp');
-    if (raw) {
-      const date = new Date(parseInt(raw, 10));
-      setLastSyncStr(date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' (' + date.toLocaleDateString() + ')');
-    }
-  };
 
   if (!isOpen) return null;
 
@@ -87,12 +73,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSyncCom
         await downloadAvaFromCloud(data.user);
       }
 
-      updateLastSyncText();
       if (onSyncComplete) onSyncComplete();
 
       setTimeout(() => {
         setMessage(null);
-      }, 2500);
+        onClose();
+      }, 1000);
     } catch (err: any) {
       console.error(err);
       setMessage({ type: 'error', text: err.message || 'Falha ao autenticar. Verifique seus dados.' });
@@ -130,12 +116,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSyncCom
         await uploadAvaToCloud(data.user);
       }
 
-      updateLastSyncText();
       if (onSyncComplete) onSyncComplete();
 
       setTimeout(() => {
         setMessage(null);
-      }, 2500);
+        onClose();
+      }, 1000);
     } catch (err: any) {
       console.error(err);
       setMessage({ type: 'error', text: err.message || 'Falha ao criar conta.' });
@@ -155,34 +141,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSyncCom
       console.error(err);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleForceUpload = async () => {
-    setSyncing(true);
-    setMessage(null);
-    const res = await uploadAvaToCloud(currentUser);
-    setSyncing(false);
-    if (res.success) {
-      setMessage({ type: 'success', text: 'Dados enviados para a nuvem com sucesso!' });
-      updateLastSyncText();
-      if (onSyncComplete) onSyncComplete();
-    } else {
-      setMessage({ type: 'error', text: res.error || 'Erro ao enviar dados.' });
-    }
-  };
-
-  const handleForceDownload = async () => {
-    setSyncing(true);
-    setMessage(null);
-    const res = await downloadAvaFromCloud(currentUser);
-    setSyncing(false);
-    if (res.success) {
-      setMessage({ type: 'success', text: 'Dados atualizados da nuvem com sucesso!' });
-      updateLastSyncText();
-      if (onSyncComplete) onSyncComplete();
-    } else {
-      setMessage({ type: 'error', text: res.error || 'Erro ao baixar dados.' });
     }
   };
 
@@ -261,16 +219,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSyncCom
           <div className="space-y-4">
             <div className="p-4 rounded-2xl bg-gray-50 dark:bg-[#0b0f1a] border border-gray-200 dark:border-[rgba(255,255,255,0.08)] space-y-3">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <UserIcon size={18} className="text-[#ff6b00]" />
-                  <span className="text-xs font-bold text-gray-900 dark:text-[#e8eaf0]">
+                <div>
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-[#9aa5bb]">
+                    E-mail Conectado
+                  </div>
+                  <div className="text-xs font-bold text-gray-900 dark:text-[#e8eaf0] mt-0.5">
                     {currentUser.email}
-                  </span>
+                  </div>
                 </div>
                 <button
                   onClick={handleLogout}
                   disabled={loading}
-                  className="flex items-center gap-1 text-[11px] font-bold text-red-500 hover:text-red-600 transition cursor-pointer"
+                  className="flex items-center gap-1 text-[11px] font-bold text-red-500 hover:text-red-600 transition cursor-pointer p-1.5 rounded-lg hover:bg-red-500/10"
                 >
                   <LogOut size={13} />
                   Sair da Conta
@@ -278,36 +238,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSyncCom
               </div>
 
               <div className="flex items-center justify-between text-xs text-gray-500 dark:text-[#9aa5bb] pt-2 border-t border-gray-200/50 dark:border-white/5 font-mono">
-                <span>Última sincronização:</span>
-                <span className="text-[#ff8533] font-bold">{lastSyncStr}</span>
+                <span>Status da Nuvem:</span>
+                <span className="text-emerald-500 font-bold flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_6px_#10b981]" />
+                  100% Sincronizado
+                </span>
               </div>
             </div>
 
-            {/* Ações de Sincronização */}
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={handleForceUpload}
-                disabled={syncing}
-                className="flex items-center justify-center gap-2 p-3 bg-[#ff6b00] hover:bg-[#e65c00] text-white rounded-2xl font-bold text-xs shadow-md transition cursor-pointer"
-              >
-                <Upload size={15} />
-                {syncing ? 'Enviando...' : 'Enviar Dados (PC ➔ Nuvem)'}
-              </button>
-
-              <button
-                onClick={handleForceDownload}
-                disabled={syncing}
-                className="flex items-center justify-center gap-2 p-3 bg-gray-100 dark:bg-[#1a2235] hover:bg-gray-200 dark:hover:bg-[#232d46] text-gray-800 dark:text-[#e8eaf0] border border-gray-200 dark:border-white/10 rounded-2xl font-bold text-xs transition cursor-pointer"
-              >
-                <Download size={15} />
-                {syncing ? 'Baixando...' : 'Baixar Dados (Nuvem ➔ Tablet)'}
-              </button>
-            </div>
-
-            <div className="p-3 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl flex items-start gap-2.5">
+            <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/25 rounded-2xl flex items-start gap-2.5">
               <ShieldCheck size={18} className="text-emerald-500 flex-shrink-0 mt-0.5" />
-              <p className="text-[11.5px] text-gray-600 dark:text-[#9aa5bb] leading-relaxed">
-                <strong>Sincronização Automática Ativa:</strong> Todas as sessões de estudo registradas e flashcards revisados são automaticamente salvos na sua nuvem.
+              <p className="text-[11.5px] text-gray-700 dark:text-[#9aa5bb] leading-relaxed">
+                <strong className="text-gray-900 dark:text-[#e8eaf0]">Sincronização 100% Automática:</strong> Todas as sessões de estudo, flashcards e revisões feitas no seu PC, Tablet ou Celular são salvas e compartilhadas instantaneamente.
               </p>
             </div>
 
