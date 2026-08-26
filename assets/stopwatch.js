@@ -1,11 +1,114 @@
 /**
  * Delta AVA — Global Resilient Stopwatch (Multi-tab Sync via localStorage timestamps)
- * Renderizado no cabeçalho em todas as telas (Index, Painéis, Atena), sem botão flutuante.
+ * Widget em formato de Pílula Canônica idêntico em todas as páginas (Index, Atena, Painéis).
  */
 (function() {
   'use strict';
 
   const STORAGE_KEY = 'delta_stopwatch_state';
+
+  // Injetar estilos CSS inline prioritários para garantir 100% de fidelidade visual
+  function injectStyles() {
+    if (document.getElementById('delta-stopwatch-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'delta-stopwatch-styles';
+    style.textContent = `
+      .delta-stopwatch-pill {
+        display: inline-flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 8px !important;
+        background: #131929 !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        border-radius: 9999px !important;
+        padding: 4px 10px 4px 12px !important;
+        height: 36px !important;
+        box-sizing: border-box !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
+        user-select: none !important;
+        white-space: nowrap !important;
+      }
+      .delta-stopwatch-pill .dsw-dot {
+        width: 8px !important;
+        height: 8px !important;
+        border-radius: 50% !important;
+        background: #f59e0b !important;
+        flex-shrink: 0 !important;
+        display: inline-block !important;
+        transition: background 0.2s !important;
+      }
+      .delta-stopwatch-pill .dsw-dot.running {
+        background: #10b981 !important;
+        box-shadow: 0 0 8px #10b981 !important;
+        animation: dswPulse 1.2s infinite ease-in-out !important;
+      }
+      @keyframes dswPulse {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.3); opacity: 0.7; }
+      }
+      .delta-stopwatch-pill .dsw-time {
+        font-family: 'Space Mono', 'JetBrains Mono', 'Courier New', monospace !important;
+        font-size: 13.5px !important;
+        font-weight: 700 !important;
+        color: #ff8533 !important;
+        letter-spacing: 0.8px !important;
+        line-height: 1 !important;
+        display: inline-block !important;
+      }
+      .delta-stopwatch-pill .dsw-divider {
+        width: 1px !important;
+        height: 15px !important;
+        background: rgba(255, 255, 255, 0.15) !important;
+        margin: 0 2px !important;
+        flex-shrink: 0 !important;
+      }
+      .delta-stopwatch-pill .dsw-btn-group {
+        display: inline-flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 4px !important;
+      }
+      .delta-stopwatch-pill .dsw-btn {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 22px !important;
+        height: 22px !important;
+        border-radius: 6px !important;
+        border: none !important;
+        cursor: pointer !important;
+        transition: all 0.15s ease !important;
+        padding: 0 !important;
+        line-height: 1 !important;
+        flex-shrink: 0 !important;
+      }
+      .delta-stopwatch-pill .dsw-btn-play {
+        background: #3b82f6 !important;
+        color: #ffffff !important;
+      }
+      .delta-stopwatch-pill .dsw-btn-play:hover {
+        background: #2563eb !important;
+        transform: scale(1.08) !important;
+      }
+      .delta-stopwatch-pill .dsw-btn-pause {
+        background: #f59e0b !important;
+        color: #ffffff !important;
+      }
+      .delta-stopwatch-pill .dsw-btn-pause:hover {
+        background: #d97706 !important;
+        transform: scale(1.08) !important;
+      }
+      .delta-stopwatch-pill .dsw-btn-stop {
+        background: #60a5fa !important;
+        color: #ffffff !important;
+      }
+      .delta-stopwatch-pill .dsw-btn-stop:hover {
+        background: #ef4444 !important;
+        transform: scale(1.08) !important;
+      }
+    `;
+    document.head.appendChild(style);
+  }
 
   function getStoredState() {
     try {
@@ -17,8 +120,7 @@
     return {
       isRunning: false,
       startTimestamp: 0,
-      accumulatedSec: 0,
-      isOpen: false
+      accumulatedSec: 0
     };
   }
 
@@ -52,11 +154,11 @@
     const elapsed = getElapsedSeconds(state);
     const timeStr = secToHHMMSS(elapsed);
 
-    const timeDisplays = document.querySelectorAll('.delta-sw-time-display');
+    const timeDisplays = document.querySelectorAll('.delta-stopwatch-pill .dsw-time');
     timeDisplays.forEach(el => { el.innerText = timeStr; });
 
-    const indicators = document.querySelectorAll('.delta-sw-indicator');
-    indicators.forEach(el => {
+    const dots = document.querySelectorAll('.delta-stopwatch-pill .dsw-dot');
+    dots.forEach(el => {
       if (state.isRunning) {
         el.classList.add('running');
       } else {
@@ -64,10 +166,10 @@
       }
     });
 
-    const playBtns = document.querySelectorAll('.delta-btn-play');
-    const pauseBtns = document.querySelectorAll('.delta-btn-pause');
-    playBtns.forEach(btn => { btn.style.display = state.isRunning ? 'none' : 'inline-block'; });
-    pauseBtns.forEach(btn => { btn.style.display = state.isRunning ? 'inline-block' : 'none'; });
+    const playBtns = document.querySelectorAll('.delta-stopwatch-pill .dsw-btn-play');
+    const pauseBtns = document.querySelectorAll('.delta-stopwatch-pill .dsw-btn-pause');
+    playBtns.forEach(btn => { btn.style.display = state.isRunning ? 'none' : 'inline-flex'; });
+    pauseBtns.forEach(btn => { btn.style.display = state.isRunning ? 'inline-flex' : 'none'; });
   }
 
   function startTicking() {
@@ -111,7 +213,7 @@
     const timeStr = secToHHMMSS(totalSec);
     const totalMins = Math.max(1, Math.round(totalSec / 60));
 
-    // Se estiver na index com o modal de registro pronto
+    // Se estiver no index com o modal de registro pronto
     if (typeof window.openRegistroModal === 'function') {
       window.openRegistroModal();
       const tempoInput = document.getElementById('modalTempo');
@@ -154,13 +256,14 @@
     saveStoredState({
       isRunning: false,
       startTimestamp: 0,
-      accumulatedSec: 0,
-      isOpen: false
+      accumulatedSec: 0
     });
     stopTicking();
   }
 
   function renderHeaderWidget() {
+    injectStyles();
+
     let container = document.getElementById('headerStopwatch');
     
     // Se não existir o container id, procurar no header
@@ -170,23 +273,31 @@
       
       container = document.createElement('div');
       container.id = 'headerStopwatch';
-      container.className = 'delta-header-stopwatch';
       headerRight.insertBefore(container, headerRight.firstChild);
     }
 
     container.innerHTML = `
-      <span class="delta-sw-indicator" title="Status do cronômetro"></span>
-      <span class="delta-sw-time-display">00:00:00</span>
-      <div class="delta-sw-actions">
-        <button class="delta-sw-btn-mini delta-btn-play" title="Iniciar / Continuar cronômetro">▶️</button>
-        <button class="delta-sw-btn-mini delta-btn-pause" title="Pausar cronômetro" style="display:none;">⏸️</button>
-        <button class="delta-sw-btn-mini delta-btn-stop" title="Finalizar e Salvar estudo">⏹️</button>
+      <div class="delta-stopwatch-pill">
+        <span class="dsw-dot" title="Status do cronômetro"></span>
+        <span class="dsw-time">00:00:00</span>
+        <div class="dsw-divider"></div>
+        <div class="dsw-btn-group">
+          <button class="dsw-btn dsw-btn-play" title="Iniciar / Continuar cronômetro">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>
+          </button>
+          <button class="dsw-btn dsw-btn-pause" title="Pausar cronômetro" style="display:none;">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><rect x="5" y="4" width="4" height="16" rx="1"></rect><rect x="15" y="4" width="4" height="16" rx="1"></rect></svg>
+          </button>
+          <button class="dsw-btn dsw-btn-stop" title="Finalizar e Salvar estudo">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"></rect></svg>
+          </button>
+        </div>
       </div>
     `;
 
-    container.querySelector('.delta-btn-play').addEventListener('click', play);
-    container.querySelector('.delta-btn-pause').addEventListener('click', pause);
-    container.querySelector('.delta-btn-stop').addEventListener('click', stopAndSave);
+    container.querySelector('.dsw-btn-play').addEventListener('click', play);
+    container.querySelector('.dsw-btn-pause').addEventListener('click', pause);
+    container.querySelector('.dsw-btn-stop').addEventListener('click', stopAndSave);
 
     const state = getStoredState();
     if (state.isRunning) {
@@ -196,7 +307,7 @@
     }
   }
 
-  // Sincronização entre abas
+  // Sincronização multi-aba em tempo real
   window.addEventListener('storage', function(e) {
     if (e.key === STORAGE_KEY) {
       const state = getStoredState();

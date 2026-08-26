@@ -119,35 +119,36 @@ function HeaderStopwatch({ onStopSession }: { onStopSession?: (minutes: number) 
   const timeFormatted = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 
   return (
-    <div className="flex items-center gap-1.5 bg-gray-100 dark:bg-[#131929] border border-gray-200 dark:border-[rgba(255,255,255,0.09)] px-2.5 py-1 rounded-xl shadow-sm">
-      <span className={`w-2 h-2 rounded-full ${isRunning ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
-      <span className="font-mono font-bold text-xs sm:text-sm text-[#ff6b00] dark:text-[#ff8533] min-w-[62px]">
+    <div className="inline-flex items-center gap-2 bg-[#131929] border border-white/10 px-3 py-1 rounded-full shadow-sm select-none h-9">
+      <span className={`w-2 h-2 rounded-full flex-shrink-0 transition-colors ${isRunning ? 'bg-emerald-500 shadow-[0_0_8px_#10b981] animate-pulse' : 'bg-amber-500'}`} />
+      <span className="font-mono font-bold text-xs sm:text-[13.5px] text-[#ff8533] min-w-[62px] tracking-wider">
         {timeFormatted}
       </span>
-      <div className="flex items-center gap-0.5 ml-1 border-l border-gray-200 dark:border-[rgba(255,255,255,0.09)] pl-1">
+      <div className="w-[1px] h-3.5 bg-white/15 mx-0.5 flex-shrink-0" />
+      <div className="inline-flex items-center gap-1">
         {!isRunning ? (
           <button
             onClick={handlePlay}
-            className="p-1 hover:bg-gray-200 dark:hover:bg-[#1a2235] rounded-lg text-emerald-600 dark:text-emerald-400 text-xs font-bold transition cursor-pointer"
+            className="w-5.5 h-5.5 bg-blue-500 hover:bg-blue-600 active:scale-95 text-white rounded-md flex items-center justify-center transition cursor-pointer"
             title="Iniciar / Continuar cronômetro"
           >
-            ▶️
+            <svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4" /></svg>
           </button>
         ) : (
           <button
             onClick={handlePause}
-            className="p-1 hover:bg-gray-200 dark:hover:bg-[#1a2235] rounded-lg text-amber-600 dark:text-amber-400 text-xs font-bold transition cursor-pointer"
+            className="w-5.5 h-5.5 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white rounded-md flex items-center justify-center transition cursor-pointer"
             title="Pausar cronômetro"
           >
-            ⏸️
+            <svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor"><rect x="5" y="4" width="4" height="16" rx="1" /><rect x="15" y="4" width="4" height="16" rx="1" /></svg>
           </button>
         )}
         <button
           onClick={handleStop}
-          className="p-1 hover:bg-gray-200 dark:hover:bg-[#1a2235] rounded-lg text-red-500 text-xs font-bold transition cursor-pointer"
+          className="w-5.5 h-5.5 bg-blue-400 hover:bg-red-500 active:scale-95 text-white rounded-md flex items-center justify-center transition cursor-pointer"
           title="Finalizar e Salvar tempo estudado"
         >
-          ⏹️
+          <svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2" /></svg>
         </button>
       </div>
     </div>
