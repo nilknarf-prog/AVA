@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   Layers, Flame, ArrowLeft, CheckCircle, Play,
   CalendarClock, BookOpen, FileText, Sun, Moon,
@@ -9,6 +9,7 @@ import { bancosDeQuestoes, type Card, type Deck } from './data';
 import {
   Rating,
   CardState,
+  MasteryTier,
   StudyMode,
   STUDY_MODES_CONFIG,
   type FSRSCard,
@@ -178,6 +179,8 @@ export default function App() {
   const [cardIndex, setCardIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [revealedClozes, setRevealedClozes] = useState<Set<number>>(new Set());
+  const [cardLatencyMs, setCardLatencyMs] = useState<number | undefined>(undefined);
+  const cardStartTimeRef = useRef<number>(performance.now());
   const [currentStreak, setCurrentStreak] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [, setIncorrectCards] = useState<Card[]>([]);
@@ -341,12 +344,22 @@ export default function App() {
     setCardIndex(0);
     setIsFlipped(false);
     setRevealedClozes(new Set());
+    setCardLatencyMs(undefined);
+    cardStartTimeRef.current = performance.now();
     setCurrentStreak(0);
     setCorrectCount(0);
     setIncorrectCards([]);
     setSessionRatings({ again: 0, hard: 0, good: 0, easy: 0 });
     setCurrentScreen('flashcards');
   };
+
+  const flipCard = useCallback(() => {
+    if (!isFlipped) {
+      const elapsed = Math.round(performance.now() - cardStartTimeRef.current);
+      setCardLatencyMs(elapsed);
+    }
+    setIsFlipped((prev) => !prev);
+  }, [isFlipped]);
 
   const openSaveModal = (newFsrs: FSRSData) => {
     const tempoTotal = Math.max(1, Math.round(currentDeck.length * 1.2));
@@ -369,7 +382,10 @@ export default function App() {
         card.id,
         rating,
         desiredRetention,
-        maxIntervalDays
+        maxIntervalDays,
+        new Date(),
+        cardLatencyMs,
+        fsrsData
       );
       newFsrs[card.id] = updatedCard;
       setFsrsData(newFsrs);
@@ -396,6 +412,8 @@ export default function App() {
     if (cardIndex < currentDeck.length - 1) {
       setIsFlipped(false);
       setRevealedClozes(new Set());
+      setCardLatencyMs(undefined);
+      cardStartTimeRef.current = performance.now();
       setCardIndex((prev) => prev + 1);
     } else {
       openSaveModal(newFsrs);
@@ -447,7 +465,7 @@ export default function App() {
 
       if (e.code === 'Space' || e.code === 'Enter') {
         e.preventDefault();
-        setIsFlipped((prev) => !prev);
+        flipCard();
       } else if (isFlipped) {
         if (e.key === '1') {
           e.preventDefault();
@@ -870,10 +888,11 @@ export default function App() {
     const isCloze = card.tipo === 'cloze' || hasCloze(card.frente);
 
     // Previsão dos 4 intervalos FSRS em tempo real
-    const previews = previewFSRSIntervals(cardFsrs, card.id, desiredRetention, maxIntervalDays);
+    const previews = previewFSRSIntervals(cardFsrs, card.id, desiredRetention, maxIntervalDays, new Date(), cardLatencyMs);
 
     // Estado do cartão
     const cardState = cardFsrs?.state ?? CardState.New;
+    const cardTier = cardFsrs?.masteryTier ?? MasteryTier.Acquisition;
 
     // Calcular Retrievability instantânea
     let currentRText = 'Novo';
@@ -932,12 +951,23 @@ export default function App() {
               
               {/* Top Header da Frente */}
               <div className="flex items-center justify-between gap-2 border-b border-gray-100 dark:border-zinc-700/60 pb-3">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <span className="bg-gray-100 dark:bg-zinc-700 text-gray-700 dark:text-zinc-300 text-xs px-2.5 py-1 rounded-lg font-bold uppercase tracking-wider">
                     {card.assunto}
                   </span>
                   
-                  {/* Badge de Estado */}
+                  {/* Badges de Domínio e Estado */}
+                  {cardTier === MasteryTier.Mastered && (
+                    <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/30">
+                      💎 Dominado
+                    </span>
+                  )}
+                  {cardTier === MasteryTier.Consolidated && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                      🥈 Consolidado
+                    </span>
+                  )}
+
                   {cardState === CardState.New && (
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
                       🔵 Novo
@@ -948,7 +978,7 @@ export default function App() {
                       🟠 Aprendizagem
                     </span>
                   )}
-                  {cardState === CardState.Review && (
+                  {cardState === CardState.Review && cardTier !== MasteryTier.Mastered && (
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                       🟢 Revisão
                     </span>
@@ -1038,16 +1068,35 @@ export default function App() {
               
               {/* Top Header do Verso */}
               <div className="flex items-center justify-between gap-2 border-b border-[#ffe6d4] dark:border-[#401900] pb-3">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <span className="bg-[#ffe6d4] dark:bg-[#4d1f00] text-[#803200] dark:text-[#ffad77] text-xs px-2.5 py-1 rounded-lg font-extrabold uppercase tracking-wider">
                     Gabarito & Fundamentação
                   </span>
                   <span className="bg-[#fff0e6] dark:bg-[#331500] text-[#ff6b00] dark:text-[#ff8533] text-[10px] font-bold px-2 py-0.5 rounded-full border border-[#ffd4b8] dark:border-[#662a00]">
                     Retenção: {currentRText}
                   </span>
-                  {card.targetCloze && card.targetCloze > 0 && (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#ff6b00]/15 text-[#ff6b00] dark:text-[#ff8533]">
-                      Oclusão c{card.targetCloze}
+                  
+                  {/* Feedback de Tempo e Fluência */}
+                  {cardLatencyMs !== undefined && (
+                    <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border flex items-center gap-1 ${
+                      cardLatencyMs <= 6000
+                        ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
+                        : 'bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-zinc-400 border-gray-200 dark:border-zinc-700'
+                    }`}>
+                      {cardLatencyMs <= 6000
+                        ? `⚡ ${(cardLatencyMs / 1000).toFixed(1)}s (Fluência Rápida)`
+                        : `⏱️ ${(cardLatencyMs / 1000).toFixed(1)}s`}
+                    </span>
+                  )}
+
+                  {cardFsrs?.consecutiveCorrect && cardFsrs.consecutiveCorrect > 1 && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
+                      🔥 {cardFsrs.consecutiveCorrect} acertos seguidos
+                    </span>
+                  )}
+                  {cardTier === MasteryTier.Mastered && (
+                    <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/30">
+                      💎 Dominado
                     </span>
                   )}
                 </div>
@@ -1111,7 +1160,7 @@ export default function App() {
         <div className="mt-6 w-full">
           {!isFlipped ? (
             <button
-              onClick={() => setIsFlipped(true)}
+              onClick={flipCard}
               className="w-full h-16 bg-gray-900 dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-100 text-white dark:text-gray-900 rounded-2xl font-extrabold text-base sm:text-lg shadow-lg hover:shadow-xl transition-all active:scale-98 flex items-center justify-center gap-2 cursor-pointer"
             >
               Revelar Gabarito (Espaço)
@@ -1203,7 +1252,7 @@ export default function App() {
           </button>
         </div>
 
-        {/* 4 Cards Principais de Indicadores */}
+        {/* 4 Cards Principais de Indicadores Neurocognitivos */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           
           <div className="bg-white dark:bg-zinc-800/90 p-5 rounded-3xl border border-gray-200 dark:border-zinc-700 shadow-sm text-center">
@@ -1213,71 +1262,65 @@ export default function App() {
           </div>
 
           <div className="bg-white dark:bg-zinc-800/90 p-5 rounded-3xl border border-gray-200 dark:border-zinc-700 shadow-sm text-center">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-500 dark:text-zinc-400">Retenção Estimada</span>
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-500 dark:text-zinc-400">Retenção Média</span>
             <p className="text-3xl font-black text-emerald-600 dark:text-emerald-400 mt-1.5">{memoryStats.avgRetrievability}%</p>
-            <p className="text-[11px] text-gray-400 mt-1">Probabilidade média de recall</p>
+            <p className="text-[11px] text-gray-400 mt-1">Probabilidade de recall</p>
           </div>
 
           <div className="bg-white dark:bg-zinc-800/90 p-5 rounded-3xl border border-gray-200 dark:border-zinc-700 shadow-sm text-center">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-500 dark:text-zinc-400">Para Hoje</span>
-            <p className="text-3xl font-black text-[#ff6b00] dark:text-[#ff8533] mt-1.5">{memoryStats.dueToday}</p>
-            <p className="text-[11px] text-gray-400 mt-1">Atingiram limiar ótimo</p>
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-purple-600 dark:text-purple-400 flex items-center justify-center gap-1">
+              💎 Dominados
+            </span>
+            <p className="text-3xl font-black text-purple-600 dark:text-purple-400 mt-1.5">{memoryStats.countTier3}</p>
+            <p className="text-[11px] text-gray-400 mt-1">Memória profunda consolidada</p>
           </div>
 
           <div className="bg-white dark:bg-zinc-800/90 p-5 rounded-3xl border border-gray-200 dark:border-zinc-700 shadow-sm text-center">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-500 dark:text-zinc-400">Próximos 7 Dias</span>
-            <p className="text-3xl font-black text-blue-600 dark:text-blue-400 mt-1.5">{memoryStats.dueNext7Days}</p>
-            <p className="text-[11px] text-gray-400 mt-1">Demanda semanal</p>
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-blue-600 dark:text-blue-400 flex items-center justify-center gap-1">
+              ⏱️ Tempo Médio
+            </span>
+            <p className="text-3xl font-black text-blue-600 dark:text-blue-400 mt-1.5">{memoryStats.avgLatencySec > 0 ? `${memoryStats.avgLatencySec}s` : '—'}</p>
+            <p className="text-[11px] text-gray-400 mt-1">Fluência de recuperação</p>
           </div>
 
         </div>
 
-        {/* Distribuição por Estados da Memória */}
+        {/* Níveis de Domínio & Estados da Memória */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           
           <div className="bg-white dark:bg-zinc-800/90 border border-gray-200 dark:border-zinc-700 rounded-3xl p-6 shadow-sm">
             <h3 className="text-sm font-extrabold uppercase tracking-wider text-gray-700 dark:text-zinc-300 mb-4 flex items-center gap-2">
-              <BrainCircuit size={16} className="text-[#ff6b00]" /> Distribuição por Estados Cognitivos
+              <BrainCircuit size={16} className="text-[#ff6b00]" /> Níveis de Domínio (Mastery Tiers)
             </h3>
 
             <div className="space-y-3">
               <div>
                 <div className="flex justify-between text-xs font-bold mb-1">
-                  <span className="text-blue-600 dark:text-blue-400">🔵 Novos (Nunca estudados)</span>
-                  <span>{memoryStats.countNew} ({memoryStats.totalCards > 0 ? Math.round((memoryStats.countNew / memoryStats.totalCards) * 100) : 0}%)</span>
+                  <span className="text-purple-600 dark:text-purple-400">💎 Tier 3: Dominados (Fixação Máxima)</span>
+                  <span>{memoryStats.countTier3} ({memoryStats.totalCards > 0 ? Math.round((memoryStats.countTier3 / memoryStats.totalCards) * 100) : 0}%)</span>
                 </div>
                 <div className="w-full bg-gray-100 dark:bg-zinc-700 h-2.5 rounded-full overflow-hidden">
-                  <div className="bg-blue-500 h-full rounded-full" style={{ width: `${(memoryStats.countNew / (memoryStats.totalCards || 1)) * 100}%` }} />
+                  <div className="bg-purple-500 h-full rounded-full" style={{ width: `${(memoryStats.countTier3 / (memoryStats.totalCards || 1)) * 100}%` }} />
                 </div>
               </div>
 
               <div>
                 <div className="flex justify-between text-xs font-bold mb-1">
-                  <span className="text-orange-600 dark:text-orange-400">🟠 Aprendizagem (Em aquisição)</span>
-                  <span>{memoryStats.countLearning} ({memoryStats.totalCards > 0 ? Math.round((memoryStats.countLearning / memoryStats.totalCards) * 100) : 0}%)</span>
+                  <span className="text-emerald-600 dark:text-emerald-400">🥈 Tier 2: Consolidados (Estabilidade &gt; 10d)</span>
+                  <span>{memoryStats.countTier2} ({memoryStats.totalCards > 0 ? Math.round((memoryStats.countTier2 / memoryStats.totalCards) * 100) : 0}%)</span>
                 </div>
                 <div className="w-full bg-gray-100 dark:bg-zinc-700 h-2.5 rounded-full overflow-hidden">
-                  <div className="bg-orange-500 h-full rounded-full" style={{ width: `${(memoryStats.countLearning / (memoryStats.totalCards || 1)) * 100}%` }} />
+                  <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${(memoryStats.countTier2 / (memoryStats.totalCards || 1)) * 100}%` }} />
                 </div>
               </div>
 
               <div>
                 <div className="flex justify-between text-xs font-bold mb-1">
-                  <span className="text-emerald-600 dark:text-emerald-400">🟢 Revisão (Memória Estabilizada)</span>
-                  <span>{memoryStats.countReview} ({memoryStats.totalCards > 0 ? Math.round((memoryStats.countReview / memoryStats.totalCards) * 100) : 0}%)</span>
+                  <span className="text-blue-600 dark:text-blue-400">🥉 Tier 1: Aquisição Inicial</span>
+                  <span>{memoryStats.countTier1} ({memoryStats.totalCards > 0 ? Math.round((memoryStats.countTier1 / memoryStats.totalCards) * 100) : 0}%)</span>
                 </div>
                 <div className="w-full bg-gray-100 dark:bg-zinc-700 h-2.5 rounded-full overflow-hidden">
-                  <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${(memoryStats.countReview / (memoryStats.totalCards || 1)) * 100}%` }} />
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between text-xs font-bold mb-1">
-                  <span className="text-red-600 dark:text-red-400">🔴 Reaprendizagem (Falhas Recentes)</span>
-                  <span>{memoryStats.countRelearning} ({memoryStats.totalCards > 0 ? Math.round((memoryStats.countRelearning / memoryStats.totalCards) * 100) : 0}%)</span>
-                </div>
-                <div className="w-full bg-gray-100 dark:bg-zinc-700 h-2.5 rounded-full overflow-hidden">
-                  <div className="bg-red-500 h-full rounded-full" style={{ width: `${(memoryStats.countRelearning / (memoryStats.totalCards || 1)) * 100}%` }} />
+                  <div className="bg-blue-500 h-full rounded-full" style={{ width: `${(memoryStats.countTier1 / (memoryStats.totalCards || 1)) * 100}%` }} />
                 </div>
               </div>
             </div>

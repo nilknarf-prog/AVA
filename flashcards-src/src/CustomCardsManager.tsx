@@ -6,7 +6,7 @@ import {
 import { type Card, type Deck } from './data';
 import { renderClozeFront } from './cloze';
 import { FLAG_CONFIG, type FlagColor } from './richText';
-import { CardState, type FSRSData } from './fsrs';
+import { CardState, MasteryTier, type FSRSData } from './fsrs';
 
 interface CustomCardsManagerProps {
   isOpen: boolean;
@@ -336,6 +336,24 @@ export const CustomCardsManager: React.FC<CustomCardsManagerProps> = ({
                       </span>
 
                       {getStateBadge(card.id)}
+
+                      {fsrsData[card.id]?.masteryTier === MasteryTier.Mastered && (
+                        <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/30">
+                          💎 Dominado
+                        </span>
+                      )}
+
+                      {fsrsData[card.id]?.avgLatencyMs && fsrsData[card.id].avgLatencyMs! > 0 && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center gap-0.5">
+                          ⏱️ {(fsrsData[card.id].avgLatencyMs! / 1000).toFixed(1)}s
+                        </span>
+                      )}
+
+                      {fsrsData[card.id]?.consecutiveCorrect && fsrsData[card.id].consecutiveCorrect! > 1 && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300">
+                          🔥 {fsrsData[card.id].consecutiveCorrect}x
+                        </span>
+                      )}
 
                       {cardFlag && (
                         <span

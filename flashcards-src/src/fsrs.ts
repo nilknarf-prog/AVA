@@ -1,7 +1,12 @@
 /**
- * FSRS (Free Spaced Repetition Scheduler) Concursos Engine v2.0
+ * FSRS (Free Spaced Repetition Scheduler) Concursos Engine v3.0 Neuro-Cognitivo (FSRS-NC 3.0)
  * Implementação neuro-calibrada para o ecossistema Atena (AVA Delta)
- * Baseado no modelo DSR (Difficulty, Stability, Retrievability) com Horizon Capping & Study Modes
+ * Baseado no modelo DSR com:
+ *  - Medição de Latência de Resposta (Response Time & Retrieval Fluency)
+ *  - Bônus de Fluência Cognitiva (CFI Multiplier para respostas rápidas de 1 a 6s)
+ *  - Níveis de Domínio (Mastery Tiers: Aquisição, Consolidado e Mestre 💎)
+ *  - Balanceador Inteligente de Carga Diária (Daily Review Load Balancer)
+ *  - Horizon Capping dinâmico por modo de estudo (Pós-Edital 21d / Pré-Edital até 120d)
  */
 
 import { type FlagColor } from './richText';
@@ -20,10 +25,16 @@ export enum CardState {
   Relearning = 3,   // 🔴 Reaprendizagem (Falha/Esquecimento recente)
 }
 
+export enum MasteryTier {
+  Acquisition = 1,  // 🥉 Tier 1: Em Aquisição / Instável (Reps 0-2 ou S < 10d)
+  Consolidated = 2, // 🥈 Tier 2: Consolidado (Reps 3-5, S 10-25d)
+  Mastered = 3,     // 🥇 Tier 3: Dominado / Mestre 💎 (Reps >= 6, S >= 25d, Consecutivos >= 4, Tempo < 7s)
+}
+
 export enum StudyMode {
-  Normal = 'normal',         // Modo Tradicional / Pré-Edital (Base sólida, máx 90 dias)
+  Normal = 'normal',         // Modo Tradicional / Pré-Edital (Base sólida, máx 90-120 dias)
   PosEdital = 'pos_edital',   // Modo Reta Final / Pós-Edital (Alta retenção, máx 21 dias)
-  Gargalos = 'gargalos',     // Modo Gargalos & Falhas (Foco em erros e bandeiras vermelhas)
+  Gargalos = 'gargalos',     // Modo Gargalos & Falhas (Foco em erros e bandeiras de urgência)
   Simulado = 'simulado',     // Modo Simulado Livre (Treino sem alterar o agendamento SRS)
 }
 
@@ -48,7 +59,7 @@ export const STUDY_MODES_CONFIG: Record<StudyMode, StudyModeInfo> = {
     icon: '📘',
     desiredRetention: 0.88,
     maxIntervalDays: 90,
-    description: 'Espaçamento equilibrado para consolidação de longo prazo com teto máximo de 90 dias.',
+    description: 'Espaçamento equilibrado para consolidação de longo prazo com teto máximo de 90 a 120 dias para cartões dominados.',
     color: '#3b82f6',
   },
   [StudyMode.PosEdital]: {
@@ -86,24 +97,30 @@ export const STUDY_MODES_CONFIG: Record<StudyMode, StudyModeInfo> = {
   },
 };
 
+export interface ReviewHistoryEntry {
+  date: string;
+  rating: Rating;
+  latencyMs?: number;
+  difficulty: number;
+  stability: number;
+  state: CardState;
+}
+
 export interface FSRSCard {
   id: string;
-  difficulty: number;  // D: 1 a 10
-  stability: number;   // S: em dias
-  reps: number;        // total de repetições
-  lapses: number;      // total de esquecimentos
-  state: CardState;    // estado atual (New, Learning, Review, Relearning)
+  difficulty: number;          // D: 1 a 10
+  stability: number;           // S: em dias
+  reps: number;                // total de repetições
+  lapses: number;              // total de esquecimentos
+  state: CardState;            // estado atual (New, Learning, Review, Relearning)
   flag?: FlagColor | null;
-  lastReview?: string; // ISO date string
-  nextReview: string;  // ISO date string
-  dueInterval: number; // intervalo atual em dias
-  history?: Array<{
-    date: string;
-    rating: Rating;
-    difficulty: number;
-    stability: number;
-    state: CardState;
-  }>;
+  lastReview?: string;         // ISO date string
+  nextReview: string;          // ISO date string
+  dueInterval: number;         // intervalo atual em dias
+  avgLatencyMs?: number;       // tempo médio de resposta em milissegundos
+  consecutiveCorrect?: number; // acertos consecutivos sem lapse
+  masteryTier?: MasteryTier;   // 1, 2 ou 3
+  history?: ReviewHistoryEntry[];
 }
 
 export type FSRSData = Record<string, FSRSCard>;
@@ -127,6 +144,49 @@ function clamp(val: number, min: number, max: number): number {
 }
 
 /**
+ * Calcula o multiplicador de Fluência Cognitiva baseado no tempo de resposta em milissegundos
+ */
+export function calculateFluencyMultiplier(latencyMs?: number, rating?: Rating): number {
+  if (!latencyMs || latencyMs < 1000) return 1.0;
+  const seconds = Math.min(latencyMs / 1000, 45.0); // Clamp a 45s para evitar punição de distração externa
+
+  // Zona de Alta Fluência (Sistema 1 - Kahneman: 1s a 6s)
+  if (seconds <= 6.0 && (rating === Rating.Good || rating === Rating.Easy)) {
+    // Resposta em 2s gera +40% de bônus; resposta em 5s gera +10% de bônus
+    const bonus = Math.min(0.40, Math.max(0, (6.0 - seconds) / 10.0));
+    return 1.0 + bonus;
+  }
+
+  // Zona de Hesitação / Esforço Elevado (> 18s)
+  if (seconds > 18.0) {
+    const penalty = Math.min(0.20, (seconds - 18.0) / 60.0);
+    return Math.max(0.80, 1.0 - penalty);
+  }
+
+  return 1.0;
+}
+
+/**
+ * Calcula o Nível de Domínio Cognitivo do Cartão
+ */
+export function calculateMasteryTier(
+  stability: number,
+  consecutiveCorrect: number,
+  avgLatencyMs?: number
+): MasteryTier {
+  // Dominado / Mestre (Tier 3): estabilidade >= 25 dias, pelo menos 4 acertos consecutivos e tempo ágil (< 7s)
+  const isFast = !avgLatencyMs || avgLatencyMs <= 7000;
+  if (stability >= 25 && consecutiveCorrect >= 4 && isFast) {
+    return MasteryTier.Mastered;
+  }
+  // Consolidado (Tier 2): estabilidade >= 10 dias e pelo menos 2 acertos consecutivos
+  if (stability >= 10 && consecutiveCorrect >= 2) {
+    return MasteryTier.Consolidated;
+  }
+  return MasteryTier.Acquisition;
+}
+
+/**
  * Calcula a probabilidade instantânea de recuperação da memória (Retrievability - R)
  */
 export function calculateRetrievability(elapsedDays: number, stability: number): number {
@@ -136,7 +196,7 @@ export function calculateRetrievability(elapsedDays: number, stability: number):
 }
 
 /**
- * Calcula o próximo intervalo em dias com limite máximo de horizonte (Horizon Capping)
+ * Calcula o próximo intervalo em dias com limite máximo de horizonte
  */
 export function calculateInterval(
   stability: number,
@@ -151,96 +211,124 @@ export function calculateInterval(
   const rawInterval = (stability / FACTOR) * ratio;
   const clampedInterval = Math.max(1, Math.round(rawInterval));
 
-  // Aplicar teto máximo do modo de estudo
   return Math.min(clampedInterval, maxIntervalDays);
 }
 
 /**
  * Adiciona leve variação (fuzzing) em intervalos médios/longos para evitar acúmulo no mesmo dia
  */
-function applyFuzzing(interval: number, cardId: string): number {
-  if (interval <= 5) return interval;
-  // Variação pseudo-determinística de +- 5% baseada no ID do cartão
+export function applyFuzzing(intervalDays: number, cardId: string): number {
+  if (intervalDays <= 4) return intervalDays;
   let hash = 0;
   for (let i = 0; i < cardId.length; i++) {
     hash = (hash << 5) - hash + cardId.charCodeAt(i);
     hash |= 0;
   }
-  const factor = 0.95 + (Math.abs(hash) % 11) * 0.01; // 0.95 a 1.05
-  return Math.max(1, Math.round(interval * factor));
+  const deltaFactor = ((Math.abs(hash) % 11) - 5) / 100; // -5% a +5%
+  const fuzzed = Math.round(intervalDays * (1 + deltaFactor));
+  return Math.max(1, fuzzed);
 }
 
 /**
- * Calcula Dificuldade Inicial (D0)
+ * Balanceador de Carga Diária: suaviza picos de revisão alocando para dias vizinhos
  */
-function initialDifficulty(rating: Rating, w = DEFAULT_FSRS_WEIGHTS): number {
-  const d0 = w[4] - Math.exp(w[5] * (rating - 1)) + 1;
-  return clamp(d0, 1.0, 10.0);
+export function balanceReviewDate(
+  targetDate: Date,
+  allCardsFsrs: FSRSData | undefined,
+  maxDailyCapacity = 35
+): Date {
+  if (!allCardsFsrs) return targetDate;
+
+  const loadByDay: Record<string, number> = {};
+  const targetKey = targetDate.toISOString().split('T')[0];
+
+  for (const c of Object.values(allCardsFsrs)) {
+    if (!c.nextReview) continue;
+    const dayKey = c.nextReview.split('T')[0];
+    loadByDay[dayKey] = (loadByDay[dayKey] || 0) + 1;
+  }
+
+  const currentLoad = loadByDay[targetKey] || 0;
+  if (currentLoad < maxDailyCapacity) {
+    return targetDate;
+  }
+
+  // Procurar o dia vizinho mais leve (+1, -1, +2, -2)
+  let bestDate = targetDate;
+  let minLoad = currentLoad;
+
+  for (const offset of [1, -1, 2, -2]) {
+    const candidate = new Date(targetDate.getTime() + offset * 86400000);
+    // Não antecipar para o passado ou hoje
+    if (candidate.getTime() <= Date.now() + 12 * 3600 * 1000) continue;
+
+    const candKey = candidate.toISOString().split('T')[0];
+    const candLoad = loadByDay[candKey] || 0;
+
+    if (candLoad < minLoad) {
+      minLoad = candLoad;
+      bestDate = candidate;
+    }
+  }
+
+  return bestDate;
 }
 
-/**
- * Calcula Estabilidade Inicial (S0)
- */
-function initialStability(rating: Rating, w = DEFAULT_FSRS_WEIGHTS): number {
-  const s0 = w[rating - 1];
-  return Math.max(0.1, s0);
+// -------------------------------------------------------------
+// FÓRMULAS INTERNAS DO FSRS v4.5 / v5
+// -------------------------------------------------------------
+
+function initialStability(r: Rating, w: number[]): number {
+  return Math.max(w[r - 1], 0.1);
 }
 
-/**
- * Atualiza Dificuldade com regressão contínua à média
- */
-function nextDifficulty(currentD: number, rating: Rating, w = DEFAULT_FSRS_WEIGHTS): number {
-  const deltaD = -w[6] * (rating - 3);
-  const rawD = currentD + deltaD;
-  const meanReversionTarget = initialDifficulty(Rating.Good, w);
-  const dPrime = w[7] * meanReversionTarget + (1 - w[7]) * rawD;
-  return clamp(dPrime, 1.0, 10.0);
+function initialDifficulty(r: Rating, w: number[]): number {
+  const d = w[4] - Math.exp(w[5] * (r - 1)) + 1;
+  return clamp(d, 1.0, 10.0);
 }
 
-/**
- * Nova estabilidade após acerto (Hard, Good, Easy)
- */
+function nextDifficulty(d: number, r: Rating, w: number[]): number {
+  const nextD = d - w[6] * (r - 3);
+  const meanReversion = w[7] * initialDifficulty(Rating.Good, w) + (1 - w[7]) * nextD;
+  return clamp(meanReversion, 1.0, 10.0);
+}
+
 function nextStabilityRecall(
   d: number,
   s: number,
   r: number,
   rating: Rating,
-  w = DEFAULT_FSRS_WEIGHTS
+  w: number[]
 ): number {
   const hardPenalty = rating === Rating.Hard ? w[15] : 1.0;
   const easyBonus = rating === Rating.Easy ? w[16] : 1.0;
-
-  const gain =
-    Math.exp(w[8]) *
-    (11 - d) *
-    Math.pow(s, -w[9]) *
-    (Math.exp(w[10] * (1 - r)) - 1) *
-    hardPenalty *
-    easyBonus;
-
-  return Math.max(s, s * (1 + gain));
+  const newS =
+    s *
+    (1 +
+      Math.exp(w[8]) *
+        (11 - d) *
+        Math.pow(s, -w[9]) *
+        (Math.exp((1 - r) * w[10]) - 1) *
+        hardPenalty *
+        easyBonus);
+  return Math.max(newS, 0.1);
 }
 
-/**
- * Nova estabilidade após esquecimento (Again)
- */
-function nextStabilityForget(
-  d: number,
-  s: number,
-  r: number,
-  w = DEFAULT_FSRS_WEIGHTS
-): number {
-  const sForget =
+function nextStabilityForget(d: number, s: number, r: number, w: number[]): number {
+  const newS =
     w[11] *
     Math.pow(d, -w[12]) *
     (Math.pow(s + 1, w[13]) - 1) *
-    Math.exp(w[14] * (1 - r));
-
-  return clamp(sForget, 0.2, s);
+    Math.exp((1 - r) * w[14]);
+  return clamp(newS, 0.1, s);
 }
 
+// -------------------------------------------------------------
+// MOTOR PRINCIPAL DE AGENDAMENTO (FSRS-NC 3.0)
+// -------------------------------------------------------------
+
 /**
- * Agenda a próxima revisão de um cartão com o algoritmo FSRS Concursos 2.0
+ * Agenda o próximo intervalo do flashcard incorporando tempo de resposta e fluência cognitiva
  */
 export function scheduleFSRSCard(
   card: FSRSCard | undefined,
@@ -248,43 +336,67 @@ export function scheduleFSRSCard(
   rating: Rating,
   desiredRetention = 0.90,
   maxIntervalDays = 90,
-  now = new Date()
+  now = new Date(),
+  latencyMs?: number,
+  allFsrsData?: FSRSData
 ): FSRSCard {
   const weights = DEFAULT_FSRS_WEIGHTS;
   const nowIso = now.toISOString();
   const currentState = card?.state ?? CardState.New;
 
+  // 1. Calcular métricas de latência e sequência
+  const prevAvg = card?.avgLatencyMs;
+  const newAvgLatency = latencyMs && latencyMs >= 1000
+    ? prevAvg ? Math.round(prevAvg * 0.65 + latencyMs * 0.35) : latencyMs
+    : prevAvg;
+
+  const prevStreak = card?.consecutiveCorrect || 0;
+  const consecutiveCorrect = rating === Rating.Again ? 0 : prevStreak + 1;
+
+  // 2. Bônus de Fluência Cognitiva (CFI)
+  const fluencyMult = calculateFluencyMultiplier(latencyMs, rating);
+  const streakBonus = Math.min(0.40, consecutiveCorrect * 0.08); // até +40% por sequência limpa
+
   // CASO 1: Cartão Novo (New) ou Primeira Repetição
   if (!card || currentState === CardState.New || card.reps === 0) {
-    const d = initialDifficulty(rating, weights);
+    let d = initialDifficulty(rating, weights);
     let s = initialStability(rating, weights);
+
+    if (rating === Rating.Easy) {
+      s = Math.max(s, 6.0) * fluencyMult;
+      d = Math.max(1.0, d - 1.5);
+    } else if (rating === Rating.Good) {
+      s = s * fluencyMult;
+    }
 
     let nextState: CardState;
     let intervalDays = 0;
-    const nextDate = new Date(now.getTime());
+    let nextDate = new Date(now.getTime());
 
     if (rating === Rating.Again) {
-      // Errou na 1ª vez: entra em Aprendizagem e reaparece na mesma sessão (10m) ou amanhã
       nextState = CardState.Learning;
       intervalDays = 0;
       nextDate.setMinutes(nextDate.getMinutes() + 10);
     } else if (rating === Rating.Hard) {
-      // Hesitou: entra em Aprendizagem com passo de 1 a 2 dias
       nextState = CardState.Learning;
       intervalDays = 1;
       nextDate.setDate(nextDate.getDate() + 1);
     } else if (rating === Rating.Good) {
-      // Lembrou bem: gradua para Revisão com intervalo de 3 a 4 dias
       nextState = CardState.Review;
-      intervalDays = Math.min(3, maxIntervalDays);
+      intervalDays = Math.min(Math.round(3 * fluencyMult), maxIntervalDays);
       nextDate.setDate(nextDate.getDate() + intervalDays);
     } else {
-      // Fácil / Pleno: gradua para Revisão com intervalo de 6 a 7 dias
+      // Fácil: salto seguro calibrado
       nextState = CardState.Review;
-      s = Math.max(s, 6.0);
-      intervalDays = Math.min(6, maxIntervalDays);
+      intervalDays = Math.min(Math.round(6 * fluencyMult), maxIntervalDays);
       nextDate.setDate(nextDate.getDate() + intervalDays);
     }
+
+    if (intervalDays > 1) {
+      nextDate = balanceReviewDate(nextDate, allFsrsData);
+    }
+
+    const masteryTier = calculateMasteryTier(s, consecutiveCorrect, newAvgLatency);
 
     return {
       id: cardId,
@@ -297,9 +409,12 @@ export function scheduleFSRSCard(
       lastReview: nowIso,
       nextReview: nextDate.toISOString(),
       dueInterval: intervalDays,
+      avgLatencyMs: newAvgLatency,
+      consecutiveCorrect,
+      masteryTier,
       history: [
         ...(card?.history || []),
-        { date: nowIso, rating, difficulty: Number(d.toFixed(2)), stability: Number(s.toFixed(2)), state: nextState },
+        { date: nowIso, rating, latencyMs, difficulty: Number(d.toFixed(2)), stability: Number(s.toFixed(2)), state: nextState },
       ],
     };
   }
@@ -310,7 +425,7 @@ export function scheduleFSRSCard(
     let newS = card.stability;
     let nextState: CardState = currentState;
     let intervalDays = 1;
-    const nextDate = new Date(now.getTime());
+    let nextDate = new Date(now.getTime());
     let lapses = card.lapses;
 
     if (rating === Rating.Again) {
@@ -324,18 +439,24 @@ export function scheduleFSRSCard(
       nextDate.setDate(nextDate.getDate() + 1);
       newS = Math.max(1.0, newS * 1.1);
     } else if (rating === Rating.Good) {
-      // Gradua para Revisão
       nextState = CardState.Review;
-      newS = Math.max(2.5, newS * 1.5);
-      intervalDays = Math.min(3, maxIntervalDays);
+      newS = Math.max(2.5, newS * 1.5 * fluencyMult);
+      intervalDays = Math.min(Math.round(3 * fluencyMult), maxIntervalDays);
       nextDate.setDate(nextDate.getDate() + intervalDays);
     } else {
-      // Fácil: gradua para Revisão com salto seguro
+      // Fácil: gradua para Revisão com aceleração
       nextState = CardState.Review;
-      newS = Math.max(5.0, newS * 2.0);
-      intervalDays = Math.min(6, maxIntervalDays);
+      newS = Math.max(6.0, newS * 2.2 * fluencyMult);
+      newD = Math.max(1.0, newD - 1.2);
+      intervalDays = Math.min(Math.round(7 * fluencyMult), maxIntervalDays);
       nextDate.setDate(nextDate.getDate() + intervalDays);
     }
+
+    if (intervalDays > 1) {
+      nextDate = balanceReviewDate(nextDate, allFsrsData);
+    }
+
+    const masteryTier = calculateMasteryTier(newS, consecutiveCorrect, newAvgLatency);
 
     return {
       id: cardId,
@@ -348,9 +469,12 @@ export function scheduleFSRSCard(
       lastReview: nowIso,
       nextReview: nextDate.toISOString(),
       dueInterval: intervalDays,
+      avgLatencyMs: newAvgLatency,
+      consecutiveCorrect,
+      masteryTier,
       history: [
         ...(card.history || []),
-        { date: nowIso, rating, difficulty: Number(newD.toFixed(2)), stability: Number(newS.toFixed(2)), state: nextState },
+        { date: nowIso, rating, latencyMs, difficulty: Number(newD.toFixed(2)), stability: Number(newS.toFixed(2)), state: nextState },
       ],
     };
   }
@@ -365,24 +489,40 @@ export function scheduleFSRSCard(
   let nextState: CardState;
   let lapses = card.lapses;
   let intervalDays: number;
-  const nextDate = new Date(now.getTime());
+  let nextDate = new Date(now.getTime());
 
   if (rating === Rating.Again) {
     // Falha: entra em Reaprendizagem
     newS = nextStabilityForget(newD, card.stability, currentR, weights);
     nextState = CardState.Relearning;
     lapses += 1;
-    intervalDays = 1; // Revisar amanhã obrigatoriamente
+    intervalDays = 1;
     nextDate.setDate(nextDate.getDate() + 1);
   } else {
-    // Acerto (Hard, Good, Easy)
-    newS = nextStabilityRecall(newD, card.stability, currentR, rating, weights);
+    // Acerto (Hard, Good, Easy) com Aceleração de Estabilidade & Fluência
+    const rawS = nextStabilityRecall(newD, card.stability, currentR, rating, weights);
+    newS = rawS * fluencyMult * (1.0 + streakBonus);
+
+    if (rating === Rating.Easy) {
+      newD = Math.max(1.0, newD - 1.0);
+    }
+
     nextState = CardState.Review;
-    const baseInterval = calculateInterval(newS, desiredRetention, maxIntervalDays);
+
+    // Se o cartão for Dominado no Pré-Edital, o teto expande até 120 dias
+    const dynamicMaxDays =
+      maxIntervalDays >= 90 && consecutiveCorrect >= 4
+        ? Math.min(120, maxIntervalDays * 1.3)
+        : maxIntervalDays;
+
+    const baseInterval = calculateInterval(newS, desiredRetention, dynamicMaxDays);
     intervalDays = applyFuzzing(baseInterval, cardId);
-    intervalDays = Math.min(intervalDays, maxIntervalDays);
+    intervalDays = Math.min(intervalDays, dynamicMaxDays);
     nextDate.setDate(nextDate.getDate() + intervalDays);
+    nextDate = balanceReviewDate(nextDate, allFsrsData);
   }
+
+  const masteryTier = calculateMasteryTier(newS, consecutiveCorrect, newAvgLatency);
 
   return {
     id: cardId,
@@ -395,9 +535,12 @@ export function scheduleFSRSCard(
     lastReview: nowIso,
     nextReview: nextDate.toISOString(),
     dueInterval: intervalDays,
+    avgLatencyMs: newAvgLatency,
+    consecutiveCorrect,
+    masteryTier,
     history: [
       ...(card.history || []),
-      { date: nowIso, rating, difficulty: Number(newD.toFixed(2)), stability: Number(newS.toFixed(2)), state: nextState },
+      { date: nowIso, rating, latencyMs, difficulty: Number(newD.toFixed(2)), stability: Number(newS.toFixed(2)), state: nextState },
     ],
   };
 }
@@ -410,7 +553,8 @@ export function previewFSRSIntervals(
   cardId: string,
   desiredRetention = 0.90,
   maxIntervalDays = 90,
-  now = new Date()
+  now = new Date(),
+  latencyMs?: number
 ): Record<Rating, { days: number; formatted: string }> {
   const result: Record<Rating, { days: number; formatted: string }> = {
     [Rating.Again]: { days: 0, formatted: '10m' },
@@ -421,7 +565,7 @@ export function previewFSRSIntervals(
 
   const ratings = [Rating.Again, Rating.Hard, Rating.Good, Rating.Easy];
   for (const r of ratings) {
-    const projected = scheduleFSRSCard(card, cardId, r, desiredRetention, maxIntervalDays, now);
+    const projected = scheduleFSRSCard(card, cardId, r, desiredRetention, maxIntervalDays, now, latencyMs);
     const days = projected.dueInterval;
     result[r] = {
       days,
@@ -449,7 +593,7 @@ export function formatIntervalString(days: number, _state?: CardState, isAgain =
 }
 
 /**
- * Migra dados do formato legado SM-2 ou FSRS antigo para FSRS Concursos 2.0
+ * Migra dados do formato legado SM-2 ou FSRS antigo para FSRS-NC 3.0
  */
 export function migrateLegacySRS(rawStorage: any): FSRSData {
   if (!rawStorage || typeof rawStorage !== 'object') return {};
@@ -468,11 +612,17 @@ export function migrateLegacySRS(rawStorage: any): FSRSData {
 
     // Se já estiver no padrão FSRS
     if (typeof legacy.stability === 'number' && typeof legacy.difficulty === 'number') {
+      const stability = legacy.stability;
+      const consecutiveCorrect = legacy.consecutiveCorrect || (legacy.reps > 0 && legacy.lapses === 0 ? legacy.reps : 1);
+      const masteryTier = legacy.masteryTier || calculateMasteryTier(stability, consecutiveCorrect, legacy.avgLatencyMs);
+
       migrated[id] = {
         ...legacy,
         state,
         flag: legacy.flag || null,
-        dueInterval: legacy.dueInterval || Math.max(1, Math.round(legacy.stability)),
+        dueInterval: legacy.dueInterval || Math.max(1, Math.round(stability)),
+        consecutiveCorrect,
+        masteryTier,
       };
       continue;
     }
@@ -482,6 +632,8 @@ export function migrateLegacySRS(rawStorage: any): FSRSData {
     const oldEase = Number(legacy.ease) || 2.5;
     const difficulty = clamp(10 - ((oldEase - 1.3) / 1.2) * 6, 1.0, 9.5);
     const stability = Math.max(1.0, oldInterval);
+    const consecutiveCorrect = oldInterval > 1 ? 2 : 1;
+    const masteryTier = calculateMasteryTier(stability, consecutiveCorrect);
 
     migrated[id] = {
       id,
@@ -496,6 +648,8 @@ export function migrateLegacySRS(rawStorage: any): FSRSData {
         : new Date().toISOString(),
       nextReview: legacy.nextReview || new Date().toISOString(),
       dueInterval: oldInterval,
+      consecutiveCorrect,
+      masteryTier,
       history: [],
     };
   }
@@ -504,7 +658,7 @@ export function migrateLegacySRS(rawStorage: any): FSRSData {
 }
 
 /**
- * Computa estatísticas detalhadas de memória da base de flashcards
+ * Computa estatísticas cognitivas detalhadas da memória
  */
 export function computeMemoryStats(
   allCardIds: string[],
@@ -517,6 +671,10 @@ export function computeMemoryStats(
   let countReview = 0;
   let countRelearning = 0;
 
+  let countTier1 = 0;
+  let countTier2 = 0;
+  let countTier3 = 0;
+
   let dueToday = 0;
   let dueNext7Days = 0;
   let dueNext14Days = 0;
@@ -524,6 +682,8 @@ export function computeMemoryStats(
 
   let totalR = 0;
   let scoredCards = 0;
+  let totalLatencySum = 0;
+  let latencyCardsCount = 0;
 
   const flagCounts: Record<string, number> = {
     red: 0,
@@ -539,11 +699,22 @@ export function computeMemoryStats(
     const card = fsrsData[id];
     if (!card || card.state === CardState.New || card.reps === 0) {
       countNew++;
+      countTier1++;
       dueToday++;
     } else {
       if (card.state === CardState.Learning) countLearning++;
       else if (card.state === CardState.Relearning) countRelearning++;
       else countReview++;
+
+      const tier = card.masteryTier || calculateMasteryTier(card.stability, card.consecutiveCorrect || 0, card.avgLatencyMs);
+      if (tier === MasteryTier.Mastered) countTier3++;
+      else if (tier === MasteryTier.Consolidated) countTier2++;
+      else countTier1++;
+
+      if (card.avgLatencyMs && card.avgLatencyMs > 0) {
+        totalLatencySum += card.avgLatencyMs;
+        latencyCardsCount++;
+      }
 
       if (card.flag && flagCounts[card.flag] !== undefined) {
         flagCounts[card.flag]++;
@@ -567,6 +738,7 @@ export function computeMemoryStats(
   });
 
   const avgRetrievability = scoredCards > 0 ? totalR / scoredCards : 1.0;
+  const avgLatencySec = latencyCardsCount > 0 ? Number((totalLatencySum / latencyCardsCount / 1000).toFixed(1)) : 0;
 
   return {
     totalCards: allCardIds.length,
@@ -574,11 +746,15 @@ export function computeMemoryStats(
     countLearning,
     countReview,
     countRelearning,
+    countTier1,
+    countTier2,
+    countTier3, // Dominados 💎
     dueToday,
     dueNext7Days,
     dueNext14Days,
     dueNext30Days,
     avgRetrievability: Math.round(avgRetrievability * 100),
+    avgLatencySec,
     flagCounts,
   };
 }
