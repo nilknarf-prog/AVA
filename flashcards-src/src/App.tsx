@@ -2,8 +2,8 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   Layers, Flame, ArrowLeft, CheckCircle, Play,
   CalendarClock, BookOpen, FileText, Sun, Moon,
-  BrainCircuit, Sparkles, Gauge, Plus, Bookmark,
-  BarChart3, Target, Info
+  BrainCircuit, Sparkles, Plus, Bookmark,
+  BarChart3, Info, X
 } from 'lucide-react';
 import { bancosDeQuestoes, type Card, type Deck } from './data';
 import {
@@ -107,7 +107,6 @@ function HeaderStopwatch({ onStopSession }: { onStopSession?: (minutes: number) 
 
   const handleStop = () => {
     handlePause();
-    if (seconds <= 0) return;
     const mins = Math.max(1, Math.round(seconds / 60));
     if (onStopSession) {
       onStopSession(mins);
@@ -120,16 +119,16 @@ function HeaderStopwatch({ onStopSession }: { onStopSession?: (minutes: number) 
   const timeFormatted = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 
   return (
-    <div className="flex items-center gap-1.5 bg-gray-100 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 px-2.5 py-1 rounded-xl shadow-sm">
+    <div className="flex items-center gap-1.5 bg-gray-100 dark:bg-[#131929] border border-gray-200 dark:border-[rgba(255,255,255,0.09)] px-2.5 py-1 rounded-xl shadow-sm">
       <span className={`w-2 h-2 rounded-full ${isRunning ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
       <span className="font-mono font-bold text-xs sm:text-sm text-[#ff6b00] dark:text-[#ff8533] min-w-[62px]">
         {timeFormatted}
       </span>
-      <div className="flex items-center gap-0.5 ml-1 border-l border-gray-200 dark:border-zinc-700 pl-1">
+      <div className="flex items-center gap-0.5 ml-1 border-l border-gray-200 dark:border-[rgba(255,255,255,0.09)] pl-1">
         {!isRunning ? (
           <button
             onClick={handlePlay}
-            className="p-1 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg text-emerald-600 dark:text-emerald-400 text-xs font-bold transition cursor-pointer"
+            className="p-1 hover:bg-gray-200 dark:hover:bg-[#1a2235] rounded-lg text-emerald-600 dark:text-emerald-400 text-xs font-bold transition cursor-pointer"
             title="Iniciar / Continuar cronômetro"
           >
             ▶️
@@ -137,7 +136,7 @@ function HeaderStopwatch({ onStopSession }: { onStopSession?: (minutes: number) 
         ) : (
           <button
             onClick={handlePause}
-            className="p-1 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg text-amber-600 dark:text-amber-400 text-xs font-bold transition cursor-pointer"
+            className="p-1 hover:bg-gray-200 dark:hover:bg-[#1a2235] rounded-lg text-amber-600 dark:text-amber-400 text-xs font-bold transition cursor-pointer"
             title="Pausar cronômetro"
           >
             ⏸️
@@ -145,7 +144,7 @@ function HeaderStopwatch({ onStopSession }: { onStopSession?: (minutes: number) 
         )}
         <button
           onClick={handleStop}
-          className="p-1 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg text-red-500 text-xs font-bold transition cursor-pointer"
+          className="p-1 hover:bg-gray-200 dark:hover:bg-[#1a2235] rounded-lg text-red-500 text-xs font-bold transition cursor-pointer"
           title="Finalizar e Salvar tempo estudado"
         >
           ⏹️
@@ -157,14 +156,31 @@ function HeaderStopwatch({ onStopSession }: { onStopSession?: (minutes: number) 
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<'decks' | 'flashcards' | 'report' | 'stats'>('decks');
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
 
-  // Custom Flashcards & Custom Decks State
+  // Navigation & Drawer
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Custom Flashcards, Custom Decks & Card Overrides
   const [customCards, setCustomCards] = useState<Card[]>([]);
   const [customDecks, setCustomDecks] = useState<Deck[]>([]);
+  const [cardOverrides, setCardOverrides] = useState<Record<string, Partial<Card> & { _deleted?: boolean }>>({});
+  
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isManagerModalOpen, setIsManagerModalOpen] = useState(false);
+  const [managerInitialDeck, setManagerInitialDeck] = useState<string>('all');
+  const [managerInitialOrigin, setManagerInitialOrigin] = useState<'all' | 'custom' | 'standard'>('all');
   const [editingCard, setEditingCard] = useState<{ card: Card; deckId: string } | null>(null);
+
+  // Stopwatch Modal State
+  const [isStopwatchModalOpen, setIsStopwatchModalOpen] = useState(false);
+  const [stopwatchData, setStopwatchData] = useState({
+    materia: 'DP',
+    assunto: 'Flashcards Atena',
+    tempo: 15,
+    obs: '',
+    categoria: 'Revisão / Flashcards',
+  });
 
   // FSRS & Study Modes State
   const [fsrsData, setFsrsData] = useState<FSRSData>({});
@@ -180,17 +196,18 @@ export default function App() {
   const [isFlipped, setIsFlipped] = useState(false);
   const [revealedClozes, setRevealedClozes] = useState<Set<number>>(new Set());
   const [cardLatencyMs, setCardLatencyMs] = useState<number | undefined>(undefined);
+  const [liveElapsedMs, setLiveElapsedMs] = useState<number>(0);
   const cardStartTimeRef = useRef<number>(performance.now());
   const [currentStreak, setCurrentStreak] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [, setIncorrectCards] = useState<Card[]>([]);
-  const [sessionRatings, setSessionRatings] = useState<RatingCounts>({ again: 0, hard: 0, good: 0, easy: 0 });
+  const [, setSessionRatings] = useState<RatingCounts>({ again: 0, hard: 0, good: 0, easy: 0 });
 
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [modalData, setModalData] = useState<ModalData>({ tempo: 0, obs: '', date: '' });
-  const [tempFsrs, setTempFsrs] = useState<FSRSData>({});
+  const [, setTempFsrs] = useState<FSRSData>({});
 
-  // 1. Carregar Custom Cards e Decks do localStorage
+  // 1. Carregar Custom Cards, Decks e Overrides do localStorage
   useEffect(() => {
     try {
       const savedCustomCards = localStorage.getItem('atena_custom_cards');
@@ -201,17 +218,29 @@ export default function App() {
       if (savedCustomDecks) {
         setCustomDecks(JSON.parse(savedCustomDecks));
       }
+      const savedOverrides = localStorage.getItem('atena_card_overrides');
+      if (savedOverrides) {
+        setCardOverrides(JSON.parse(savedOverrides));
+      }
     } catch (e) {
-      console.error('Erro ao ler custom cards/decks:', e);
+      console.error('Erro ao ler custom cards/decks/overrides:', e);
     }
   }, []);
 
-  // 2. Mesclar Baralhos Oficiais com Custom Decks e Inserir Custom Cards
+  // 2. Mesclar Baralhos Oficiais com Custom Decks, Overrides e Inserir Custom Cards
   const allDecks: Deck[] = useMemo(() => {
-    const merged: Deck[] = bancosDeQuestoes.map((d) => ({
-      ...d,
-      cards: [...d.cards],
-    }));
+    const merged: Deck[] = bancosDeQuestoes.map((d) => {
+      const activeCards: Card[] = [];
+      d.cards.forEach((c) => {
+        const override = cardOverrides[c.id];
+        if (override && override._deleted) return; // Cartão ocultado/excluído
+        activeCards.push(override ? { ...c, ...override, deckId: d.id } : { ...c, deckId: d.id });
+      });
+      return {
+        ...d,
+        cards: activeCards,
+      };
+    });
 
     customDecks.forEach((cd) => {
       if (!merged.find((m) => m.id === cd.id)) {
@@ -223,29 +252,39 @@ export default function App() {
     });
 
     customCards.forEach((c) => {
-      const targetDeckId = c.deckId || 'dp';
+      const override = cardOverrides[c.id];
+      if (override && override._deleted) return;
+      const cardToUse = override ? { ...c, ...override } : c;
+      const targetDeckId = cardToUse.deckId || 'dp';
       const deck = merged.find((m) => m.id === targetDeckId);
       if (deck) {
-        if (!deck.cards.some((existing) => existing.id === c.id)) {
-          deck.cards.push(c);
+        if (!deck.cards.some((existing) => existing.id === cardToUse.id)) {
+          deck.cards.push({ ...cardToUse, isCustom: true });
         }
       } else {
-        if (merged.length > 0 && !merged[0].cards.some((existing) => existing.id === c.id)) {
-          merged[0].cards.push(c);
+        if (merged.length > 0 && !merged[0].cards.some((existing) => existing.id === cardToUse.id)) {
+          merged[0].cards.push({ ...cardToUse, isCustom: true });
         }
       }
     });
 
     return merged;
-  }, [customCards, customDecks]);
+  }, [customCards, customDecks, cardOverrides]);
 
-  const allCardIds = useMemo(() => {
-    return allDecks.flatMap((d) => d.cards.map((c) => c.id));
+  const allCardsFlat = useMemo(() => {
+    return allDecks.flatMap((d) =>
+      d.cards.map((c) => ({
+        ...c,
+        deckId: c.deckId || d.id,
+        deckTitle: d.titulo,
+        sigla: d.sigla,
+      }))
+    );
   }, [allDecks]);
 
   // Recalcular cartões devidos hoje de acordo com o modo
   const calculateTodayCards = useCallback((data: FSRSData, decks: Deck[], mode = studyMode) => {
-    const now = new Date().getTime();
+    const now = Date.now();
     const due: Card[] = [];
     const allCards = decks.flatMap((deck) => deck.cards);
 
@@ -253,12 +292,10 @@ export default function App() {
       const cardFsrs = data[card.id];
 
       if (mode === StudyMode.Gargalos) {
-        // Foco em gargalos: lapses >= 1 ou bandeira vermelha ou não dominados
         if (cardFsrs && (cardFsrs.lapses > 0 || cardFsrs.flag === 'red' || card.flag === 'red' || cardFsrs.difficulty >= 7)) {
           due.push(card);
         }
-      } else if (!cardFsrs || cardFsrs.state === CardState.New || cardFsrs.reps === 0) {
-        // Cartões novos sempre disponíveis para primeiro estudo
+      } else if (!cardFsrs || cardFsrs.state === CardState.New || !cardFsrs.reps || cardFsrs.reps === 0) {
         due.push(card);
       } else if (new Date(cardFsrs.nextReview).getTime() <= now) {
         due.push(card);
@@ -272,13 +309,10 @@ export default function App() {
   useEffect(() => {
     // Theme
     const savedTheme = localStorage.getItem('delta-theme');
-    if (savedTheme === 'dark') {
-      setIsDarkMode(true);
-      document.documentElement.classList.add('dark');
-    } else if (savedTheme === 'light') {
+    if (savedTheme === 'light') {
       setIsDarkMode(false);
       document.documentElement.classList.remove('dark');
-    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    } else {
       setIsDarkMode(true);
       document.documentElement.classList.add('dark');
     }
@@ -290,7 +324,6 @@ export default function App() {
       setDesiredRetention(STUDY_MODES_CONFIG[savedMode].desiredRetention);
       setMaxIntervalDays(STUDY_MODES_CONFIG[savedMode].maxIntervalDays);
     } else {
-      // Padrão: Modo Reta Final (Pós-Edital)
       setStudyMode(StudyMode.PosEdital);
       setDesiredRetention(0.94);
       setMaxIntervalDays(21);
@@ -345,6 +378,7 @@ export default function App() {
     setIsFlipped(false);
     setRevealedClozes(new Set());
     setCardLatencyMs(undefined);
+    setLiveElapsedMs(0);
     cardStartTimeRef.current = performance.now();
     setCurrentStreak(0);
     setCorrectCount(0);
@@ -361,6 +395,15 @@ export default function App() {
     setIsFlipped((prev) => !prev);
   }, [isFlipped]);
 
+  // Cronômetro ao vivo durante a leitura da frente
+  useEffect(() => {
+    if (currentScreen !== 'flashcards' || isFlipped) return;
+    const interval = setInterval(() => {
+      setLiveElapsedMs(Math.round(performance.now() - cardStartTimeRef.current));
+    }, 100);
+    return () => clearInterval(interval);
+  }, [currentScreen, isFlipped, cardIndex]);
+
   const openSaveModal = (newFsrs: FSRSData) => {
     const tempoTotal = Math.max(1, Math.round(currentDeck.length * 1.2));
     const now = new Date();
@@ -375,7 +418,6 @@ export default function App() {
     const newFsrs: FSRSData = { ...fsrsData };
     const currentCardData: FSRSCard | undefined = newFsrs[card.id];
 
-    // Se for modo simulado, não altera o agendamento SRS oficial
     if (studyMode !== StudyMode.Simulado) {
       const updatedCard = scheduleFSRSCard(
         currentCardData,
@@ -392,7 +434,6 @@ export default function App() {
       localStorage.setItem('atena_srs', JSON.stringify(newFsrs));
     }
 
-    // Atualizar estatísticas da sessão
     if (rating === Rating.Again) {
       setCurrentStreak(0);
       setIncorrectCards((prev) => [...prev, card]);
@@ -413,6 +454,7 @@ export default function App() {
       setIsFlipped(false);
       setRevealedClozes(new Set());
       setCardLatencyMs(undefined);
+      setLiveElapsedMs(0);
       cardStartTimeRef.current = performance.now();
       setCardIndex((prev) => prev + 1);
     } else {
@@ -420,13 +462,11 @@ export default function App() {
     }
   };
 
-  // Alterar bandeira de um cartão durante a revisão
   const handleToggleCardFlag = (targetFlag: FlagColor | null) => {
     if (!currentDeck || currentDeck.length === 0) return;
     const card = currentDeck[cardIndex];
     card.flag = targetFlag;
 
-    // Atualizar no fsrsData
     const newFsrs: FSRSData = { ...fsrsData };
     if (newFsrs[card.id]) {
       newFsrs[card.id].flag = targetFlag;
@@ -446,11 +486,69 @@ export default function App() {
     setFsrsData(newFsrs);
     localStorage.setItem('atena_srs', JSON.stringify(newFsrs));
 
-    // Se for custom card, atualizar no localStorage de custom cards
-    const customIdx = customCards.findIndex((c) => c.id === card.id);
-    if (customIdx >= 0) {
-      const updated = [...customCards];
-      updated[customIdx].flag = targetFlag;
+    // Gravar em overrides
+    const newOverrides = {
+      ...cardOverrides,
+      [card.id]: { ...(cardOverrides[card.id] || {}), flag: targetFlag }
+    };
+    setCardOverrides(newOverrides);
+    localStorage.setItem('atena_card_overrides', JSON.stringify(newOverrides));
+  };
+
+  // Salvar ou Editar Card (Universal)
+  const handleSaveCard = (cardsToSave: Card | Card[], deckId: string) => {
+    const list = Array.isArray(cardsToSave) ? cardsToSave : [cardsToSave];
+    
+    list.forEach(card => {
+      // Se for card padrão (não custom), salvar em overrides
+      if (!card.isCustom && bancosDeQuestoes.some(d => d.cards.some(c => c.id === card.id))) {
+        const newOverrides = {
+          ...cardOverrides,
+          [card.id]: {
+            assunto: card.assunto,
+            frente: card.frente,
+            verso: card.verso,
+            extra: card.extra,
+            flag: card.flag,
+            tags: card.tags,
+            imageUrl: card.imageUrl,
+            align: card.align,
+            targetCloze: card.targetCloze,
+          }
+        };
+        setCardOverrides(newOverrides);
+        localStorage.setItem('atena_card_overrides', JSON.stringify(newOverrides));
+      } else {
+        // É custom card
+        const updatedCustom = [...customCards];
+        const idx = updatedCustom.findIndex(c => c.id === card.id);
+        if (idx >= 0) {
+          updatedCustom[idx] = { ...card, deckId };
+        } else {
+          updatedCustom.push({ ...card, deckId, isCustom: true });
+        }
+        setCustomCards(updatedCustom);
+        localStorage.setItem('atena_custom_cards', JSON.stringify(updatedCustom));
+      }
+    });
+
+    setIsCreateModalOpen(false);
+    setEditingCard(null);
+  };
+
+  // Excluir ou ocultar card
+  const handleDeleteCard = (cardId: string, isStandard = false) => {
+    if (!confirm('Deseja realmente remover este flashcard da sua base de estudos?')) return;
+
+    if (isStandard) {
+      const newOverrides = {
+        ...cardOverrides,
+        [cardId]: { ...(cardOverrides[cardId] || {}), _deleted: true }
+      };
+      setCardOverrides(newOverrides);
+      localStorage.setItem('atena_card_overrides', JSON.stringify(newOverrides));
+    } else {
+      const updated = customCards.filter(c => c.id !== cardId);
       setCustomCards(updated);
       localStorage.setItem('atena_custom_cards', JSON.stringify(updated));
     }
@@ -458,7 +556,7 @@ export default function App() {
 
   // Atalhos de teclado na revisão
   useEffect(() => {
-    if (currentScreen !== 'flashcards' || showSaveModal) return;
+    if (currentScreen !== 'flashcards' || showSaveModal || isStopwatchModalOpen) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
@@ -485,115 +583,85 @@ export default function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentScreen, isFlipped, cardIndex, currentDeck, showSaveModal]);
+  }, [currentScreen, isFlipped, cardIndex, currentDeck, showSaveModal, isStopwatchModalOpen, flipCard]);
 
-  const confirmSaveSession = () => {
+  // Manipulador de parada do Cronômetro Global (Sem alert!)
+  const handleStopStopwatch = (minutes: number) => {
+    setStopwatchData({
+      materia: currentDeck.length > 0 ? (currentDeck[0].deckId?.toUpperCase() || 'DP') : 'DP',
+      assunto: `Estudo de Flashcards Atena (${STUDY_MODES_CONFIG[studyMode].shortName})`,
+      tempo: Math.max(1, minutes),
+      obs: `Sessão de Flashcards FSRS · Modo ${STUDY_MODES_CONFIG[studyMode].name}`,
+      categoria: 'Revisão / Flashcards',
+    });
+    setIsStopwatchModalOpen(true);
+  };
+
+  const handleSaveStopwatchToTracker = () => {
     try {
-      const logsStr = localStorage.getItem('delta_estudos') || '[]';
-      const logs = JSON.parse(logsStr);
+      const raw = localStorage.getItem('delta_estudos');
+      const logs = raw ? JSON.parse(raw) : [];
+      const now = new Date();
+      const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
       logs.push({
-        date: modalData.date,
-        mat: 'RLM/REV',
-        assunto: `Flashcards (${STUDY_MODES_CONFIG[studyMode].shortName}): ${deckName}`,
-        tempo: Number(modalData.tempo) || 0,
-        qts: currentDeck.length,
+        date: dateStr,
+        mat: stopwatchData.materia,
+        assunto: stopwatchData.assunto || 'Flashcards Atena FSRS',
+        categoria: stopwatchData.categoria,
+        tempo: stopwatchData.tempo,
+        qts: correctCount,
         acertos: correctCount,
-        obs: modalData.obs || `FSRS Concursos | Modo: ${STUDY_MODES_CONFIG[studyMode].shortName} | Errei:${sessionRatings.again} Dif:${sessionRatings.hard} Bom:${sessionRatings.good} Fac:${sessionRatings.easy}`,
+        obs: stopwatchData.obs || 'Sessão registrada via Atena Flashcards',
       });
       localStorage.setItem('delta_estudos', JSON.stringify(logs));
+      setIsStopwatchModalOpen(false);
+      
+      // Resetar cronômetro
+      const resetSw = { isRunning: false, startTimestamp: 0, accumulatedSec: 0, isOpen: false };
+      localStorage.setItem('delta_stopwatch_state', JSON.stringify(resetSw));
+      window.dispatchEvent(new Event('storage'));
     } catch (e) {
-      console.error('Erro ao integrar tracker', e);
+      console.error('Erro ao salvar no delta_estudos:', e);
     }
-    setShowSaveModal(false);
-    calculateTodayCards(tempFsrs, allDecks, studyMode);
-    setCurrentScreen('report');
   };
 
-  // --- HANDLERS PARA CARTÕES CUSTOMIZADOS ---
-  const handleSaveCustomCard = (cardOrCards: Card | Card[], deckId: string) => {
-    let updatedCards = [...customCards];
-    const cardsToAdd = Array.isArray(cardOrCards) ? cardOrCards : [cardOrCards];
-
-    cardsToAdd.forEach((c) => {
-      const existingIndex = updatedCards.findIndex((card) => card.id === c.id);
-      if (existingIndex >= 0) {
-        updatedCards[existingIndex] = { ...c, deckId };
-      } else {
-        updatedCards.push({ ...c, deckId });
-      }
-    });
-
-    setCustomCards(updatedCards);
-    localStorage.setItem('atena_custom_cards', JSON.stringify(updatedCards));
-
-    if (deckId.startsWith('custom_') && !customDecks.some((d) => d.id === deckId)) {
-      const newDeck: Deck = {
-        id: deckId,
-        titulo: 'Baralho Personalizado',
-        sigla: 'MEU',
-        descricao: 'Baralho de flashcards criado por você.',
-        cards: [],
-        isCustom: true,
-      };
-      const updatedDecks = [...customDecks, newDeck];
-      setCustomDecks(updatedDecks);
-      localStorage.setItem('atena_custom_decks', JSON.stringify(updatedDecks));
-    }
-
-    setEditingCard(null);
-  };
-
-  const handleDeleteCustomCard = (cardId: string) => {
-    const updated = customCards.filter((c) => c.id !== cardId);
-    setCustomCards(updated);
-    localStorage.setItem('atena_custom_cards', JSON.stringify(updated));
-  };
-
-  const handleImportCustomCards = (imported: Card[]) => {
-    const map = new Map<string, Card>();
-    customCards.forEach((c) => map.set(c.id, c));
-    imported.forEach((c) => map.set(c.id, { ...c, isCustom: true }));
-    const merged = Array.from(map.values());
-    setCustomCards(merged);
-    localStorage.setItem('atena_custom_cards', JSON.stringify(merged));
-  };
-
-  // Estatísticas cognitivas globais
   const memoryStats = useMemo(() => {
-    return computeMemoryStats(allCardIds, fsrsData);
-  }, [allCardIds, fsrsData]);
+    return computeMemoryStats(allCardsFlat.map(c => c.id), fsrsData);
+  }, [fsrsData, allCardsFlat]);
 
-  // --- RENDERS ---
-
-  // Header Global
-  const renderNavbar = () => (
-    <header className="sticky top-0 z-40 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border-b border-gray-200 dark:border-zinc-800 transition-colors">
-      <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+  // ── HEADER CANÔNICO & DRAWER ──────────────────────────────
+  const renderHeader = () => (
+    <header className="sticky top-0 z-40 bg-white/95 dark:bg-[#0b0f1a]/95 backdrop-blur-md border-b border-gray-200 dark:border-[rgba(255,255,255,0.09)] px-4 sm:px-6">
+      <div className="max-w-7xl mx-auto flex items-center justify-between h-16 gap-3">
         
-        {/* Logo & Voltar */}
+        {/* Esquerda: Menu Hamburger + Logotipo Canônico Delta AVA */}
         <div className="flex items-center gap-3">
-          {currentScreen !== 'decks' ? (
-            <button
-              onClick={() => setCurrentScreen('decks')}
-              className="p-2 rounded-xl text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-zinc-800 transition flex items-center gap-1.5 text-xs font-bold"
-            >
-              <ArrowLeft size={18} /> Baralhos
-            </button>
-          ) : (
-            <a
-              href="../index.html"
-              className="flex items-center gap-2.5 text-gray-900 dark:text-white font-extrabold text-base tracking-tight hover:opacity-80 transition"
-            >
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#ff6b00] to-[#ff8533] text-white flex items-center justify-center font-black shadow-md shadow-[#ff6b00]/20">
-                Δ
-              </div>
-              <span className="hidden sm:inline">Atena · Flashcards</span>
-            </a>
-          )}
+          <button
+            onClick={() => setIsSidebarOpen(true)}
+            aria-label="Abrir Menu Lateral"
+            className="p-2 text-gray-700 dark:text-[#e8eaf0] hover:bg-gray-100 dark:hover:bg-[#1a2235] rounded-xl transition cursor-pointer text-lg font-bold"
+          >
+            ☰
+          </button>
+
+          <a
+            href="../index.html"
+            title="Voltar ao Dashboard Principal do AVA"
+            className="flex items-center gap-2 group text-decoration-none"
+          >
+            <span className="text-xs font-extrabold tracking-wider text-[#ff6b00] uppercase border border-[#ff6b00] px-2.5 py-1 rounded-full font-mono group-hover:bg-[#ff6b00]/10 transition-colors shadow-sm">
+              ⚖️ DELTA AVA
+            </span>
+          </a>
+
+          <div className="hidden md:flex items-center gap-1.5 pl-2 border-l border-gray-200 dark:border-[rgba(255,255,255,0.09)] text-xs text-gray-400 dark:text-[#9aa5bb]">
+            <span>/</span>
+            <span className="font-semibold text-gray-700 dark:text-[#e8eaf0]">Atena Flashcards</span>
+          </div>
         </div>
 
-        {/* Centro: Seletor Rápido de Modo de Estudo */}
-        <div className="hidden md:flex items-center gap-1 bg-gray-100 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 p-1 rounded-2xl shadow-inner text-xs">
+        {/* Centro: Modos de Estudo */}
+        <div className="hidden lg:flex items-center bg-gray-100 dark:bg-[#131929] p-1 rounded-2xl border border-gray-200 dark:border-[rgba(255,255,255,0.08)] text-xs">
           {(Object.keys(STUDY_MODES_CONFIG) as StudyMode[]).map((m) => {
             const cfg = STUDY_MODES_CONFIG[m];
             const isSelected = studyMode === m;
@@ -602,10 +670,10 @@ export default function App() {
                 key={m}
                 onClick={() => handleSelectStudyMode(m)}
                 title={cfg.description}
-                className={`px-3 py-1.5 rounded-xl font-bold transition-all flex items-center gap-1.5 ${
+                className={`px-3 py-1.5 rounded-xl font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                   isSelected
-                    ? 'bg-white dark:bg-zinc-900 text-[#ff6b00] dark:text-[#ff8533] shadow-sm scale-100'
-                    : 'text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white'
+                    ? 'bg-white dark:bg-[#1a2235] text-[#ff6b00] dark:text-[#ff8533] shadow-sm'
+                    : 'text-gray-600 dark:text-[#9aa5bb] hover:text-gray-900 dark:hover:text-white'
                 }`}
               >
                 <span>{cfg.icon}</span>
@@ -619,45 +687,25 @@ export default function App() {
         </div>
 
         {/* Direita: Stopwatch, Stats, Theme */}
-        <div className="flex items-center gap-2">
-          <HeaderStopwatch
-            onStopSession={(mins) => {
-              const now = new Date();
-              const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-              try {
-                const logsStr = localStorage.getItem('delta_estudos') || '[]';
-                const logs = JSON.parse(logsStr);
-                logs.push({
-                  date: dateStr,
-                  mat: 'RLM/REV',
-                  assunto: `Estudo Livre: Flashcards Atena`,
-                  tempo: mins,
-                  qts: 0,
-                  acertos: 0,
-                  obs: `Sessão de Cronômetro | Modo: ${STUDY_MODES_CONFIG[studyMode].shortName}`,
-                });
-                localStorage.setItem('delta_estudos', JSON.stringify(logs));
-                alert(`✅ ${mins} minutos de estudo salvos no Tracker!`);
-              } catch (e) {}
-            }}
-          />
+        <div className="flex items-center gap-2 sm:gap-3">
+          <HeaderStopwatch onStopSession={handleStopStopwatch} />
 
           <button
             onClick={() => setCurrentScreen('stats')}
-            className={`p-2 rounded-xl border transition flex items-center gap-1 text-xs font-bold ${
+            className={`px-3 py-1.5 rounded-xl border transition flex items-center gap-1.5 text-xs font-bold cursor-pointer ${
               currentScreen === 'stats'
                 ? 'bg-[#ff6b00] text-white border-[#ff6b00]'
-                : 'bg-white dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 border-gray-200 dark:border-zinc-700 hover:bg-gray-50'
+                : 'bg-white dark:bg-[#131929] text-gray-700 dark:text-[#e8eaf0] border-gray-200 dark:border-[rgba(255,255,255,0.09)] hover:bg-gray-50 dark:hover:bg-[#1a2235]'
             }`}
             title="Estatísticas Cognitivas da Memória"
           >
-            <BarChart3 size={16} />
+            <BarChart3 size={15} className="text-[#ff6b00]" />
             <span className="hidden sm:inline">Estatísticas</span>
           </button>
 
           <button
             onClick={toggleTheme}
-            className="p-2 rounded-xl bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 text-gray-700 dark:text-zinc-300 hover:bg-gray-50 transition"
+            className="w-9 h-9 flex items-center justify-center rounded-xl bg-white dark:bg-[#131929] border border-gray-200 dark:border-[rgba(255,255,255,0.09)] text-gray-700 dark:text-[#e8eaf0] hover:bg-gray-50 dark:hover:bg-[#1a2235] transition cursor-pointer"
             title="Alternar Tema Claro / Escuro"
           >
             {isDarkMode ? <Sun size={17} className="text-amber-400" /> : <Moon size={17} />}
@@ -668,233 +716,231 @@ export default function App() {
     </header>
   );
 
-  // Tela 1: Biblioteca de Baralhos
-  const renderDecks = () => (
-    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-5xl mx-auto px-4 py-8 pb-16">
-      
-      {/* Top Action & Stats Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white flex items-center gap-2.5">
-            <Layers className="text-[#ff6b00]" /> Biblioteca de Baralhos
-          </h2>
-          <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm mt-1">
-            Motor FSRS Concursos 2.0 com Repetição Espaçada, Cloze e Destaques Jurídicos
-          </p>
-        </div>
+  // ── TELA 1: BIBLIOTECA DE BARALHOS ────────────────────────
+  const renderDecks = () => {
+    const totalCardsCount = allDecks.reduce((acc, d) => acc + d.cards.length, 0);
 
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Botão Novo Flashcard */}
-          <button
-            onClick={() => {
-              setEditingCard(null);
-              setIsCreateModalOpen(true);
-            }}
-            className="px-4 py-2 bg-[#ff6b00] hover:bg-[#e65c00] text-white font-bold text-xs rounded-xl shadow-md shadow-[#ff6b00]/20 flex items-center gap-1.5 transition-all hover:scale-105 active:scale-95"
-          >
-            <Plus size={16} /> Novo Flashcard
-          </button>
-
-          {/* Botão Meus Cards */}
-          <button
-            onClick={() => setIsManagerModalOpen(true)}
-            className="px-3.5 py-2 bg-white dark:bg-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-700 text-gray-700 dark:text-zinc-200 border border-gray-200 dark:border-zinc-700 font-bold text-xs rounded-xl shadow-sm flex items-center gap-1.5 transition-all"
-          >
-            <Bookmark size={15} className="text-[#ff6b00]" /> Meus Cards ({customCards.length})
-          </button>
-        </div>
-      </div>
-
-      {/* Hero Card: Revisões do Dia + Modo Ativo */}
-      <div className="bg-gradient-to-br from-[#fff4ed] to-[#ffe6d4] dark:from-[#261200] dark:to-[#170a00] border-2 border-[#ffd4b8] dark:border-[#592200] rounded-3xl p-6 sm:p-8 shadow-sm hover:shadow-md transition-all mb-8 relative overflow-hidden">
+    return (
+      <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-5xl mx-auto px-4 py-8 pb-16">
         
-        {/* Glow de fundo */}
-        <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-[#ff6b00]/10 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
-          <div className="space-y-2 max-w-xl">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="bg-[#ff6b00] text-white text-[11px] uppercase font-black px-3 py-1 rounded-full flex items-center gap-1 shadow-sm">
-                <Sparkles size={13} /> {STUDY_MODES_CONFIG[studyMode].name}
-              </span>
-              <span className="bg-white/80 dark:bg-zinc-800/80 text-gray-700 dark:text-zinc-300 text-[11px] font-bold px-2.5 py-1 rounded-full border border-gray-200/60 dark:border-zinc-700">
-                Teto: Máx {maxIntervalDays} dias
-              </span>
-              <span className="bg-white/80 dark:bg-zinc-800/80 text-gray-700 dark:text-zinc-300 text-[11px] font-bold px-2.5 py-1 rounded-full border border-gray-200/60 dark:border-zinc-700">
-                Meta: {Math.round(desiredRetention * 100)}% Retenção
-              </span>
-            </div>
-
-            <h3 className="text-xl sm:text-2xl font-black text-[#803200] dark:text-[#ffad77] flex items-center gap-2 pt-1">
-              <CalendarClock className="text-[#ff6b00]" size={26} />
-              Revisões do Dia (FSRS Concursos)
-            </h3>
-
-            <p className="text-[#a64800] dark:text-[#cca080] text-xs sm:text-sm font-medium leading-relaxed">
-              Você possui <strong className="font-extrabold text-base text-[#803200] dark:text-[#ffb280]">{todayCards.length}</strong> cartões prontos para consolidar a curva do esquecimento com base no modelo neurocientífico.
+        {/* Top Action & Stats Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-[#e8eaf0] flex items-center gap-2.5 font-display">
+              <Layers className="text-[#ff6b00]" /> Biblioteca de Baralhos
+            </h2>
+            <p className="text-gray-500 dark:text-[#9aa5bb] text-xs sm:text-sm mt-1">
+              Motor FSRS-NC 3.0 Neuro-Calibrado com Repetição Espaçada, Cloze e Destaques Jurídicos
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto shrink-0">
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Botão Novo Flashcard */}
             <button
-              onClick={() => startDeck(todayCards, `Revisões do Dia (${STUDY_MODES_CONFIG[studyMode].shortName})`)}
-              disabled={todayCards.length === 0}
-              className={`px-8 py-3.5 rounded-2xl font-extrabold text-sm flex items-center justify-center gap-2 transition-all shadow-lg ${
-                todayCards.length > 0
-                  ? 'bg-[#ff6b00] hover:bg-[#e65c00] text-white cursor-pointer hover:scale-105 active:scale-95 shadow-[#ff6b00]/30'
-                  : 'bg-gray-300 dark:bg-zinc-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
-              }`}
+              onClick={() => {
+                setEditingCard(null);
+                setIsCreateModalOpen(true);
+              }}
+              className="px-4 py-2 bg-[#ff6b00] hover:bg-[#e65c00] text-white font-bold text-xs rounded-xl shadow-md flex items-center gap-1.5 transition-all hover:scale-105 active:scale-95 cursor-pointer"
             >
-              <Play size={18} />
-              Revisar Agora ({todayCards.length})
+              <Plus size={16} /> Novo Flashcard
+            </button>
+
+            {/* Botão Meus Cards */}
+            <button
+              onClick={() => {
+                setManagerInitialDeck('all');
+                setManagerInitialOrigin('custom');
+                setIsManagerModalOpen(true);
+              }}
+              className="px-3.5 py-2 bg-white dark:bg-[#131929] hover:bg-gray-50 dark:hover:bg-[#1a2235] text-gray-700 dark:text-[#e8eaf0] border border-gray-200 dark:border-[rgba(255,255,255,0.09)] font-bold text-xs rounded-xl shadow-sm flex items-center gap-1.5 transition cursor-pointer"
+            >
+              <Bookmark size={15} className="text-[#ff6b00]" /> Meus Cards ({customCards.length})
             </button>
           </div>
         </div>
 
-        {/* Seletor mobile de modos */}
-        <div className="mt-5 pt-4 border-t border-[#ff6b00]/20 flex flex-wrap gap-2 md:hidden">
-          <span className="text-xs font-bold text-gray-500 self-center">Modo:</span>
-          {(Object.keys(STUDY_MODES_CONFIG) as StudyMode[]).map((m) => (
-            <button
-              key={m}
-              onClick={() => handleSelectStudyMode(m)}
-              className={`px-2.5 py-1 text-xs font-bold rounded-lg ${
-                studyMode === m
-                  ? 'bg-[#ff6b00] text-white'
-                  : 'bg-white/80 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300'
-              }`}
-            >
-              {STUDY_MODES_CONFIG[m].shortName}
-            </button>
-          ))}
+        {/* Hero Card: Revisões do Dia + Modo Ativo */}
+        <div className="bg-gradient-to-br from-[#fff4ed] to-[#ffe6d4] dark:from-[#131929] dark:to-[#0b0f1a] border-2 border-[#ffd4b8] dark:border-[#ff6b00]/30 rounded-3xl p-6 sm:p-8 shadow-sm hover:shadow-md transition-all mb-8 relative overflow-hidden">
+          
+          <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-[#ff6b00]/10 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
+            <div className="space-y-2 max-w-xl">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="bg-[#ff6b00] text-white text-[11px] uppercase font-black px-3 py-1 rounded-full flex items-center gap-1 shadow-sm font-mono">
+                  <Sparkles size={13} /> {STUDY_MODES_CONFIG[studyMode].name}
+                </span>
+                <span className="bg-white/80 dark:bg-[#1a2235] text-gray-700 dark:text-[#e8eaf0] text-[11px] font-bold px-2.5 py-1 rounded-full border border-gray-200/60 dark:border-[rgba(255,255,255,0.08)] font-mono">
+                  Teto: Máx {maxIntervalDays} dias
+                </span>
+                <span className="bg-white/80 dark:bg-[#1a2235] text-gray-700 dark:text-[#e8eaf0] text-[11px] font-bold px-2.5 py-1 rounded-full border border-gray-200/60 dark:border-[rgba(255,255,255,0.08)] font-mono">
+                  Meta: {Math.round(desiredRetention * 100)}% Retenção
+                </span>
+              </div>
+
+              <h3 className="text-xl sm:text-2xl font-black text-[#803200] dark:text-[#e8eaf0] flex items-center gap-2 pt-1 font-display">
+                <CalendarClock className="text-[#ff6b00]" size={26} />
+                Revisões do Dia (FSRS Concursos)
+              </h3>
+
+              <p className="text-[#a64800] dark:text-[#9aa5bb] text-xs sm:text-sm font-medium leading-relaxed">
+                Você possui <strong className="font-extrabold text-base text-[#803200] dark:text-[#ff8533]">{todayCards.length}</strong> cartões prontos para consolidar a curva do esquecimento com base no modelo neurocientífico.
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto shrink-0">
+              <button
+                onClick={() => startDeck(todayCards, `Revisões do Dia (${STUDY_MODES_CONFIG[studyMode].shortName})`)}
+                disabled={todayCards.length === 0}
+                className={`px-8 py-3.5 rounded-2xl font-extrabold text-sm flex items-center justify-center gap-2 transition-all shadow-lg ${
+                  todayCards.length > 0
+                    ? 'bg-[#ff6b00] hover:bg-[#e65c00] text-white cursor-pointer hover:scale-105 active:scale-95 shadow-[#ff6b00]/30'
+                    : 'bg-gray-300 dark:bg-[#1a2235] text-gray-500 dark:text-[#7d889e] cursor-not-allowed'
+                }`}
+              >
+                <Play size={18} />
+                Revisar Agora ({todayCards.length})
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
 
-      {/* Lista de Baralhos */}
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-          Baralhos de Estudo ({allDecks.reduce((acc, d) => acc + d.cards.length, 0)} Cartões)
-        </h3>
-        <span className="text-xs text-gray-500 dark:text-zinc-400">
-          {allDecks.length} matérias disponíveis
-        </span>
-      </div>
+        {/* Lista de Baralhos */}
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-[#e8eaf0] flex items-center gap-2 font-display">
+            Baralhos de Estudo ({totalCardsCount} Cartões)
+          </h3>
+          <span className="text-xs text-gray-500 dark:text-[#9aa5bb] font-mono">
+            {allDecks.length} matérias disponíveis
+          </span>
+        </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {allDecks.map((deck) => {
-          const customCountInDeck = deck.cards.filter((c) => c.isCustom).length;
-          const dueInDeck = deck.cards.filter((c) => {
-            const cardFsrs = fsrsData[c.id];
-            return !cardFsrs || cardFsrs.state === CardState.New || new Date(cardFsrs.nextReview).getTime() <= Date.now();
-          }).length;
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {allDecks.map((deck) => {
+            const customCountInDeck = deck.cards.filter((c) => c.isCustom).length;
+            const dueInDeck = deck.cards.filter((c) => {
+              const cardFsrs = fsrsData[c.id];
+              return !cardFsrs || cardFsrs.state === CardState.New || new Date(cardFsrs.nextReview).getTime() <= Date.now();
+            }).length;
 
-          return (
-            <div
-              key={deck.id}
-              className="bg-white dark:bg-zinc-800/90 border border-gray-200 dark:border-zinc-700/80 rounded-3xl p-6 shadow-sm hover:shadow-md transition-all group flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] uppercase tracking-widest text-[#ff6b00] dark:text-[#ff8533] font-black">
-                    {deck.sigla} · Carreira Policial
-                  </span>
-                  <div className="flex items-center gap-1.5">
-                    {dueInDeck > 0 && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#ff6b00]/15 text-[#ff6b00] dark:text-[#ff8533]">
+            return (
+              <div
+                key={deck.id}
+                className="bg-white dark:bg-[#131929] border border-gray-200 dark:border-[rgba(255,255,255,0.08)] rounded-3xl p-6 shadow-sm hover:border-[#ff6b00]/40 dark:hover:border-[#ff6b00]/40 transition-all group flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] uppercase tracking-widest text-[#ff6b00] dark:text-[#ff8533] font-mono font-bold">
+                      {deck.sigla} · Carreira Policial
+                    </span>
+                    
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#ff6b00]/15 text-[#ff6b00] dark:text-[#ff8533] font-mono">
                         {dueInDeck} para hoje
                       </span>
-                    )}
-                    {customCountInDeck > 0 && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                        +{customCountInDeck} meus
-                      </span>
-                    )}
+
+                      {customCountInDeck > 0 && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setManagerInitialDeck(deck.id);
+                            setManagerInitialOrigin('custom');
+                            setIsManagerModalOpen(true);
+                          }}
+                          title="Ver seus flashcards personalizados deste baralho"
+                          className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition cursor-pointer font-mono"
+                        >
+                          +{customCountInDeck} meus
+                        </button>
+                      )}
+                    </div>
                   </div>
+
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-[#e8eaf0] mt-1.5 font-display">
+                    {deck.titulo}
+                  </h3>
+                  <p className="text-gray-600 dark:text-[#9aa5bb] mt-2 text-xs sm:text-sm leading-relaxed">
+                    {deck.descricao}
+                  </p>
                 </div>
 
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mt-1.5">{deck.titulo}</h3>
-                <p className="text-gray-600 dark:text-gray-300 mt-2 text-xs sm:text-sm leading-relaxed">{deck.descricao}</p>
-              </div>
-
-              {/* Tópicos / Assuntos dropdown */}
-              <div className="mt-4">
-                <details className="group/assunto">
-                  <summary className="text-xs font-bold text-gray-500 dark:text-gray-400 cursor-pointer flex items-center gap-1.5 hover:text-[#ff6b00] transition list-none">
-                    <span className="transform group-open/assunto:rotate-90 transition-transform text-[10px]">▶</span> Ver Tópicos Detalhados
-                  </summary>
-                  <div className="mt-3 flex flex-col gap-2 pl-3 border-l-2 border-[#ffe6d4] dark:border-[#4d1f00] max-h-48 overflow-y-auto pr-1">
-                    {Object.entries(
-                      deck.cards.reduce((acc, card) => {
-                        if (!acc[card.assunto]) acc[card.assunto] = [];
-                        acc[card.assunto].push(card);
-                        return acc;
-                      }, {} as Record<string, Card[]>)
-                    ).map(([assunto, cards]) => (
-                      <div
-                        key={assunto}
-                        className="flex justify-between items-center bg-gray-50 dark:bg-zinc-800 p-2 rounded-xl text-xs border border-gray-100 dark:border-zinc-700"
-                      >
-                        <span className="text-gray-700 dark:text-zinc-300 font-medium truncate pr-2" title={assunto}>
-                          {assunto}
-                        </span>
-                        <button
-                          onClick={() => startDeck(cards, `${deck.sigla}: ${assunto}`)}
-                          className="shrink-0 bg-white dark:bg-zinc-700 text-[#ff6b00] border border-gray-200 dark:border-zinc-600 hover:bg-[#ff6b00] hover:text-white px-2.5 py-1 rounded-lg font-bold transition shadow-sm"
+                {/* Tópicos / Assuntos dropdown */}
+                <div className="mt-4">
+                  <details className="group/assunto">
+                    <summary className="text-xs font-bold text-gray-500 dark:text-[#9aa5bb] cursor-pointer flex items-center gap-1.5 hover:text-[#ff6b00] transition list-none">
+                      <span className="transform group-open/assunto:rotate-90 transition-transform text-[10px]">▶</span> Ver Tópicos Detalhados
+                    </summary>
+                    <div className="mt-3 flex flex-col gap-2 pl-3 border-l-2 border-[#ffe6d4] dark:border-[#ff6b00]/20 max-h-48 overflow-y-auto pr-1">
+                      {Object.entries(
+                        deck.cards.reduce((acc, card) => {
+                          if (!acc[card.assunto]) acc[card.assunto] = [];
+                          acc[card.assunto].push(card);
+                          return acc;
+                        }, {} as Record<string, Card[]>)
+                      ).map(([assunto, cards]) => (
+                        <div
+                          key={assunto}
+                          className="flex justify-between items-center bg-gray-50 dark:bg-[#0b0f1a] p-2 rounded-xl text-xs border border-gray-100 dark:border-[rgba(255,255,255,0.08)]"
                         >
-                          Estudar ({cards.length})
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </details>
-              </div>
+                          <span className="text-gray-700 dark:text-[#e8eaf0] font-medium truncate pr-2" title={assunto}>
+                            {assunto}
+                          </span>
+                          <button
+                            onClick={() => startDeck(cards, `${deck.sigla}: ${assunto}`)}
+                            className="shrink-0 bg-white dark:bg-[#131929] text-[#ff6b00] border border-gray-200 dark:border-[rgba(255,255,255,0.08)] hover:bg-[#ff6b00] hover:text-white px-2.5 py-1 rounded-lg font-bold transition shadow-sm cursor-pointer"
+                          >
+                            Estudar ({cards.length})
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </details>
+                </div>
 
-              <div className="mt-6 flex justify-between items-center border-t border-gray-100 dark:border-zinc-700 pt-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-gray-500 dark:text-gray-400 text-xs font-bold flex items-center gap-1">
-                    <BookOpen size={15} /> {deck.cards.length} Cartões
-                  </span>
+                {/* Ações do Rodapé do Baralho */}
+                <div className="mt-6 flex justify-between items-center border-t border-gray-100 dark:border-[rgba(255,255,255,0.08)] pt-4">
                   <button
                     onClick={() => {
-                      setEditingCard(null);
-                      setIsCreateModalOpen(true);
+                      setManagerInitialDeck(deck.id);
+                      setManagerInitialOrigin('all');
+                      setIsManagerModalOpen(true);
                     }}
-                    className="p-1 rounded-lg text-gray-400 hover:text-[#ff6b00] hover:bg-gray-100 dark:hover:bg-zinc-700 transition"
-                    title="Adicionar cartão neste baralho"
+                    className="text-gray-500 dark:text-[#9aa5bb] hover:text-[#ff6b00] dark:hover:text-[#ff8533] text-xs font-bold flex items-center gap-1.5 transition cursor-pointer"
+                    title="Visualizar e gerenciar todos os cartões desta matéria"
                   >
-                    <Plus size={14} />
+                    <BookOpen size={15} /> {deck.cards.length} Cartões
+                  </button>
+
+                  <button
+                    onClick={() => startDeck(deck.cards, deck.titulo)}
+                    className="text-[#ff6b00] dark:text-[#ff8533] font-extrabold text-xs sm:text-sm flex items-center gap-1 group-hover:gap-2 transition-all cursor-pointer"
+                  >
+                    Estudar Baralho Completo <ArrowLeft size={16} className="rotate-180" />
                   </button>
                 </div>
-                <button
-                  onClick={() => startDeck(deck.cards, deck.titulo)}
-                  className="text-[#ff6b00] dark:text-[#ff8533] font-extrabold text-xs sm:text-sm flex items-center gap-1 group-hover:gap-2 transition-all"
-                >
-                  Estudar Baralho Completo <ArrowLeft size={16} className="rotate-180" />
-                </button>
+
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
+
       </div>
+    );
+  };
 
-    </div>
-  );
-
-  // Tela 2: Flashcards Player (Revisão Interativa com Rich Text e Flags)
+  // ── TELA 2: FLASHCARDS PLAYER ─────────────────────────────
   const renderFlashcard = () => {
     if (!currentDeck || currentDeck.length === 0) return null;
     const card = currentDeck[cardIndex];
     const cardFsrs = fsrsData[card.id];
     const isCloze = card.tipo === 'cloze' || hasCloze(card.frente);
 
-    // Previsão dos 4 intervalos FSRS em tempo real
     const previews = previewFSRSIntervals(cardFsrs, card.id, desiredRetention, maxIntervalDays, new Date(), cardLatencyMs);
 
-    // Estado do cartão
     const cardState = cardFsrs?.state ?? CardState.New;
     const cardTier = cardFsrs?.masteryTier ?? MasteryTier.Acquisition;
 
-    // Calcular Retrievability instantânea
     let currentRText = 'Novo';
     if (cardFsrs && cardFsrs.stability > 0 && cardFsrs.lastReview) {
       const elapsedDays = Math.max(0, (Date.now() - new Date(cardFsrs.lastReview).getTime()) / (1000 * 60 * 60 * 24));
@@ -910,23 +956,23 @@ export default function App() {
         {/* Top Info Bar */}
         <div className="w-full flex justify-between items-center mb-5 gap-3">
           <div className="flex flex-col">
-            <span className="text-[11px] font-extrabold text-gray-400 dark:text-zinc-500 uppercase tracking-wider">
+            <span className="text-[11px] font-extrabold text-gray-400 dark:text-[#7d889e] uppercase tracking-wider font-mono">
               {deckName}
             </span>
-            <span className="text-gray-900 dark:text-zinc-100 font-extrabold text-sm sm:text-base">
+            <span className="text-gray-900 dark:text-[#e8eaf0] font-extrabold text-sm sm:text-base font-display">
               Cartão {cardIndex + 1} de {currentDeck.length}
             </span>
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Seletor rápido de bandeiras durante o estudo */}
-            <div className="flex items-center bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 p-1 rounded-xl shadow-sm gap-1">
+            {/* Seletor rápido de bandeiras */}
+            <div className="flex items-center bg-white dark:bg-[#131929] border border-gray-200 dark:border-[rgba(255,255,255,0.08)] p-1 rounded-xl shadow-sm gap-1">
               {(Object.keys(FLAG_CONFIG) as FlagColor[]).map((f) => (
                 <button
                   key={f}
                   onClick={() => handleToggleCardFlag(currentFlag === f ? null : f)}
                   title={`Marcar como ${FLAG_CONFIG[f].label}`}
-                  className={`w-5 h-5 rounded-full transition-all ${
+                  className={`w-5 h-5 rounded-full transition-all cursor-pointer ${
                     currentFlag === f ? 'scale-125 ring-2 ring-offset-1 ' + FLAG_CONFIG[f].ring : 'opacity-40 hover:opacity-100'
                   }`}
                   style={{ backgroundColor: FLAG_CONFIG[f].color }}
@@ -934,11 +980,19 @@ export default function App() {
               ))}
             </div>
 
-            {/* Indicador de Ofensiva */}
-            <div className="flex items-center gap-1.5 bg-[#fff4ed] dark:bg-[#331500] px-3.5 py-1.5 rounded-xl border border-[#ffe6d4] dark:border-[#662a00] shadow-sm">
+            {/* Ofensiva */}
+            <div className="flex items-center gap-1.5 bg-[#fff4ed] dark:bg-[#131929] px-3.5 py-1.5 rounded-xl border border-[#ffe6d4] dark:border-[rgba(255,255,255,0.08)] shadow-sm">
               <Flame size={16} className="text-[#ff6b00] dark:text-[#ff8533]" />
-              <span className="text-[#803200] dark:text-[#ffad77] font-bold text-xs">{currentStreak}</span>
+              <span className="text-[#803200] dark:text-[#ffad77] font-bold text-xs font-mono">{currentStreak}</span>
             </div>
+
+            <button
+              onClick={() => setCurrentScreen('decks')}
+              className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-white rounded-xl hover:bg-gray-100 dark:hover:bg-[#1a2235] transition cursor-pointer"
+              title="Sair da sessão"
+            >
+              <X size={18} />
+            </button>
           </div>
         </div>
 
@@ -947,16 +1001,15 @@ export default function App() {
           <div className={`relative w-full h-full transition-all duration-500 transform-style-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
             
             {/* FRENTE DO CARTÃO */}
-            <div className={`w-full min-h-[420px] bg-white dark:bg-zinc-800/95 border-2 border-gray-200 dark:border-zinc-700 rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col justify-between ${isFlipped ? 'hidden' : 'flex'}`}>
+            <div className={`w-full min-h-[420px] bg-white dark:bg-[#131929] border-2 border-gray-200 dark:border-[rgba(255,255,255,0.09)] rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col justify-between ${isFlipped ? 'hidden' : 'flex'}`}>
               
               {/* Top Header da Frente */}
-              <div className="flex items-center justify-between gap-2 border-b border-gray-100 dark:border-zinc-700/60 pb-3">
+              <div className="flex items-center justify-between gap-2 border-b border-gray-100 dark:border-[rgba(255,255,255,0.08)] pb-3">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="bg-gray-100 dark:bg-zinc-700 text-gray-700 dark:text-zinc-300 text-xs px-2.5 py-1 rounded-lg font-bold uppercase tracking-wider">
+                  <span className="bg-gray-100 dark:bg-[#1a2235] text-gray-700 dark:text-[#e8eaf0] text-xs px-2.5 py-1 rounded-lg font-bold uppercase tracking-wider font-mono">
                     {card.assunto}
                   </span>
                   
-                  {/* Badges de Domínio e Estado */}
                   {cardTier === MasteryTier.Mastered && (
                     <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/30">
                       💎 Dominado
@@ -969,30 +1022,47 @@ export default function App() {
                   )}
 
                   {cardState === CardState.New && (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 font-mono">
                       🔵 Novo
                     </span>
                   )}
                   {cardState === CardState.Learning && (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20 font-mono">
                       🟠 Aprendizagem
                     </span>
                   )}
                   {cardState === CardState.Review && cardTier !== MasteryTier.Mastered && (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-mono">
                       🟢 Revisão
                     </span>
                   )}
                   {cardState === CardState.Relearning && (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 font-mono">
                       🔴 Reaprendizagem
                     </span>
                   )}
                 </div>
 
                 <div className="flex items-center gap-2">
+                  {/* Cronômetro ao Vivo na Frente do Cartão */}
+                  <div
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono font-bold border transition-colors shadow-sm"
+                    style={{
+                      backgroundColor: liveElapsedMs <= 6000 ? 'rgba(16, 185, 129, 0.12)' : liveElapsedMs <= 15000 ? 'rgba(245, 158, 11, 0.12)' : 'rgba(239, 68, 68, 0.12)',
+                      color: liveElapsedMs <= 6000 ? '#10b981' : liveElapsedMs <= 15000 ? '#f59e0b' : '#ef4444',
+                      borderColor: liveElapsedMs <= 6000 ? 'rgba(16, 185, 129, 0.3)' : liveElapsedMs <= 15000 ? 'rgba(245, 158, 11, 0.3)' : 'rgba(239, 68, 68, 0.3)'
+                    }}
+                    title={liveElapsedMs <= 6000 ? "Zona de Fluência Rápida (Bônus FSRS)" : liveElapsedMs <= 15000 ? "Esforço Moderado" : "Alta Hesitação"}
+                  >
+                    <span className="animate-pulse">⏱️</span>
+                    <span>{(liveElapsedMs / 1000).toFixed(1)}s</span>
+                    <span className="hidden sm:inline text-[10px] font-normal opacity-80">
+                      {liveElapsedMs <= 6000 ? '· Fluente' : liveElapsedMs <= 15000 ? '· Normal' : '· Hesitação'}
+                    </span>
+                  </div>
+
                   {card.targetCloze && card.targetCloze > 0 && (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#ff6b00]/15 text-[#ff6b00] dark:text-[#ff8533] border border-[#ff6b00]/30">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#ff6b00]/15 text-[#ff6b00] dark:text-[#ff8533] border border-[#ff6b00]/30 font-mono">
                       🎯 Oclusão c{card.targetCloze}
                     </span>
                   )}
@@ -1004,9 +1074,6 @@ export default function App() {
                       🚩 {FLAG_CONFIG[currentFlag].label}
                     </span>
                   )}
-                  <span className="text-[11px] text-gray-400 font-medium">
-                    {isCloze ? '🧩 Cloze Deletion' : 'Frente'}
-                  </span>
                 </div>
               </div>
 
@@ -1026,7 +1093,7 @@ export default function App() {
                     });
                   }}
                   align={card.align || 'center'}
-                  className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-zinc-100"
+                  className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-[#e8eaf0]"
                 />
 
                 {card.imageUrl && (
@@ -1034,7 +1101,7 @@ export default function App() {
                     <img
                       src={card.imageUrl}
                       alt="Imagem do cartão"
-                      className="max-h-56 rounded-2xl border border-gray-200 dark:border-zinc-700 shadow-md object-contain"
+                      className="max-h-56 rounded-2xl border border-gray-200 dark:border-[rgba(255,255,255,0.08)] shadow-md object-contain"
                     />
                   </div>
                 )}
@@ -1042,7 +1109,7 @@ export default function App() {
                 {card.tags && card.tags.length > 0 && (
                   <div className="flex flex-wrap justify-center gap-1 mt-4">
                     {card.tags.map((t) => (
-                      <span key={t} className="text-[10px] font-semibold text-gray-400 dark:text-zinc-500 bg-gray-100 dark:bg-zinc-800 px-2 py-0.5 rounded-md">
+                      <span key={t} className="text-[10px] font-semibold text-gray-400 dark:text-[#7d889e] bg-gray-100 dark:bg-[#1a2235] px-2 py-0.5 rounded-md font-mono">
                         #{t}
                       </span>
                     ))}
@@ -1051,7 +1118,7 @@ export default function App() {
               </div>
 
               {/* Rodapé da Frente */}
-              <div className="text-center text-xs text-gray-400 border-t border-gray-100 dark:border-zinc-700/60 pt-3 flex flex-col sm:flex-row items-center justify-between gap-1">
+              <div className="text-center text-xs text-gray-400 dark:text-[#7d889e] border-t border-gray-100 dark:border-[rgba(255,255,255,0.08)] pt-3 flex flex-col sm:flex-row items-center justify-between gap-1">
                 {isCloze ? (
                   <span className="text-[#ff6b00] dark:text-[#ff8533] font-medium text-[11px]">
                     👆 Toque/clique nas palavras ocultas para revelar uma a uma
@@ -1063,25 +1130,24 @@ export default function App() {
               </div>
             </div>
 
-            {/* VERSO DO CARTÃO (GABARITO REVELADO) */}
-            <div className={`w-full min-h-[420px] bg-[#fffaf5] dark:bg-[#1c0e00] border-2 border-[#ffd4b8] dark:border-[#592200] rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col justify-between ${!isFlipped ? 'hidden' : 'flex'}`}>
+            {/* VERSO DO CARTÃO (GABARITO) */}
+            <div className={`w-full min-h-[420px] bg-[#fffaf5] dark:bg-[#0b0f1a] border-2 border-[#ffd4b8] dark:border-[#ff6b00]/30 rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col justify-between ${!isFlipped ? 'hidden' : 'flex'}`}>
               
               {/* Top Header do Verso */}
-              <div className="flex items-center justify-between gap-2 border-b border-[#ffe6d4] dark:border-[#401900] pb-3">
+              <div className="flex items-center justify-between gap-2 border-b border-[#ffe6d4] dark:border-[rgba(255,255,255,0.08)] pb-3">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="bg-[#ffe6d4] dark:bg-[#4d1f00] text-[#803200] dark:text-[#ffad77] text-xs px-2.5 py-1 rounded-lg font-extrabold uppercase tracking-wider">
+                  <span className="bg-[#ffe6d4] dark:bg-[#1a2235] text-[#803200] dark:text-[#ff8533] text-xs px-2.5 py-1 rounded-lg font-extrabold uppercase tracking-wider font-mono">
                     Gabarito & Fundamentação
                   </span>
-                  <span className="bg-[#fff0e6] dark:bg-[#331500] text-[#ff6b00] dark:text-[#ff8533] text-[10px] font-bold px-2 py-0.5 rounded-full border border-[#ffd4b8] dark:border-[#662a00]">
+                  <span className="bg-[#fff0e6] dark:bg-[#131929] text-[#ff6b00] dark:text-[#ff8533] text-[10px] font-bold px-2 py-0.5 rounded-full border border-[#ffd4b8] dark:border-[#ff6b00]/20 font-mono">
                     Retenção: {currentRText}
                   </span>
                   
-                  {/* Feedback de Tempo e Fluência */}
                   {cardLatencyMs !== undefined && (
-                    <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border flex items-center gap-1 ${
+                    <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border flex items-center gap-1 font-mono ${
                       cardLatencyMs <= 6000
                         ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
-                        : 'bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-zinc-400 border-gray-200 dark:border-zinc-700'
+                        : 'bg-gray-100 dark:bg-[#1a2235] text-gray-600 dark:text-[#9aa5bb] border-gray-200 dark:border-[rgba(255,255,255,0.08)]'
                     }`}>
                       {cardLatencyMs <= 6000
                         ? `⚡ ${(cardLatencyMs / 1000).toFixed(1)}s (Fluência Rápida)`
@@ -1090,7 +1156,7 @@ export default function App() {
                   )}
 
                   {cardFsrs?.consecutiveCorrect && cardFsrs.consecutiveCorrect > 1 && (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20 font-mono">
                       🔥 {cardFsrs.consecutiveCorrect} acertos seguidos
                     </span>
                   )}
@@ -1119,19 +1185,19 @@ export default function App() {
                     isBack={true}
                     targetCloze={card.targetCloze || 0}
                     align={card.align || 'center'}
-                    className="text-lg sm:text-xl font-bold text-[#803200] dark:text-[#ffcfb3]"
+                    className="text-lg sm:text-xl font-bold text-[#803200] dark:text-[#e8eaf0]"
                   />
                 ) : (
                   <RichContentRenderer
                     content={card.verso}
                     isBack={true}
                     align={card.align || 'left'}
-                    className="text-base sm:text-lg font-medium text-[#803200] dark:text-[#ffcfb3]"
+                    className="text-base sm:text-lg font-medium text-[#803200] dark:text-[#e8eaf0]"
                   />
                 )}
 
                 {card.extra && (
-                  <div className="p-3.5 rounded-2xl bg-white/80 dark:bg-zinc-900/80 border border-[#ffe6d4] dark:border-[#4d1f00] text-xs sm:text-sm text-[#803200] dark:text-[#ffad77] shadow-sm">
+                  <div className="p-3.5 rounded-2xl bg-white/80 dark:bg-[#131929] border border-[#ffe6d4] dark:border-[rgba(255,255,255,0.08)] text-xs sm:text-sm text-[#803200] dark:text-[#9aa5bb] shadow-sm">
                     📝 <strong>Fundamentação:</strong> {card.extra}
                   </div>
                 )}
@@ -1141,14 +1207,14 @@ export default function App() {
                     <img
                       src={card.imageUrl}
                       alt="Imagem do cartão"
-                      className="max-h-56 rounded-2xl border border-[#ffd4b8] dark:border-[#4d1f00] shadow-md object-contain"
+                      className="max-h-56 rounded-2xl border border-[#ffd4b8] dark:border-[rgba(255,255,255,0.08)] shadow-md object-contain"
                     />
                   </div>
                 )}
               </div>
 
               {/* Rodapé do Verso */}
-              <div className="text-center text-xs text-[#a64800] dark:text-[#cca080] border-t border-[#ffe6d4] dark:border-[#401900] pt-3 font-semibold">
+              <div className="text-center text-xs text-[#a64800] dark:text-[#9aa5bb] border-t border-[#ffe6d4] dark:border-[rgba(255,255,255,0.08)] pt-3 font-semibold">
                 Classifique sua lembrança abaixo (Teclas 1, 2, 3 ou 4) para o agendamento FSRS
               </div>
             </div>
@@ -1161,7 +1227,7 @@ export default function App() {
           {!isFlipped ? (
             <button
               onClick={flipCard}
-              className="w-full h-16 bg-gray-900 dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-100 text-white dark:text-gray-900 rounded-2xl font-extrabold text-base sm:text-lg shadow-lg hover:shadow-xl transition-all active:scale-98 flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full h-16 bg-[#ff6b00] hover:bg-[#e65c00] text-white rounded-2xl font-extrabold text-base sm:text-lg shadow-lg hover:shadow-xl transition-all active:scale-98 flex items-center justify-center gap-2 cursor-pointer"
             >
               Revelar Gabarito (Espaço)
             </button>
@@ -1176,7 +1242,7 @@ export default function App() {
                   <span className="text-xs text-red-400 font-mono">[1]</span>
                   <span className="text-sm font-black">🔴 Errei</span>
                 </div>
-                <span className="text-[11px] font-bold text-red-600/90 dark:text-red-300 mt-1 bg-red-100 dark:bg-red-900/50 px-2.5 py-0.5 rounded-full group-hover:scale-105 transition-transform">
+                <span className="text-[11px] font-bold text-red-600/90 dark:text-red-300 mt-1 bg-red-100 dark:bg-red-900/50 px-2.5 py-0.5 rounded-full group-hover:scale-105 transition-transform font-mono">
                   {previews[Rating.Again].formatted}
                 </span>
               </button>
@@ -1190,7 +1256,7 @@ export default function App() {
                   <span className="text-xs text-amber-400 font-mono">[2]</span>
                   <span className="text-sm font-black">🟡 Difícil</span>
                 </div>
-                <span className="text-[11px] font-bold text-amber-700/90 dark:text-amber-300 mt-1 bg-amber-100 dark:bg-amber-900/50 px-2.5 py-0.5 rounded-full group-hover:scale-105 transition-transform">
+                <span className="text-[11px] font-bold text-amber-700/90 dark:text-amber-300 mt-1 bg-amber-100 dark:bg-amber-900/50 px-2.5 py-0.5 rounded-full group-hover:scale-105 transition-transform font-mono">
                   +{previews[Rating.Hard].formatted}
                 </span>
               </button>
@@ -1204,7 +1270,7 @@ export default function App() {
                   <span className="text-xs text-emerald-400 font-mono">[3]</span>
                   <span className="text-sm font-black">🟢 Bom</span>
                 </div>
-                <span className="text-[11px] font-bold text-emerald-700/90 dark:text-emerald-300 mt-1 bg-emerald-100 dark:bg-emerald-900/50 px-2.5 py-0.5 rounded-full group-hover:scale-105 transition-transform">
+                <span className="text-[11px] font-bold text-emerald-700/90 dark:text-emerald-300 mt-1 bg-emerald-100 dark:bg-emerald-900/50 px-2.5 py-0.5 rounded-full group-hover:scale-105 transition-transform font-mono">
                   +{previews[Rating.Good].formatted}
                 </span>
               </button>
@@ -1218,7 +1284,7 @@ export default function App() {
                   <span className="text-xs text-blue-400 font-mono">[4]</span>
                   <span className="text-sm font-black">🔵 Fácil</span>
                 </div>
-                <span className="text-[11px] font-bold text-blue-700/90 dark:text-blue-300 mt-1 bg-blue-100 dark:bg-blue-900/50 px-2.5 py-0.5 rounded-full group-hover:scale-105 transition-transform">
+                <span className="text-[11px] font-bold text-blue-700/90 dark:text-blue-300 mt-1 bg-blue-100 dark:bg-blue-900/50 px-2.5 py-0.5 rounded-full group-hover:scale-105 transition-transform font-mono">
                   +{previews[Rating.Easy].formatted}
                 </span>
               </button>
@@ -1230,86 +1296,83 @@ export default function App() {
     );
   };
 
-  // Tela 3: Estatísticas Cognitivas de Memória
+  // ── TELA 3: ESTATÍSTICAS DA MEMÓRIA ───────────────────────
   const renderStats = () => {
     return (
       <div className="max-w-5xl mx-auto px-4 py-8 pb-16 animate-in fade-in slide-in-from-bottom-6 duration-500">
         
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white flex items-center gap-2.5">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-[#e8eaf0] flex items-center gap-2.5 font-display">
               <BarChart3 className="text-[#ff6b00]" /> Dashboard da Memória & FSRS
             </h2>
-            <p className="text-xs sm:text-sm text-gray-500 dark:text-zinc-400 mt-1">
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-[#9aa5bb] mt-1">
               Métricas cognitivas de fixação, estados e projeção de revisões futuras
             </p>
           </div>
           <button
             onClick={() => setCurrentScreen('decks')}
-            className="px-4 py-2 rounded-xl bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 font-bold text-xs hover:bg-gray-200 transition"
+            className="px-4 py-2 rounded-xl bg-gray-100 dark:bg-[#1a2235] text-gray-700 dark:text-[#e8eaf0] font-bold text-xs hover:bg-gray-200 dark:hover:bg-[#1f2a3c] transition cursor-pointer"
           >
             ← Voltar
           </button>
         </div>
 
-        {/* 4 Cards Principais de Indicadores Neurocognitivos */}
+        {/* 4 Cards Principais */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          
-          <div className="bg-white dark:bg-zinc-800/90 p-5 rounded-3xl border border-gray-200 dark:border-zinc-700 shadow-sm text-center">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-500 dark:text-zinc-400">Total de Flashcards</span>
-            <p className="text-3xl font-black text-gray-900 dark:text-white mt-1.5">{memoryStats.totalCards}</p>
+          <div className="bg-white dark:bg-[#131929] p-5 rounded-3xl border border-gray-200 dark:border-[rgba(255,255,255,0.08)] shadow-sm text-center">
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-500 dark:text-[#9aa5bb] font-mono">Total de Flashcards</span>
+            <p className="text-3xl font-black text-gray-900 dark:text-[#e8eaf0] mt-1.5 font-mono">{memoryStats.totalCards}</p>
             <p className="text-[11px] text-gray-400 mt-1">Base completa</p>
           </div>
 
-          <div className="bg-white dark:bg-zinc-800/90 p-5 rounded-3xl border border-gray-200 dark:border-zinc-700 shadow-sm text-center">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-500 dark:text-zinc-400">Retenção Média</span>
-            <p className="text-3xl font-black text-emerald-600 dark:text-emerald-400 mt-1.5">{memoryStats.avgRetrievability}%</p>
+          <div className="bg-white dark:bg-[#131929] p-5 rounded-3xl border border-gray-200 dark:border-[rgba(255,255,255,0.08)] shadow-sm text-center">
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-500 dark:text-[#9aa5bb] font-mono">Retenção Média</span>
+            <p className="text-3xl font-black text-emerald-600 dark:text-emerald-400 mt-1.5 font-mono">{memoryStats.avgRetrievability}%</p>
             <p className="text-[11px] text-gray-400 mt-1">Probabilidade de recall</p>
           </div>
 
-          <div className="bg-white dark:bg-zinc-800/90 p-5 rounded-3xl border border-gray-200 dark:border-zinc-700 shadow-sm text-center">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-purple-600 dark:text-purple-400 flex items-center justify-center gap-1">
+          <div className="bg-white dark:bg-[#131929] p-5 rounded-3xl border border-gray-200 dark:border-[rgba(255,255,255,0.08)] shadow-sm text-center">
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-purple-600 dark:text-purple-400 flex items-center justify-center gap-1 font-mono">
               💎 Dominados
             </span>
-            <p className="text-3xl font-black text-purple-600 dark:text-purple-400 mt-1.5">{memoryStats.countTier3}</p>
+            <p className="text-3xl font-black text-purple-600 dark:text-purple-400 mt-1.5 font-mono">{memoryStats.countTier3}</p>
             <p className="text-[11px] text-gray-400 mt-1">Memória profunda consolidada</p>
           </div>
 
-          <div className="bg-white dark:bg-zinc-800/90 p-5 rounded-3xl border border-gray-200 dark:border-zinc-700 shadow-sm text-center">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-blue-600 dark:text-blue-400 flex items-center justify-center gap-1">
+          <div className="bg-white dark:bg-[#131929] p-5 rounded-3xl border border-gray-200 dark:border-[rgba(255,255,255,0.08)] shadow-sm text-center">
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-blue-600 dark:text-blue-400 flex items-center justify-center gap-1 font-mono">
               ⏱️ Tempo Médio
             </span>
-            <p className="text-3xl font-black text-blue-600 dark:text-blue-400 mt-1.5">{memoryStats.avgLatencySec > 0 ? `${memoryStats.avgLatencySec}s` : '—'}</p>
+            <p className="text-3xl font-black text-blue-600 dark:text-blue-400 mt-1.5 font-mono">{memoryStats.avgLatencySec > 0 ? `${memoryStats.avgLatencySec}s` : '—'}</p>
             <p className="text-[11px] text-gray-400 mt-1">Fluência de recuperação</p>
           </div>
-
         </div>
 
-        {/* Níveis de Domínio & Estados da Memória */}
+        {/* Níveis de Domínio & Estados */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          
-          <div className="bg-white dark:bg-zinc-800/90 border border-gray-200 dark:border-zinc-700 rounded-3xl p-6 shadow-sm">
-            <h3 className="text-sm font-extrabold uppercase tracking-wider text-gray-700 dark:text-zinc-300 mb-4 flex items-center gap-2">
+          <div className="bg-white dark:bg-[#131929] border border-gray-200 dark:border-[rgba(255,255,255,0.08)] rounded-3xl p-6 shadow-sm">
+            <h3 className="text-sm font-extrabold uppercase tracking-wider text-gray-700 dark:text-[#e8eaf0] mb-4 flex items-center gap-2 font-mono">
               <BrainCircuit size={16} className="text-[#ff6b00]" /> Níveis de Domínio (Mastery Tiers)
             </h3>
 
-            <div className="space-y-3">
+            <div className="space-y-3 font-mono">
               <div>
                 <div className="flex justify-between text-xs font-bold mb-1">
-                  <span className="text-purple-600 dark:text-purple-400">💎 Tier 3: Dominados (Fixação Máxima)</span>
+                  <span className="text-purple-600 dark:text-purple-400">💎 Tier 3: Dominados</span>
                   <span>{memoryStats.countTier3} ({memoryStats.totalCards > 0 ? Math.round((memoryStats.countTier3 / memoryStats.totalCards) * 100) : 0}%)</span>
                 </div>
-                <div className="w-full bg-gray-100 dark:bg-zinc-700 h-2.5 rounded-full overflow-hidden">
+                <div className="w-full bg-gray-100 dark:bg-[#0b0f1a] h-2.5 rounded-full overflow-hidden">
                   <div className="bg-purple-500 h-full rounded-full" style={{ width: `${(memoryStats.countTier3 / (memoryStats.totalCards || 1)) * 100}%` }} />
                 </div>
               </div>
 
               <div>
                 <div className="flex justify-between text-xs font-bold mb-1">
-                  <span className="text-emerald-600 dark:text-emerald-400">🥈 Tier 2: Consolidados (Estabilidade &gt; 10d)</span>
+                  <span className="text-emerald-600 dark:text-emerald-400">🥈 Tier 2: Consolidados</span>
                   <span>{memoryStats.countTier2} ({memoryStats.totalCards > 0 ? Math.round((memoryStats.countTier2 / memoryStats.totalCards) * 100) : 0}%)</span>
                 </div>
-                <div className="w-full bg-gray-100 dark:bg-zinc-700 h-2.5 rounded-full overflow-hidden">
+                <div className="w-full bg-gray-100 dark:bg-[#0b0f1a] h-2.5 rounded-full overflow-hidden">
                   <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${(memoryStats.countTier2 / (memoryStats.totalCards || 1)) * 100}%` }} />
                 </div>
               </div>
@@ -1319,7 +1382,7 @@ export default function App() {
                   <span className="text-blue-600 dark:text-blue-400">🥉 Tier 1: Aquisição Inicial</span>
                   <span>{memoryStats.countTier1} ({memoryStats.totalCards > 0 ? Math.round((memoryStats.countTier1 / memoryStats.totalCards) * 100) : 0}%)</span>
                 </div>
-                <div className="w-full bg-gray-100 dark:bg-zinc-700 h-2.5 rounded-full overflow-hidden">
+                <div className="w-full bg-gray-100 dark:bg-[#0b0f1a] h-2.5 rounded-full overflow-hidden">
                   <div className="bg-blue-500 h-full rounded-full" style={{ width: `${(memoryStats.countTier1 / (memoryStats.totalCards || 1)) * 100}%` }} />
                 </div>
               </div>
@@ -1327,195 +1390,303 @@ export default function App() {
           </div>
 
           {/* Projeção Temporal */}
-          <div className="bg-white dark:bg-zinc-800/90 border border-gray-200 dark:border-zinc-700 rounded-3xl p-6 shadow-sm">
-            <h3 className="text-sm font-extrabold uppercase tracking-wider text-gray-700 dark:text-zinc-300 mb-4 flex items-center gap-2">
-              <CalendarClock size={16} className="text-[#ff6b00]" /> Projeção de Carga de Revisão
+          <div className="bg-white dark:bg-[#131929] border border-gray-200 dark:border-[rgba(255,255,255,0.08)] rounded-3xl p-6 shadow-sm">
+            <h3 className="text-sm font-extrabold uppercase tracking-wider text-gray-700 dark:text-[#e8eaf0] mb-4 flex items-center gap-2 font-mono">
+              <CalendarClock size={16} className="text-[#ff6b00]" /> Projeção de Carga
             </h3>
 
-            <div className="grid grid-cols-3 gap-3 text-center pt-2">
-              <div className="bg-gray-50 dark:bg-zinc-900 p-4 rounded-2xl border border-gray-100 dark:border-zinc-700">
+            <div className="grid grid-cols-3 gap-3 text-center pt-2 font-mono">
+              <div className="bg-gray-50 dark:bg-[#0b0f1a] p-4 rounded-2xl border border-gray-100 dark:border-[rgba(255,255,255,0.08)]">
                 <span className="text-xs text-gray-400 font-semibold">Hoje</span>
                 <p className="text-2xl font-black text-[#ff6b00] mt-1">{memoryStats.dueToday}</p>
               </div>
 
-              <div className="bg-gray-50 dark:bg-zinc-900 p-4 rounded-2xl border border-gray-100 dark:border-zinc-700">
+              <div className="bg-gray-50 dark:bg-[#0b0f1a] p-4 rounded-2xl border border-gray-100 dark:border-[rgba(255,255,255,0.08)]">
                 <span className="text-xs text-gray-400 font-semibold">14 Dias</span>
                 <p className="text-2xl font-black text-blue-600 dark:text-blue-400 mt-1">{memoryStats.dueNext14Days}</p>
               </div>
 
-              <div className="bg-gray-50 dark:bg-zinc-900 p-4 rounded-2xl border border-gray-100 dark:border-zinc-700">
+              <div className="bg-gray-50 dark:bg-[#0b0f1a] p-4 rounded-2xl border border-gray-100 dark:border-[rgba(255,255,255,0.08)]">
                 <span className="text-xs text-gray-400 font-semibold">30 Dias</span>
                 <p className="text-2xl font-black text-purple-600 dark:text-purple-400 mt-1">{memoryStats.dueNext30Days}</p>
               </div>
             </div>
 
-            <div className="mt-4 p-3 bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 rounded-2xl text-xs text-blue-900 dark:text-blue-200 flex items-start gap-2">
-              <Info size={16} className="text-blue-500 shrink-0 mt-0.5" />
+            <div className="mt-4 p-3 bg-[#0b0f1a] border border-[#ff6b00]/20 rounded-2xl text-xs text-[#9aa5bb] flex items-start gap-2">
+              <Info size={16} className="text-[#ff6b00] shrink-0 mt-0.5" />
               <span>
-                Com o teto de <strong>{maxIntervalDays} dias</strong> do modo ativo ({STUDY_MODES_CONFIG[studyMode].shortName}), todos os cartões são garantidos de serem revistos antes da prova sem buracos de memória.
+                Com o teto de <strong>{maxIntervalDays} dias</strong> ({STUDY_MODES_CONFIG[studyMode].shortName}), todos os cartões são garantidos de serem revistos antes da prova sem buracos de memória.
               </span>
             </div>
           </div>
-
         </div>
 
       </div>
     );
   };
 
-  // Tela 4: Relatório pós-sessão
+  // ── TELA 4: RELATÓRIO PÓS-SESSÃO ──────────────────────────
   const renderReport = () => {
     const totalAnswered = currentDeck.length;
     const accuracy = totalAnswered > 0 ? Math.round((correctCount / totalAnswered) * 100) : 0;
 
     return (
       <div className="max-w-3xl mx-auto px-4 py-8 pb-16 animate-in fade-in slide-in-from-bottom-8 duration-500">
-        <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white mb-2 text-center">
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-[#e8eaf0] mb-2 text-center font-display">
           Relatório de Sessão FSRS Concursos
         </h2>
-        <p className="text-xs sm:text-sm text-gray-500 dark:text-zinc-400 text-center mb-8">
+        <p className="text-xs sm:text-sm text-gray-500 dark:text-[#9aa5bb] text-center mb-8">
           Sua sessão foi processada com sucesso no modo {STUDY_MODES_CONFIG[studyMode].name} e salva no Tracker.
         </p>
 
-        {/* Métricas Principais */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-white dark:bg-zinc-800 p-6 rounded-3xl border border-gray-200 dark:border-zinc-700 shadow-sm text-center">
+          <div className="bg-white dark:bg-[#131929] p-6 rounded-3xl border border-gray-200 dark:border-[rgba(255,255,255,0.08)] shadow-sm text-center">
             <CheckCircle className="mx-auto text-emerald-500 dark:text-emerald-400 mb-2" size={32} />
-            <p className="text-gray-500 dark:text-zinc-400 text-xs font-bold uppercase tracking-wider">Aproveitamento</p>
-            <p className="text-4xl font-black text-gray-900 dark:text-white mt-1">{accuracy}%</p>
+            <p className="text-gray-500 dark:text-[#9aa5bb] text-xs font-bold uppercase tracking-wider font-mono">Aproveitamento</p>
+            <p className="text-4xl font-black text-gray-900 dark:text-[#e8eaf0] mt-1 font-mono">{accuracy}%</p>
             <p className="text-gray-400 text-xs mt-1">{correctCount} de {totalAnswered} acertos</p>
           </div>
 
-          <div className="bg-[#fff4ed] dark:bg-[#210e00] p-6 rounded-3xl border border-[#ffd4b8] dark:border-[#592200] shadow-sm text-center flex flex-col justify-center items-center">
+          <div className="bg-white dark:bg-[#131929] p-6 rounded-3xl border border-gray-200 dark:border-[rgba(255,255,255,0.08)] shadow-sm text-center flex flex-col justify-center items-center">
             <FileText className="text-[#ff6b00] dark:text-[#ff8533] mb-2" size={32} />
-            <p className="text-[#803200] dark:text-[#ffad77] text-xs font-bold uppercase tracking-wider">Tempo Registrado</p>
-            <p className="text-2xl font-black text-[#ff6b00] dark:text-[#ff8533] mt-1">+{modalData.tempo} minutos</p>
-            <p className="text-xs text-[#a64800] dark:text-[#cca080] mt-1">Salvo em delta_estudos</p>
+            <p className="text-gray-500 dark:text-[#9aa5bb] text-xs font-bold uppercase tracking-wider font-mono">Tempo Registrado</p>
+            <p className="text-2xl font-black text-[#ff6b00] dark:text-[#ff8533] mt-1 font-mono">+{modalData.tempo} minutos</p>
+            <p className="text-xs text-gray-400 mt-1">Salvo em delta_estudos</p>
           </div>
 
-          <div className="bg-white dark:bg-zinc-800 p-6 rounded-3xl border border-gray-200 dark:border-zinc-700 shadow-sm text-center flex flex-col justify-center">
-            <Target className="mx-auto text-blue-500 mb-2" size={32} />
-            <p className="text-gray-500 dark:text-zinc-400 text-xs font-bold uppercase tracking-wider">Modo Utilizado</p>
-            <p className="text-xl font-black text-gray-900 dark:text-white mt-1">{STUDY_MODES_CONFIG[studyMode].shortName}</p>
-            <p className="text-xs text-gray-400 mt-1">Teto de {maxIntervalDays} dias</p>
-          </div>
-        </div>
-
-        {/* Distribuição de Respostas */}
-        <div className="bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-3xl p-6 shadow-sm mb-8">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-zinc-400 mb-4 flex items-center gap-2">
-            <Gauge size={16} className="text-[#ff6b00]" /> Classificação das Respostas
-          </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-            <div className="p-3 bg-red-50 dark:bg-red-950/30 rounded-2xl border border-red-100 dark:border-red-900/40">
-              <span className="text-xs font-bold text-red-600 dark:text-red-400">🔴 Errei</span>
-              <p className="text-2xl font-black text-red-700 dark:text-red-300 mt-1">{sessionRatings.again}</p>
-            </div>
-            <div className="p-3 bg-amber-50 dark:bg-amber-950/30 rounded-2xl border border-amber-100 dark:border-amber-900/40">
-              <span className="text-xs font-bold text-amber-600 dark:text-amber-400">🟡 Difícil</span>
-              <p className="text-2xl font-black text-amber-700 dark:text-amber-300 mt-1">{sessionRatings.hard}</p>
-            </div>
-            <div className="p-3 bg-emerald-50 dark:bg-emerald-950/30 rounded-2xl border border-emerald-100 dark:border-emerald-900/40">
-              <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">🟢 Bom</span>
-              <p className="text-2xl font-black text-emerald-700 dark:text-emerald-300 mt-1">{sessionRatings.good}</p>
-            </div>
-            <div className="p-3 bg-blue-50 dark:bg-blue-950/30 rounded-2xl border border-blue-100 dark:border-blue-900/40">
-              <span className="text-xs font-bold text-blue-600 dark:text-blue-400">🔵 Fácil</span>
-              <p className="text-2xl font-black text-blue-700 dark:text-blue-300 mt-1">{sessionRatings.easy}</p>
-            </div>
+          <div className="bg-white dark:bg-[#131929] p-6 rounded-3xl border border-gray-200 dark:border-[rgba(255,255,255,0.08)] shadow-sm text-center">
+            <Flame className="mx-auto text-amber-500 dark:text-amber-400 mb-2" size={32} />
+            <p className="text-gray-500 dark:text-[#9aa5bb] text-xs font-bold uppercase tracking-wider font-mono">Ofensiva de Acertos</p>
+            <p className="text-4xl font-black text-amber-500 dark:text-amber-400 mt-1 font-mono">{currentStreak}</p>
+            <p className="text-gray-400 text-xs mt-1">Seguidos sem errar</p>
           </div>
         </div>
 
-        {/* Botões de Ação */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+        <div className="flex justify-center gap-3">
           <button
             onClick={() => setCurrentScreen('decks')}
-            className="w-full sm:w-auto px-8 py-3.5 bg-[#ff6b00] hover:bg-[#e65c00] text-white font-extrabold text-sm rounded-2xl shadow-md transition-all active:scale-95"
+            className="px-6 py-3 bg-[#ff6b00] hover:bg-[#e65c00] text-white font-bold text-sm rounded-2xl shadow-lg transition cursor-pointer"
           >
-            Voltar aos Baralhos
-          </button>
-          <button
-            onClick={() => startDeck(todayCards, `Revisões do Dia (${STUDY_MODES_CONFIG[studyMode].shortName})`)}
-            disabled={todayCards.length === 0}
-            className="w-full sm:w-auto px-8 py-3.5 bg-gray-100 dark:bg-zinc-800 text-gray-800 dark:text-zinc-200 font-bold text-sm rounded-2xl hover:bg-gray-200 transition"
-          >
-            Continuar Revisando ({todayCards.length})
+            Voltar à Biblioteca de Baralhos
           </button>
         </div>
-
       </div>
     );
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0f0f12] text-gray-900 dark:text-zinc-100 font-sans transition-colors duration-200">
+    <div className="min-h-screen bg-[#f4f6fa] dark:bg-[#0b0f1a] text-[#0f172a] dark:text-[#e8eaf0] transition-colors duration-200">
       
-      {/* Top Navigation */}
-      {renderNavbar()}
+      {/* ── SIDEBAR DRAWER MENU CANÔNICO ── */}
+      <div
+        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-[900] transition-opacity duration-300 ${
+          isSidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+        onClick={() => setIsSidebarOpen(false)}
+      />
 
-      {/* Main Screens Router */}
+      <div
+        className={`fixed left-0 top-0 bottom-0 w-[300px] bg-white dark:bg-[#131929] border-r border-gray-200 dark:border-[rgba(255,255,255,0.09)] z-[901] transition-transform duration-300 shadow-2xl flex flex-col ${
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <div className="p-5 border-b border-gray-100 dark:border-[rgba(255,255,255,0.08)] flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-xl">⚖️</span>
+            <h2 className="text-base font-extrabold text-gray-900 dark:text-[#e8eaf0] font-display">
+              Menu Delta
+            </h2>
+          </div>
+          <button
+            onClick={() => setIsSidebarOpen(false)}
+            className="p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-[#1a2235] transition cursor-pointer"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        <nav className="p-4 space-y-1.5 flex-1 overflow-y-auto">
+          <a
+            href="../index.html"
+            className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-gray-700 dark:text-[#9aa5bb] hover:text-[#ff6b00] dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#1a2235] transition"
+          >
+            <span>🏠</span> Home / Dashboard
+          </a>
+          <a
+            href="../index.html#edital"
+            className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-gray-700 dark:text-[#9aa5bb] hover:text-[#ff6b00] dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#1a2235] transition"
+          >
+            <span>📋</span> Edital Verticalizado
+          </a>
+          <a
+            href="../index.html#conquistas"
+            className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-gray-700 dark:text-[#9aa5bb] hover:text-[#ff6b00] dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#1a2235] transition"
+          >
+            <span>🏆</span> Conquistas & Medalhas
+          </a>
+          <a
+            href="../index.html#panels"
+            className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-gray-700 dark:text-[#9aa5bb] hover:text-[#ff6b00] dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#1a2235] transition"
+          >
+            <span>📚</span> Biblioteca de Painéis
+          </a>
+          <a
+            href="../index.html#history"
+            className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-gray-700 dark:text-[#9aa5bb] hover:text-[#ff6b00] dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#1a2235] transition"
+          >
+            <span>📜</span> Histórico de Estudos
+          </a>
+          
+          <div className="pt-2 border-t border-gray-100 dark:border-[rgba(255,255,255,0.08)]">
+            <div className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-[#ff6b00]/10 text-[#ff6b00] dark:text-[#ff8533] border border-[#ff6b00]/20">
+              <span>⚡</span> Módulo Flashcards (Atena)
+            </div>
+          </div>
+        </nav>
+
+        <div className="p-4 border-t border-gray-100 dark:border-[rgba(255,255,255,0.08)] text-[11px] text-gray-400 dark:text-[#7d889e] text-center font-mono">
+          AVA Delta · Ambiente Virtual
+        </div>
+      </div>
+
+      {renderHeader()}
+
       <main>
         {currentScreen === 'decks' && renderDecks()}
         {currentScreen === 'flashcards' && renderFlashcard()}
-        {currentScreen === 'stats' && renderStats()}
         {currentScreen === 'report' && renderReport()}
+        {currentScreen === 'stats' && renderStats()}
       </main>
 
-      {/* Modal de Salvar Sessão */}
-      {showSaveModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-4">
-            <div className="text-center space-y-1">
-              <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center mx-auto mb-2 font-bold text-xl">
-                ✓
+      {/* MODAL UNIVERSAL DE CRIAÇÃO / EDIÇÃO */}
+      <CardCreatorModal
+        isOpen={isCreateModalOpen}
+        onClose={() => {
+          setIsCreateModalOpen(false);
+          setEditingCard(null);
+        }}
+        onSaveCard={handleSaveCard}
+        availableDecks={allDecks}
+        editingCard={editingCard}
+      />
+
+      {/* GERENCIADOR E EDITOR UNIVERSAL DE CARDS */}
+      <CustomCardsManager
+        isOpen={isManagerModalOpen}
+        onClose={() => setIsManagerModalOpen(false)}
+        allCards={allCardsFlat}
+        availableDecks={allDecks}
+        fsrsData={fsrsData}
+        initialDeckFilter={managerInitialDeck}
+        initialOriginFilter={managerInitialOrigin}
+        onEditCard={(card, deckId) => {
+          setEditingCard({ card, deckId });
+          setIsManagerModalOpen(false);
+          setIsCreateModalOpen(true);
+        }}
+        onDeleteCard={handleDeleteCard}
+        onOpenCreateModal={(defaultDeckId) => {
+          setEditingCard(defaultDeckId ? { card: { id: '', deckId: defaultDeckId, assunto: '', frente: '', verso: '', tipo: 'basico' }, deckId: defaultDeckId } : null);
+          setIsManagerModalOpen(false);
+          setIsCreateModalOpen(true);
+        }}
+        onImportCards={(imported) => {
+          const updated = [...customCards, ...imported];
+          setCustomCards(updated);
+          localStorage.setItem('atena_custom_cards', JSON.stringify(updated));
+        }}
+      />
+
+      {/* MODAL DE REGISTRO DO CRONÔMETRO ESTILIZADO (SEM ALERT!) */}
+      {isStopwatchModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fadeIn">
+          <div className="bg-white dark:bg-[#131929] border border-gray-200 dark:border-[rgba(255,255,255,0.1)] rounded-3xl w-full max-w-md shadow-2xl overflow-hidden p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-gray-100 dark:border-[rgba(255,255,255,0.08)] pb-3">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">⏱️</span>
+                <h3 className="text-base font-extrabold text-gray-900 dark:text-[#e8eaf0] font-display">
+                  Registrar Sessão de Estudo
+                </h3>
               </div>
-              <h3 className="text-xl font-extrabold text-gray-900 dark:text-white">Sessão Concluída!</h3>
-              <p className="text-xs text-gray-500 dark:text-zinc-400">
-                Grave o tempo de estudo no Tracker do AVA Delta
-              </p>
+              <button
+                onClick={() => setIsStopwatchModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-white cursor-pointer"
+              >
+                <X size={18} />
+              </button>
             </div>
 
-            <div className="space-y-3 pt-2">
+            <div className="space-y-3">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-zinc-400 mb-1">
-                  Tempo Estudado (minutos)
+                <label className="text-[11px] font-bold uppercase text-gray-400 dark:text-[#9aa5bb]">
+                  Matéria
                 </label>
-                <input
-                  type="number"
-                  min="1"
-                  value={modalData.tempo}
-                  onChange={(e) => setModalData({ ...modalData, tempo: Number(e.target.value) })}
-                  className="w-full bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-zinc-100 font-bold"
-                />
+                <select
+                  value={stopwatchData.materia}
+                  onChange={(e) => setStopwatchData(prev => ({ ...prev, materia: e.target.value }))}
+                  className="w-full mt-1 p-2.5 bg-gray-50 dark:bg-[#0b0f1a] border border-gray-200 dark:border-[rgba(255,255,255,0.08)] rounded-xl text-xs font-bold text-gray-900 dark:text-[#e8eaf0] focus:border-[#ff6b00] outline-none"
+                >
+                  <option value="DP">Direito Penal (DP)</option>
+                  <option value="DPP">Dir. Processual Penal (DPP)</option>
+                  <option value="DC">Direito Constitucional (DC)</option>
+                  <option value="DA">Direito Administrativo (DA)</option>
+                  <option value="LPE">Legislação Penal Especial (LPE)</option>
+                  <option value="DCV">Direito Civil (DCV)</option>
+                  <option value="ML">Medicina Legal (ML)</option>
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[11px] font-bold uppercase text-gray-400 dark:text-[#9aa5bb]">
+                    Tempo (minutos)
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={stopwatchData.tempo}
+                    onChange={(e) => setStopwatchData(prev => ({ ...prev, tempo: parseInt(e.target.value) || 1 }))}
+                    className="w-full mt-1 p-2.5 bg-gray-50 dark:bg-[#0b0f1a] border border-gray-200 dark:border-[rgba(255,255,255,0.08)] rounded-xl text-xs font-bold text-gray-900 dark:text-[#e8eaf0] focus:border-[#ff6b00] outline-none font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-bold uppercase text-gray-400 dark:text-[#9aa5bb]">
+                    Categoria
+                  </label>
+                  <input
+                    type="text"
+                    value={stopwatchData.categoria}
+                    readOnly
+                    className="w-full mt-1 p-2.5 bg-gray-100 dark:bg-[#1a2235] border border-gray-200 dark:border-[rgba(255,255,255,0.08)] rounded-xl text-xs font-bold text-gray-500 dark:text-[#9aa5bb] outline-none"
+                  />
+                </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-zinc-400 mb-1">
-                  Observações da Sessão
+                <label className="text-[11px] font-bold uppercase text-gray-400 dark:text-[#9aa5bb]">
+                  Observações
                 </label>
                 <input
                   type="text"
-                  placeholder="Ex: Foco em Crimes contra a Vida e Prazos"
-                  value={modalData.obs}
-                  onChange={(e) => setModalData({ ...modalData, obs: e.target.value })}
-                  className="w-full bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl px-3.5 py-2.5 text-xs text-gray-900 dark:text-zinc-100"
+                  value={stopwatchData.obs}
+                  onChange={(e) => setStopwatchData(prev => ({ ...prev, obs: e.target.value }))}
+                  placeholder="Ex: Revisão dos gargalos de Penal no FSRS..."
+                  className="w-full mt-1 p-2.5 bg-gray-50 dark:bg-[#0b0f1a] border border-gray-200 dark:border-[rgba(255,255,255,0.08)] rounded-xl text-xs text-gray-900 dark:text-[#e8eaf0] focus:border-[#ff6b00] outline-none"
                 />
               </div>
             </div>
 
-            <div className="flex gap-2 pt-3">
+            <div className="pt-3 border-t border-gray-100 dark:border-[rgba(255,255,255,0.08)] flex justify-end gap-2">
               <button
-                onClick={() => {
-                  setShowSaveModal(false);
-                  setCurrentScreen('report');
-                }}
-                className="flex-1 py-3 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 rounded-xl font-bold text-xs"
+                onClick={() => setIsStopwatchModalOpen(false)}
+                className="px-4 py-2 rounded-xl border border-gray-200 dark:border-[rgba(255,255,255,0.08)] text-gray-600 dark:text-[#9aa5bb] font-bold text-xs hover:bg-gray-100 dark:hover:bg-[#1a2235] transition cursor-pointer"
               >
-                Pular Registro
+                Cancelar
               </button>
               <button
-                onClick={confirmSaveSession}
-                className="flex-1 py-3 bg-[#ff6b00] hover:bg-[#e65c00] text-white rounded-xl font-extrabold text-xs shadow-md shadow-[#ff6b00]/20"
+                onClick={handleSaveStopwatchToTracker}
+                className="px-5 py-2 bg-[#ff6b00] hover:bg-[#e65c00] text-white font-bold text-xs rounded-xl shadow-md transition cursor-pointer"
               >
                 Salvar no Tracker
               </button>
@@ -1524,37 +1695,88 @@ export default function App() {
         </div>
       )}
 
-      {/* Modal Criar / Editar Flashcard */}
-      <CardCreatorModal
-        isOpen={isCreateModalOpen}
-        onClose={() => {
-          setIsCreateModalOpen(false);
-          setEditingCard(null);
-        }}
-        onSaveCard={handleSaveCustomCard}
-        availableDecks={allDecks}
-        editingCard={editingCard}
-      />
+      {/* MODAL DE CONCLUSÃO DE SESSÃO */}
+      {showSaveModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fadeIn">
+          <div className="bg-white dark:bg-[#131929] border border-gray-200 dark:border-[rgba(255,255,255,0.1)] rounded-3xl w-full max-w-md shadow-2xl overflow-hidden p-6 space-y-4">
+            <div className="text-center space-y-1">
+              <div className="w-12 h-12 bg-emerald-500/10 text-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-2 border border-emerald-500/20">
+                <CheckCircle size={28} />
+              </div>
+              <h3 className="text-lg font-extrabold text-gray-900 dark:text-[#e8eaf0] font-display">
+                Sessão Concluída!
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-[#9aa5bb]">
+                Deseja registrar essa sessão no Tracker de Estudos do AVA?
+              </p>
+            </div>
 
-      {/* Modal Gerenciador de Flashcards Próprios */}
-      <CustomCardsManager
-        isOpen={isManagerModalOpen}
-        onClose={() => setIsManagerModalOpen(false)}
-        customCards={customCards}
-        availableDecks={allDecks}
-        fsrsData={fsrsData}
-        onEditCard={(card, deckId) => {
-          setEditingCard({ card, deckId });
-          setIsManagerModalOpen(false);
-          setIsCreateModalOpen(true);
-        }}
-        onDeleteCard={handleDeleteCustomCard}
-        onOpenCreateModal={() => {
-          setEditingCard(null);
-          setIsCreateModalOpen(true);
-        }}
-        onImportCards={handleImportCustomCards}
-      />
+            <div className="space-y-3">
+              <div>
+                <label className="text-[11px] font-bold uppercase text-gray-400 dark:text-[#9aa5bb]">
+                  Tempo Total (minutos)
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={modalData.tempo}
+                  onChange={(e) => setModalData(prev => ({ ...prev, tempo: parseInt(e.target.value) || 1 }))}
+                  className="w-full mt-1 p-2.5 bg-gray-50 dark:bg-[#0b0f1a] border border-gray-200 dark:border-[rgba(255,255,255,0.08)] rounded-xl text-xs font-bold text-gray-900 dark:text-[#e8eaf0] focus:border-[#ff6b00] outline-none font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="text-[11px] font-bold uppercase text-gray-400 dark:text-[#9aa5bb]">
+                  Observações
+                </label>
+                <input
+                  type="text"
+                  value={modalData.obs}
+                  onChange={(e) => setModalData(prev => ({ ...prev, obs: e.target.value }))}
+                  placeholder="Ex: Revisão dos baralhos no modo Reta Final..."
+                  className="w-full mt-1 p-2.5 bg-gray-50 dark:bg-[#0b0f1a] border border-gray-200 dark:border-[rgba(255,255,255,0.08)] rounded-xl text-xs text-gray-900 dark:text-[#e8eaf0] focus:border-[#ff6b00] outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-gray-100 dark:border-[rgba(255,255,255,0.08)] flex justify-end gap-2">
+              <button
+                onClick={() => {
+                  setShowSaveModal(false);
+                  setCurrentScreen('report');
+                }}
+                className="px-4 py-2 rounded-xl border border-gray-200 dark:border-[rgba(255,255,255,0.08)] text-gray-600 dark:text-[#9aa5bb] font-bold text-xs hover:bg-gray-100 dark:hover:bg-[#1a2235] transition cursor-pointer"
+              >
+                Pular Registro
+              </button>
+              <button
+                onClick={() => {
+                  try {
+                    const raw = localStorage.getItem('delta_estudos');
+                    const logs = raw ? JSON.parse(raw) : [];
+                    logs.push({
+                      date: modalData.date,
+                      mat: currentDeck.length > 0 ? (currentDeck[0].deckId?.toUpperCase() || 'DP') : 'DP',
+                      assunto: `Flashcards Atena (${deckName})`,
+                      categoria: 'Revisão / Flashcards',
+                      tempo: modalData.tempo,
+                      qts: currentDeck.length,
+                      acertos: correctCount,
+                      obs: modalData.obs || `Modo: ${STUDY_MODES_CONFIG[studyMode].shortName}`,
+                    });
+                    localStorage.setItem('delta_estudos', JSON.stringify(logs));
+                  } catch (e) {}
+                  setShowSaveModal(false);
+                  setCurrentScreen('report');
+                }}
+                className="px-5 py-2 bg-[#ff6b00] hover:bg-[#e65c00] text-white font-bold text-xs rounded-xl shadow-md transition cursor-pointer"
+              >
+                Salvar no Tracker
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

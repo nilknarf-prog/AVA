@@ -8,7 +8,7 @@
 (function() {
   'use strict';
 
-  // Baralhos de questões padrão da base Atena
+  // Baralhos de questões padrão da base oficial Atena (77 cartões)
   const BANCOS_PADRAO = [
     {
       id: 'dp',
@@ -28,13 +28,13 @@
         { id: 'dp11', deckId: 'dp', assunto: 'Funcionalismo Penal', frente: 'No Funcionalismo, qual a diferença entre a finalidade do Direito Penal para Roxin e para Jakobs?', verso: 'ROXIN (Moderado): Proteção de Bens Jurídicos. JAKOBS (Radical/Sistêmico): Assegurar a vigência da Norma (autor do Direito Penal do Inimigo). MACETE: Roxin = Respeita os Bens Jurídicos. Jakobs = Justiça para o Sistema.' },
         { id: 'dp12', deckId: 'dp', assunto: 'Interpretação Restritiva', frente: 'Na interpretação restritiva da lei penal, qual é a premissa sobre o texto legal e a vontade da lei?', verso: 'A premissa é que a lei disse MAIS do que queria ("lex dixit plus quam voluit"). O intérprete deve limitar/restringir seu alcance.' },
         { id: 'dp13', deckId: 'dp', assunto: 'Consunção', frente: 'Para a aplicação do princípio da consunção, é obrigatório que o crime absorvido (meio) tenha pena menor que o crime continente (fim)?', verso: 'NÃO. É plenamente possível que o crime absorvido tenha pena MAIOR. O que importa é a relação de dependência (meio e fim) e não o quantum da pena.' },
-        { id: 'dp14', deckId: 'dp', assunto: 'Teoria Finalista', frente: 'Na teoria finalista (adotada no CP), onde ficam o dolo e a culpa e quais os 3 elementos da culpabilidade?', verso: 'Dolo e culpa ficam na CONDUTA (fato típico). A culpabilidade é normativa pura, composta pelo IPE: Imputabilidade, Potencial consciência da ilicitude e Exigibilidade de conduta diversa.' },
-        { id: 'dp15', deckId: 'dp', assunto: 'Dolo Normativo vs Natural', frente: 'Qual a diferença entre o Dolo Normativo (Causalismo) e o Dolo Natural (Finalismo)?', verso: 'Dolo Normativo (Causalismo): Ficava na culpabilidade e continha a consciência da ilicitude (dolus malus). Dolo Natural (Finalismo): Fica no fato típico e é composto apenas por CONSCIÊNCIA e VONTADE.' }
+        { id: 'dp14', deckId: 'dp', assunto: 'Teoria Finalista (Welzel)', frente: 'Na teoria finalista (adotada no CP), onde ficam o dolo e a culpa e quais os 3 elementos da culpabilidade?', verso: 'Dolo e culpa ficam na CONDUTA (fato típico). A culpabilidade é normativa pura, composta pelo IPE: Imputabilidade, Potencial consciência da ilicitude e Exigibilidade de conduta diversa.' },
+        { id: 'dp15', deckId: 'dp', assunto: 'Dolo Normativo vs Dolo Natural', frente: 'Qual a diferença entre o Dolo Normativo (Causalismo) e o Dolo Natural (Finalismo)?', verso: 'Dolo Normativo (Causalismo): Ficava na culpabilidade e continha a consciência da ilicitude (dolus malus). Dolo Natural (Finalismo): Fica no fato típico e é composto apenas por CONSCIÊNCIA e VONTADE.' }
       ]
     },
     {
       id: 'dpp',
-      titulo: 'Processo Penal',
+      titulo: 'Dir. Processual Penal',
       sigla: 'DPP',
       cards: [
         { id: 'dpp1', deckId: 'dpp', assunto: 'Inquérito Policial', frente: 'O delegado de polícia pode mandar arquivar os autos de inquérito se não achar provas?', verso: 'NÃO. O arquivamento é de competência do Ministério Público / Juiz, JAMAIS da autoridade policial (Art. 17, CPP).' },
@@ -42,7 +42,11 @@
         { id: 'dpp3', deckId: 'dpp', assunto: 'Ação Penal', frente: 'A representação do ofendido na ação penal pública condicionada pode ser retratada após o oferecimento da denúncia?', verso: 'NÃO. A retratação só é possível ATÉ o oferecimento da denúncia (Art. 25, CPP).' },
         { id: 'dpp4', deckId: 'dpp', assunto: 'Provas', frente: 'São inadmissíveis as provas derivadas das ilícitas, sem qualquer exceção?', verso: 'NÃO. Há exceções: fonte independente e descoberta inevitável.' },
         { id: 'dpp5', deckId: 'dpp', assunto: 'Prisão Preventiva', frente: 'Pode ser decretada prisão preventiva como antecipação de cumprimento de pena?', verso: 'NÃO. A prisão preventiva não pode ter finalidade de antecipação de pena (Art. 313, §2º).' },
-        { id: 'dpp6', deckId: 'dpp', assunto: 'ANPP', frente: 'O ANPP cabe em crimes cometidos com violência ou grave ameaça?', verso: 'NÃO. O ANPP exige infração sem violência ou grave ameaça e pena mínima < 4 anos.' }
+        { id: 'dpp6', deckId: 'dpp', assunto: 'Acordo de Não Persecução', frente: 'O ANPP cabe em crimes cometidos com violência ou grave ameaça?', verso: 'NÃO. O ANPP exige infração sem violência ou grave ameaça e pena mínima < 4 anos.' },
+        { id: 'dpp7', deckId: 'dpp', assunto: 'Inquérito Policial', frente: 'É garantido ao advogado acessar os autos do inquérito de forma irrestrita, inclusive diligências em andamento?', verso: 'NÃO. O acesso abrange apenas os elementos JÁ DOCUMENTADOS (Súmula Vinculante 14).' },
+        { id: 'dpp8', deckId: 'dpp', assunto: 'Competência', frente: 'O juízo competente para julgar estelionato por cheque sem fundo é o do local de recusa?', verso: 'SIM. Súmula 521 STF / Art. 70, §4º, CPP (Local da agência bancária sacada).' },
+        { id: 'dpp9', deckId: 'dpp', assunto: 'Prisão Temporária', frente: 'A prisão temporária pode ser decretada de ofício pelo Juiz?', verso: 'NÃO. Depende SEMPRE de representação da autoridade policial ou requerimento do MP.' },
+        { id: 'dpp10', deckId: 'dpp', assunto: 'Provas', frente: 'O juiz pode fundamentar sua decisão EXCLUSIVAMENTE nos elementos informativos do Inquérito?', verso: 'NÃO. Vedação expressa no art. 155, CPP (salvo provas cautelares, não repetíveis e antecipadas).' }
       ]
     },
     {
@@ -50,20 +54,64 @@
       titulo: 'Direito Constitucional',
       sigla: 'DC',
       cards: [
-        { id: 'dc1', deckId: 'dc', assunto: 'Remédios Constitucionais', frente: 'Cabe Habeas Corpus contra imposição de pena de exclusão de militar ou perda de posto?', verso: 'NÃO. Não cabe HC em punições disciplinares militares quanto ao mérito, mas cabe quanto à LEGALIDADE.' },
-        { id: 'dc2', deckId: 'dc', assunto: 'Direitos Fundamentais', frente: 'A inviolabilidade do domicílio admite entrada noturna sem consentimento em caso de determinação judicial?', verso: 'NÃO. Determinação judicial apenas DURANTE O DIA. À noite: flagrante delito, desastre ou socorro.' },
-        { id: 'dc3', deckId: 'dc', assunto: 'Segurança Pública', frente: 'A Polícia Penal está expressamente prevista no rol do Art. 144 da CF/88?', verso: 'SIM. Inserida pela Emenda Constitucional nº 104/2019.' },
-        { id: 'dc4', deckId: 'dc', assunto: 'Competências', frente: 'Compete privativamente à União legislar sobre direito penal e processual penal?', verso: 'SIM. Art. 22, I da CF/88.' }
+        { id: 'dc1', deckId: 'dc', assunto: 'Eficácia das Normas', frente: 'A norma que garante o direito de greve no serviço público é de eficácia plena?', verso: 'NÃO. É de eficácia LIMITADA, dependendo de lei específica para seu exercício.' },
+        { id: 'dc2', deckId: 'dc', assunto: 'Habeas Corpus', frente: 'Cabe Habeas Corpus contra punição disciplinar militar?', verso: 'NÃO. Salvo para questionar os pressupostos de legalidade (hierarquia, poder de punir), mas não o mérito.' },
+        { id: 'dc3', deckId: 'dc', assunto: 'Remédios Constitucionais', frente: 'O Mandado de Injunção serve para suprir falta de norma regulamentadora de qualquer direito?', verso: 'NÃO. Apenas para direitos, liberdades constitucionais, nacionalidade, soberania e cidadania.' },
+        { id: 'dc4', deckId: 'dc', assunto: 'Segurança Pública', frente: 'As guardas municipais fazem parte do rol dos órgãos de segurança pública stricto sensu (Art. 144, incisos I a VI)?', verso: 'NÃO. Estão previstas no §8º do Art. 144, com função de proteção de bens, serviços e instalações.' },
+        { id: 'dc5', deckId: 'dc', assunto: 'CPI', frente: 'A CPI pode determinar quebra de sigilo bancário sem autorização judicial?', verso: 'SIM. A CPI possui poderes de investigação próprios das autoridades judiciais (cláusula de reserva de jurisdição atenuada).' },
+        { id: 'dc6', deckId: 'dc', assunto: 'Extradição', frente: 'O brasileiro nato pode ser extraditado se o crime foi cometido no exterior?', verso: 'NÃO. O brasileiro nato NUNCA pode ser extraditado.' },
+        { id: 'dc7', deckId: 'dc', assunto: 'CPI', frente: 'A CPI pode decretar prisão preventiva de testemunha que mente?', verso: 'NÃO. CPI não pode decretar prisão, exceto em flagrante delito.' },
+        { id: 'dc8', deckId: 'dc', assunto: 'Competência', frente: 'A segurança viária nas rodovias federais é de competência da Polícia Federal?', verso: 'NÃO. É de competência da Polícia Rodoviária Federal.' },
+        { id: 'dc9', deckId: 'dc', assunto: 'Súmula Vinculante', frente: 'Qualquer pessoa pode propor a edição, revisão ou cancelamento de Súmula Vinculante?', verso: 'NÃO. Apenas os legitimados da Ação Direta de Inconstitucionalidade (Art. 103) e outros específicos.' },
+        { id: 'dc10', deckId: 'dc', assunto: 'Mandado de Segurança', frente: 'Cabe mandado de segurança contra lei em tese?', verso: 'NÃO. Salvo se a lei produzir efeitos concretos imediatos (Súmula 266 STF).' },
+        { id: 'dc11', deckId: 'dc', assunto: 'Classificação das Constituições', frente: 'A Constituição Outorgada tem participação popular em sua elaboração, enquanto a Cesarista não tem?', verso: 'NÃO. Nenhuma tem participação na elaboração. A diferença é que a Cesarista (ex: Napoleão) prevê RATIFICAÇÃO POPULAR POSTERIOR (plebiscito de fachada). A Outorgada é 100% imposta (ex: 1824, 1937, 1967).' }
       ]
     },
     {
       id: 'da',
-      titulo: 'Direito Administrativo',
+      titulo: 'Dir. Administrativo',
       sigla: 'DA',
       cards: [
-        { id: 'da1', deckId: 'da', assunto: 'Poder de Polícia', frente: 'O poder de polícia administrativa incide sobre bens, direitos e atividades, enquanto a judiciária sobre pessoas?', verso: 'SIM. Polícia Administrativa = caráter preventivo/bens. Polícia Judiciária = repressiva/pessoas infratoras.' },
-        { id: 'da2', deckId: 'da', assunto: 'Atos Administrativos', frente: 'A revogação de um ato administrativo produz efeitos retroativos (ex tunc)?', verso: 'NÃO. Revogação produz efeitos EX NUNC (não retroage). A anulação é que produz efeitos EX TUNC.' },
-        { id: 'da3', deckId: 'da', assunto: 'Improbidade Administrativa', frente: 'Após a Lei 14.230/21, ainda existe ato de improbidade na modalidade culposa?', verso: 'NÃO. Exige-se DOLO ESPECÍFICO em todas as modalidades.' }
+        { id: 'da1', deckId: 'da', assunto: 'Atos Administrativos', frente: 'A revogação de um ato administrativo produz efeitos ex tunc (retroativos)?', verso: 'NÃO. A revogação produz efeitos EX NUNC (daqui para frente). A anulação é que produz efeitos ex tunc.' },
+        { id: 'da2', deckId: 'da', assunto: 'Poder de Polícia', frente: 'O poder de polícia pode ser delegado integralmente à iniciativa privada?', verso: 'NÃO. STF decidiu que apenas fases de consentimento, fiscalização e sanção (em empresas públicas/sociedade economia mista que prestam serviço público em regime não concorrencial) podem, mas nunca legislar/ordem.' },
+        { id: 'da3', deckId: 'da', assunto: 'Responsabilidade Civil', frente: 'A responsabilidade civil do Estado por conduta omissiva é sempre objetiva?', verso: 'NÃO. Via de regra, a omissão estatal enseja responsabilidade SUBJETIVA (teoria da culpa do serviço/faute du service).' },
+        { id: 'da4', deckId: 'da', assunto: 'Atributos do Ato', frente: 'A presunção de legitimidade dos atos administrativos é absoluta?', verso: 'NÃO. É presunção RELATIVA (juris tantum), admitindo prova em contrário.' },
+        { id: 'da5', deckId: 'da', assunto: 'Poder Disciplinar', frente: 'O poder disciplinar abrange a aplicação de multa a um cidadão por excesso de velocidade?', verso: 'NÃO. Multa de trânsito é exercício do Poder de POLÍCIA (vínculo geral). Poder Disciplinar exige vínculo específico (servidor ou contratado).' },
+        { id: 'da6', deckId: 'da', assunto: 'Concessão', frente: 'A concessão de serviço público exige lei autorizadora e licitação na modalidade concorrência ou diálogo competitivo?', verso: 'SIM. Sempre exige licitação nas modalidades concorrência ou diálogo.' },
+        { id: 'da7', deckId: 'da', assunto: 'Improbidade', frente: 'Após a Lei 14.230/21, admite-se ato de improbidade administrativa culposo?', verso: 'NÃO. A nova lei exige DOLO ESPECÍFICO para todas as modalidades.' },
+        { id: 'da8', deckId: 'da', assunto: 'Agentes Públicos', frente: 'É permitida a acumulação remunerada de um cargo de professor com outro técnico ou científico?', verso: 'SIM, desde que haja compatibilidade de horários (Art. 37, XVI, CF).' },
+        { id: 'da9', deckId: 'da', assunto: 'Licitação', frente: 'Na inexigibilidade de licitação, a competição é inviável, mas há vários possíveis fornecedores?', verso: 'NÃO. Inexigibilidade decorre justamente da inviabilidade de competição (ex: fornecedor exclusivo, artista consagrado).' },
+        { id: 'da10', deckId: 'da', assunto: 'Bens Públicos', frente: 'Os bens de uso comum do povo e de uso especial são alienáveis?', verso: 'NÃO. São inalienáveis enquanto mantiverem essa destinação. Só alienáveis após desafetação.' }
+      ]
+    },
+    {
+      id: 'lpe',
+      titulo: 'Leg. Penal Especial',
+      sigla: 'LPE',
+      cards: [
+        { id: 'lpe1', deckId: 'lpe', assunto: 'Maria da Penha', frente: 'A Lei Maria da Penha (Lei 11.340) aplica-se somente quando a vítima for mulher e o agressor for homem?', verso: 'NÃO. O agressor pode ser de qualquer gênero (inclusive outra mulher), desde que a violência seja baseada em gênero contra a mulher.' },
+        { id: 'lpe2', deckId: 'lpe', assunto: 'Lei de Drogas', frente: 'O crime de porte de drogas para consumo pessoal (Art. 28) é punido com pena de prisão?', verso: 'NÃO. Não há pena privativa de liberdade. Apenas advertência, prestação de serviços ou medida educativa (despenalização).' },
+        { id: 'lpe3', deckId: 'lpe', assunto: 'Estatuto do Desarmamento', frente: 'O porte de arma de fogo de uso permitido, se a arma estiver desmuniciada, não é crime?', verso: 'NÃO. O STF e STJ consideram crime de perigo abstrato. É CRIME mesmo desmuniciada.' },
+        { id: 'lpe4', deckId: 'lpe', assunto: 'Crime de Tortura', frente: 'O crime de tortura é inafiançável e imprescritível?', verso: 'NÃO. É inafiançável, insuscetível de graça ou anistia. MAS É PRESCRITÍVEL (apenas racismo e ação de grupos armados são imprescritíveis).' },
+        { id: 'lpe5', deckId: 'lpe', assunto: 'Crimes Hediondos', frente: 'O roubo com restrição de liberdade da vítima (sequestro relâmpago) é considerado crime hediondo?', verso: 'SIM. Incluído pelo Pacote Anticrime na Lei 8.072/90.' },
+        { id: 'lpe6', deckId: 'lpe', assunto: 'ECA', frente: 'Vender bebida alcoólica para adolescente é apenas infração administrativa?', verso: 'NÃO. É CRIME previsto no ECA (Art. 243) com pena de detenção.' },
+        { id: 'lpe7', deckId: 'lpe', assunto: 'Abuso de Autoridade', frente: 'Existe crime de abuso de autoridade culposo na Lei 13.869/19?', verso: 'NÃO. Todos os crimes da lei de abuso exigem DOLO ESPECÍFICO.' },
+        { id: 'lpe8', deckId: 'lpe', assunto: 'Lei de Drogas', frente: 'A associação para o tráfico (Art. 35) é considerada crime hediondo?', verso: 'NÃO. O tráfico (Art. 33) e financiamento (Art. 36) são equiparados a hediondos. A associação NÃO É.' },
+        { id: 'lpe9', deckId: 'lpe', assunto: 'Crimes Ambientais', frente: 'Pessoas jurídicas podem ser responsabilizadas penalmente por crimes ambientais?', verso: 'SIM. Responsabilidade penal da pessoa jurídica é expressamente admitida na CF e na Lei 9.605/98.' },
+        { id: 'lpe10', deckId: 'lpe', assunto: 'Organização Criminosa', frente: 'A infiltração policial em organização criminosa pode ser feita sem autorização judicial?', verso: 'NÃO. Exige, em qualquer hipótese, prévia autorização judicial motivada.' }
+      ]
+    },
+    {
+      id: 'dcv',
+      titulo: 'Direito Civil',
+      sigla: 'DCV',
+      cards: [
+        { id: 'dcv1', deckId: 'dcv', assunto: 'LINDB - Integração Normativa', frente: 'Na ausência de norma, o juiz aplicará a lei segundo a analogia, a equidade, os costumes e os princípios gerais do direito?', verso: 'NÃO. A ordem de integração (Art. 4º LINDB) é: 1º Analogia, 2º Costumes, 3º Princípios gerais de direito. A EQUIDADE NÃO ESTÁ NO ROL.' },
+        { id: 'dcv2', deckId: 'dcv', assunto: 'LINDB - Subsunção x Integração', frente: 'A subsunção ocorre quando o juiz preenche uma lacuna da lei usando a analogia?', verso: 'NÃO. Subsunção é o enquadramento do fato à norma EXISTENTE. Preencher lacuna é INTEGRAÇÃO.' },
+        { id: 'dcv3', deckId: 'dcv', assunto: 'Das Pessoas - Nascituro', frente: 'O STJ, na prática jurisprudencial, adota integralmente a Teoria Natalista descrita no art. 2º do CC?', verso: 'NÃO. O CC adota a Natalista na letra fria, mas o STJ tende para a Teoria CONCEPCIONISTA (reconhece danos morais por morte de nascituro e alimentos gravídicos).' },
+        { id: 'dcv4', deckId: 'dcv', assunto: 'Capacidade Civil', frente: 'Após o Estatuto da Pessoa com Deficiência, quem são os absolutamente incapazes no Direito Civil brasileiro?', verso: 'APENAS os menores de 16 anos. Os enfermos/deficientes mentais saíram do rol e agora são capazes ou relativamente incapazes.' },
+        { id: 'dcv5', deckId: 'dcv', assunto: 'Desconsideração da PJ', frente: 'Para ocorrer a desconsideração da Personalidade Jurídica (Art. 50, CC), basta demonstrar a insolvência ou encerramento irregular da empresa?', verso: 'NÃO. A regra (Teoria Maior) exige ABUSO DA PERSONALIDADE, caracterizado por Desvio de Finalidade OU Confusão Patrimonial.' },
+        { id: 'dcv6', deckId: 'dcv', assunto: 'Desconsideração Direta x Inversa', frente: 'Na desconsideração INVERSA da personalidade jurídica, os bens da pessoa jurídica respondem por dívidas pessoais do sócio?', verso: 'SIM. É muito comum em varas de Família (ex: sócio oculta patrimônio na empresa para fugir de partilha ou pensão).' }
       ]
     },
     {
@@ -71,8 +119,11 @@
       titulo: 'Medicina Legal',
       sigla: 'ML',
       cards: [
-        { id: 'ml1', deckId: 'ml', assunto: 'Tanatologia', frente: 'A mancha verde abdominal aparece primeiro na fossa ilíaca esquerda nos afogados?', verso: 'NÃO. No cadáver comum: fossa ilíaca DIREITA. No afogado: início no TÓRAX e PESCOÇO.' },
-        { id: 'ml2', deckId: 'ml', assunto: 'Traumatologia', frente: 'Feridas pérfuro-contusas são provocadas tipicamente por projéteis de arma de fogo?', verso: 'SIM. PAF produz ferida pérfuro-contusa com orifício de entrada, orla de escoriação e orla de enxugo.' }
+        { id: 'ml1', deckId: 'ml', assunto: 'Corpo de Delito', frente: 'Se houver trauma (energia atingiu o corpo) mas não houver lesão constatável (nenhum vestígio físico), o crime a ser registrado é Lesão Corporal leve?', verso: 'NÃO. Sem vestígio, o laudo será negativo. A conduta deve ser desclassificada para VIAS DE FATO (Art. 21 da LCP).' },
+        { id: 'ml2', deckId: 'ml', assunto: 'Peritos', frente: 'Na ausência de perito oficial, o exame de corpo de delito pode ser feito por apenas 1 (uma) pessoa idônea com diploma superior?', verso: 'NÃO. Na falta de perito oficial (onde 1 basta), exige-se a nomeação de 2 (DUAS) pessoas idôneas com curso superior (Art. 159, §1º, CPP).' },
+        { id: 'ml3', deckId: 'ml', assunto: 'Documentos Médico-Legais', frente: "O 'Parecer' é o exame direto e minucioso realizado pelo perito no corpo da vítima, reduzido a termo?", verso: 'NÃO. Isso é o RELATÓRIO/LAUDO. O Parecer é apenas uma OPINIÃO TÉCNICA sobre um exame/laudo já realizado por outro profissional.' },
+        { id: 'ml4', deckId: 'ml', assunto: 'Infortunística', frente: 'O acidente de percurso (trajeto de casa para o trabalho) é equiparado a acidente de trabalho, garantindo direitos previdenciários?', verso: 'SIM. É o chamado acidente atípico (ou por equiparação), mesmo ocorrendo fora das dependências e do horário de trabalho.' },
+        { id: 'ml5', deckId: 'ml', assunto: 'Traumatologia', frente: 'Qual a diferença conceitual entre Trauma e Lesão na Medicina Legal?', verso: 'TRAUMA é a CAUSA (a energia ou objeto que atinge o corpo, ex: projétil, soco). LESÃO é o EFEITO (o dano ou alteração estrutural no corpo, ex: fratura, equimose).' }
       ]
     }
   ];
@@ -80,19 +131,55 @@
   // --- CARREGAMENTO DE TODOS OS CARTÕES E DO ESTADO FSRS ---
   function getAllCards() {
     let all = [];
+    
+    // 1. Ler Overrides salvos pelo usuário (edições de cartões padrão)
+    let overrides = {};
+    try {
+      const rawOverrides = localStorage.getItem('atena_card_overrides');
+      if (rawOverrides) overrides = JSON.parse(rawOverrides);
+    } catch(e) {}
+
     BANCOS_PADRAO.forEach(deck => {
       deck.cards.forEach(c => {
-        all.push({ ...c, deckTitle: deck.titulo, sigla: deck.sigla });
+        const cardOverride = overrides[c.id];
+        if (cardOverride && cardOverride._deleted) return; // Cartão ocultado/excluído
+        const merged = cardOverride ? { ...c, ...cardOverride } : c;
+        all.push({ ...merged, deckTitle: deck.titulo, sigla: deck.sigla });
       });
     });
 
+    // 2. Custom Decks
+    try {
+      const customDecksRaw = localStorage.getItem('atena_custom_decks');
+      if (customDecksRaw) {
+        const cDecks = JSON.parse(customDecksRaw);
+        if (Array.isArray(cDecks)) {
+          cDecks.forEach(cd => {
+            if (cd.cards && Array.isArray(cd.cards)) {
+              cd.cards.forEach(c => {
+                all.push({ ...c, deckTitle: cd.titulo, sigla: cd.sigla || 'CUST' });
+              });
+            }
+          });
+        }
+      }
+    } catch(e) {}
+
+    // 3. Custom Cards
     try {
       const customRaw = localStorage.getItem('atena_custom_cards');
       if (customRaw) {
         const customCards = JSON.parse(customRaw);
         if (Array.isArray(customCards)) {
           customCards.forEach(c => {
-            all.push({ ...c, deckTitle: c.assunto || 'Personalizados', sigla: 'CUST' });
+            if (!all.some(existing => existing.id === c.id)) {
+              const deckMatch = BANCOS_PADRAO.find(d => d.id === c.deckId);
+              all.push({
+                ...c,
+                deckTitle: deckMatch ? deckMatch.titulo : (c.assunto || 'Personalizados'),
+                sigla: deckMatch ? deckMatch.sigla : 'CUST'
+              });
+            }
           });
         }
       }
@@ -123,25 +210,30 @@
     }
   }
 
-  // --- OBTENÇÃO DOS CARTÕES DEVIDOS HOJE ---
+  // --- OBTENÇÃO DOS CARTÕES DEVIDOS HOJE (IDÊNTICO AO ATENA FLASHCARDS) ---
   function getDueCards(subjectFilter = null) {
     const allCards = getAllCards();
     const fsrs = getFSRSData();
-    const now = new Date();
-    const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+    const now = Date.now();
+    const studyMode = localStorage.getItem('atena_study_mode') || 'pos_edital';
 
     const dueCards = allCards.filter(card => {
-      if (subjectFilter && card.deckId !== subjectFilter && card.sigla !== subjectFilter) {
+      if (subjectFilter && card.deckId !== subjectFilter && card.sigla !== subjectFilter && card.deckTitle !== subjectFilter) {
         return false;
       }
       const srsInfo = fsrs[card.id];
-      if (!srsInfo) {
-        // Cartão novo ainda não estudado: entra na fila se não tiver data
+
+      if (studyMode === 'gargalos') {
+        return srsInfo && (srsInfo.lapses > 0 || srsInfo.flag === 'red' || card.flag === 'red' || srsInfo.difficulty >= 7);
+      }
+
+      if (!srsInfo || srsInfo.state === 0 || !srsInfo.reps || srsInfo.reps === 0) {
+        // Cartão novo: sempre devido na primeira vez
         return true;
       }
+
       if (!srsInfo.nextReview) return true;
-      const nextDate = srsInfo.nextReview.split('T')[0];
-      return nextDate <= todayStr;
+      return new Date(srsInfo.nextReview).getTime() <= now;
     });
 
     return dueCards;
