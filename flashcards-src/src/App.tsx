@@ -3,7 +3,7 @@ import {
   Layers, Flame, ArrowLeft, CheckCircle, Play,
   CalendarClock, BookOpen, FileText, Sun, Moon,
   BrainCircuit, Sparkles, Plus, Bookmark,
-  BarChart3, Info, X, Edit3
+  BarChart3, Info, X, Edit3, Cloud
 } from 'lucide-react';
 import { bancosDeQuestoes, type Card, type Deck } from './data';
 import {
@@ -28,6 +28,8 @@ import {
 } from './richText';
 import { CardCreatorModal } from './CardCreatorModal';
 import { CustomCardsManager } from './CustomCardsManager';
+import { AuthModal } from './AuthModal';
+import { supabase, uploadAvaToCloud, downloadAvaFromCloud, type User } from './supabase';
 
 
 
@@ -205,6 +207,41 @@ export default function App() {
   const [, setSessionRatings] = useState<RatingCounts>({ again: 0, hard: 0, good: 0, easy: 0 });
 
   const sessionStartTimeRef = useRef<number>(Date.now());
+
+  // Cloud Auth & Sync State
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [supabaseUser, setSupabaseUser] = useState<User | null>(null);
+
+  // Monitorar Autenticação e Sincronizar ao Iniciar
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setSupabaseUser(user);
+      if (user) {
+        downloadAvaFromCloud(user).then((res) => {
+          if (res.applied) {
+            try {
+              const sc = localStorage.getItem('atena_custom_cards');
+              if (sc) setCustomCards(JSON.parse(sc));
+              const sd = localStorage.getItem('atena_custom_decks');
+              if (sd) setCustomDecks(JSON.parse(sd));
+              const so = localStorage.getItem('atena_card_overrides');
+              if (so) setCardOverrides(JSON.parse(so));
+              const sf = localStorage.getItem('atena_srs');
+              if (sf) setFsrsData(JSON.parse(sf));
+            } catch (e) {}
+          }
+        });
+      }
+    });
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSupabaseUser(session?.user || null);
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
 
   // 1. Carregar Custom Cards, Decks e Overrides do localStorage
   useEffect(() => {
@@ -529,6 +566,9 @@ export default function App() {
     };
     setCardOverrides(newOverrides);
     localStorage.setItem('atena_card_overrides', JSON.stringify(newOverrides));
+
+    // Auto-sync com a nuvem
+    uploadAvaToCloud(supabaseUser);
   };
 
   // Salvar ou Editar Card (Universal)
@@ -581,6 +621,9 @@ export default function App() {
 
     setIsCreateModalOpen(false);
     setEditingCard(null);
+
+    // Auto-sync com a nuvem
+    uploadAvaToCloud(supabaseUser);
   };
 
   // Excluir ou ocultar card
@@ -709,6 +752,9 @@ export default function App() {
       });
       localStorage.setItem('delta_estudos', JSON.stringify(logs));
       setIsStopwatchModalOpen(false);
+
+      // Auto-sync com a nuvem
+      uploadAvaToCloud(supabaseUser);
       
       // Resetar cronômetro
       const resetSw = { isRunning: false, startTimestamp: 0, accumulatedSec: 0, isOpen: false };
@@ -784,8 +830,18 @@ export default function App() {
           })}
         </div>
 
-        {/* Direita: Stopwatch, Stats, Theme */}
+        {/* Direita: Cloud, Stopwatch, Stats, Theme */}
         <div className="flex items-center gap-2 sm:gap-3">
+          <button
+            onClick={() => setIsAuthModalOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-[#131929] border border-gray-200 dark:border-[rgba(255,255,255,0.09)] hover:border-[#ff6b00] text-xs font-bold text-gray-700 dark:text-[#e8eaf0] transition cursor-pointer shadow-sm"
+            title={supabaseUser ? `Conectado como ${supabaseUser.email} · Clique para gerenciar nuvem` : "Entrar ou Criar Conta para sincronizar entre PC e Tablet"}
+          >
+            <span className={`w-2 h-2 rounded-full ${supabaseUser ? 'bg-emerald-500 shadow-[0_0_6px_#10b981]' : 'bg-gray-400'}`} />
+            <Cloud size={14} className={supabaseUser ? 'text-emerald-500' : 'text-gray-400'} />
+            <span className="hidden sm:inline">{supabaseUser ? 'Nuvem' : 'Conectar'}</span>
+          </button>
+
           <HeaderStopwatch onStopSession={handleStopStopwatch} />
 
           <button
@@ -1902,6 +1958,24 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {/* MODAL DE AUTENTICAÇÃO E SINCRONIZAÇÃO EM NUVEM */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onSyncComplete={() => {
+          try {
+            const sc = localStorage.getItem('atena_custom_cards');
+            if (sc) setCustomCards(JSON.parse(sc));
+            const sd = localStorage.getItem('atena_custom_decks');
+            if (sd) setCustomDecks(JSON.parse(sd));
+            const so = localStorage.getItem('atena_card_overrides');
+            if (so) setCardOverrides(JSON.parse(so));
+            const sf = localStorage.getItem('atena_srs');
+            if (sf) setFsrsData(JSON.parse(sf));
+          } catch (e) {}
+        }}
+      />
 
     </div>
   );
