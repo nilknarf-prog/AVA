@@ -1170,7 +1170,7 @@ export default function App() {
             </div>
 
             {/* VERSO DO CARTÃO (GABARITO) */}
-            <div className={`w-full min-h-[420px] bg-[#fffaf5] dark:bg-[#0b0f1a] border-2 border-[#ffd4b8] dark:border-[#ff6b00]/30 rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col justify-between ${!isFlipped ? 'hidden' : 'flex'}`}>
+            <div className={`w-full min-h-[420px] bg-[#fffaf5] dark:bg-[#0b0f1a] border-2 border-[#ffd4b8] dark:border-[#ff6b00]/30 rounded-3xl p-6 sm:p-8 shadow-xl flex-col justify-between rotate-y-180 ${!isFlipped ? 'hidden' : 'flex'}`}>
               
               {/* Top Header do Verso */}
               <div className="flex items-center justify-between gap-2 border-b border-[#ffe6d4] dark:border-[rgba(255,255,255,0.08)] pb-3">
