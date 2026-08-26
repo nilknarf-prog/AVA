@@ -836,12 +836,21 @@ export default function App() {
         <div className="flex items-center gap-2 sm:gap-3">
           <button
             onClick={() => setIsAuthModalOpen(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-[#131929] border border-gray-200 dark:border-[rgba(255,255,255,0.09)] hover:border-[#ff6b00] text-xs font-bold text-gray-700 dark:text-[#e8eaf0] transition cursor-pointer shadow-sm"
+            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer shadow-sm active:scale-95 ${
+              supabaseUser
+                ? 'bg-white dark:bg-[#131929] text-gray-800 dark:text-[#e8eaf0] border border-emerald-500/30 hover:border-emerald-500'
+                : 'bg-white dark:bg-[#131929] text-gray-700 dark:text-[#e8eaf0] border border-gray-200 dark:border-[rgba(255,255,255,0.12)] hover:border-[#ff6b00] hover:text-[#ff8533]'
+            }`}
             title={supabaseUser ? `Conectado como ${supabaseUser.email} · Clique para gerenciar nuvem` : "Entrar ou Criar Conta para sincronizar entre PC e Tablet"}
           >
-            <span className={`w-2 h-2 rounded-full ${supabaseUser ? 'bg-emerald-500 shadow-[0_0_6px_#10b981]' : 'bg-gray-400'}`} />
-            <Cloud size={14} className={supabaseUser ? 'text-emerald-500' : 'text-gray-400'} />
-            <span className="hidden sm:inline">{supabaseUser ? 'Nuvem' : 'Conectar'}</span>
+            <span className="relative flex h-2 w-2">
+              {supabaseUser && (
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              )}
+              <span className={`relative inline-flex rounded-full h-2 w-2 ${supabaseUser ? 'bg-emerald-500 shadow-[0_0_6px_#10b981]' : 'bg-gray-400'}`}></span>
+            </span>
+            <Cloud size={14} className={supabaseUser ? 'text-emerald-500' : 'text-gray-400 dark:text-[#9aa5bb]'} />
+            <span className="hidden sm:inline">{supabaseUser ? 'Sincronizado' : 'Conectar Nuvem'}</span>
           </button>
 
           <HeaderStopwatch onStopSession={handleStopStopwatch} />

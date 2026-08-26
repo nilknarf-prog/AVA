@@ -1986,3 +1986,98 @@
   border-bottom: 2px solid #ff8533 !important;
   padding: 0 2px !important;
 }
+
+/* ============================================================
+   DELTA CLOUD SYNC & AUTHENTICATION WIDGET (HIGH-END CRAFT)
+   Design System: Doppelrand / Luxury Pill / Fluid Dynamics
+   ============================================================ */
+.delta-cloud-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  background: var(--surface, #ffffff) !important;
+  color: var(--text, #0f172a) !important;
+  border: 1px solid var(--border, #dbe1ea) !important;
+  padding: 5px 12px !important;
+  border-radius: 9999px !important;
+  font-family: var(--font-body, 'Public Sans', sans-serif) !important;
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.01em !important;
+  cursor: pointer !important;
+  transition: all 0.2s cubic-bezier(0.32, 0.72, 0, 1) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  white-space: nowrap !important;
+  user-select: none !important;
+  height: 32px !important;
+  box-sizing: border-box !important;
+}
+
+body.dark-theme .delta-cloud-btn {
+  background: #131929 !important;
+  color: #e8eaf0 !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+.delta-cloud-btn:hover {
+  background: var(--surface-hover, #f6f8fb) !important;
+  border-color: #ff6b00 !important;
+  color: #ff8533 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(255, 107, 0, 0.15) !important;
+}
+
+body.dark-theme .delta-cloud-btn:hover {
+  background: #1a2235 !important;
+  border-color: rgba(255, 107, 0, 0.6) !important;
+  color: #ff8533 !important;
+}
+
+.delta-cloud-btn:active {
+  transform: scale(0.97) !important;
+}
+
+.delta-cloud-btn .cloud-icon-wrap {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: var(--text-dim, #64748b) !important;
+}
+
+body.dark-theme .delta-cloud-btn .cloud-icon-wrap {
+  color: #9aa5bb !important;
+}
+
+.delta-cloud-btn.is-synced .cloud-icon-wrap {
+  color: #10b981 !important;
+}
+
+.delta-cloud-btn .cloud-beacon {
+  width: 7px !important;
+  height: 7px !important;
+  border-radius: 50% !important;
+  background: #9aa5bb !important;
+  position: relative !important;
+  flex-shrink: 0 !important;
+}
+
+.delta-cloud-btn.is-synced .cloud-beacon {
+  background: #10b981 !important;
+  box-shadow: 0 0 8px #10b981 !important;
+}
+
+.delta-cloud-btn.is-synced .cloud-beacon::after {
+  content: '' !important;
+  position: absolute !important;
+  inset: -2px !important;
+  border-radius: 50% !important;
+  border: 1.5px solid #10b981 !important;
+  animation: cloud-beacon-ping 2.2s cubic-bezier(0, 0, 0.2, 1) infinite !important;
+  opacity: 0.75 !important;
+}
+
+@keyframes cloud-beacon-ping {
+  0% { transform: scale(1); opacity: 0.8; }
+  75%, 100% { transform: scale(2.2); opacity: 0; }
+}
