@@ -585,12 +585,21 @@
           updateHeaderButton();
         }, 1000);
       } else {
-        const { data, error } = await supabaseClient.auth.signUp({ email, password });
+        // Cria usuário ou atualiza a senha de forma definitiva no Supabase
+        const { error: rpcErr } = await supabaseClient.rpc('ava_register_or_set_password', {
+          p_email: email,
+          p_password: password
+        });
+        if (rpcErr) throw rpcErr;
+
+        // Login imediato com a credencial criada/atualizada
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
         if (error) throw error;
+
         currentUser = data.user;
         feedback.style.display = 'block';
         feedback.style.color = '#10b981';
-        feedback.innerText = '✅ Conta criada com sucesso! Salvando seus estudos na nuvem...';
+        feedback.innerText = '✅ Conta ativada com sucesso! Salvando seus estudos na nuvem...';
         await pushToCloud();
         setTimeout(() => {
           closeSyncModal();

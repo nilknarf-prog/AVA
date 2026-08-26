@@ -102,16 +102,25 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSyncCom
     setMessage(null);
 
     try {
-      const { data, error } = await supabase.auth.signUp({
+      // 1. Cria ou redefine a credencial diretamente no Supabase
+      const { error: rpcErr } = await supabase.rpc('ava_register_or_set_password', {
+        p_email: email.trim(),
+        p_password: password.trim(),
+      });
+
+      if (rpcErr) throw rpcErr;
+
+      // 2. Realiza login imediato com a senha definida
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       });
 
       if (error) throw error;
 
-      setMessage({ type: 'success', text: 'Conta criada! Enviando seus dados atuais para a nuvem...' });
+      setMessage({ type: 'success', text: 'Conta ativada com sucesso! Salvando seus dados na nuvem...' });
 
-      // Enviar os dados locais atuais para a nova conta
+      // 3. Enviar os dados locais atuais para a nuvem
       if (data.user) {
         await uploadAvaToCloud(data.user);
       }
@@ -124,7 +133,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSyncCom
       }, 1000);
     } catch (err: any) {
       console.error(err);
-      setMessage({ type: 'error', text: err.message || 'Falha ao criar conta.' });
+      setMessage({ type: 'error', text: err.message || 'Falha ao ativar conta.' });
     } finally {
       setLoading(false);
     }
