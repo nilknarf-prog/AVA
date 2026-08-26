@@ -29,11 +29,7 @@ import {
 import { CardCreatorModal } from './CardCreatorModal';
 import { CustomCardsManager } from './CustomCardsManager';
 
-interface ModalData {
-  tempo: number;
-  obs: string;
-  date: string;
-}
+
 
 interface RatingCounts {
   again: number;
@@ -208,9 +204,7 @@ export default function App() {
   const [, setIncorrectCards] = useState<Card[]>([]);
   const [, setSessionRatings] = useState<RatingCounts>({ again: 0, hard: 0, good: 0, easy: 0 });
 
-  const [showSaveModal, setShowSaveModal] = useState(false);
-  const [modalData, setModalData] = useState<ModalData>({ tempo: 0, obs: '', date: '' });
-  const [, setTempFsrs] = useState<FSRSData>({});
+  const sessionStartTimeRef = useRef<number>(Date.now());
 
   // 1. Carregar Custom Cards, Decks e Overrides do localStorage
   useEffect(() => {
@@ -385,6 +379,7 @@ export default function App() {
     setCardLatencyMs(undefined);
     setLiveElapsedMs(0);
     cardStartTimeRef.current = performance.now();
+    sessionStartTimeRef.current = Date.now();
     setCurrentStreak(0);
     setCorrectCount(0);
     setIncorrectCards([]);
@@ -409,13 +404,49 @@ export default function App() {
     return () => clearInterval(interval);
   }, [currentScreen, isFlipped, cardIndex]);
 
-  const openSaveModal = (newFsrs: FSRSData) => {
-    const tempoTotal = Math.max(1, Math.round(currentDeck.length * 1.2));
+  const openSaveModal = (_newFsrs?: FSRSData) => {
+    // 1. Obter tempo exato do Cronômetro Global do cabeçalho
+    let formattedTime = '00:05:00';
+    try {
+      const raw = localStorage.getItem('delta_stopwatch_state');
+      if (raw) {
+        const state = JSON.parse(raw);
+        let totalSec = state.accumulatedSec || 0;
+        if (state.isRunning && state.startTimestamp) {
+          totalSec += Math.max(0, Math.floor((Date.now() - state.startTimestamp) / 1000));
+        }
+        if (totalSec > 0) {
+          const h = Math.floor(totalSec / 3600);
+          const m = Math.floor((totalSec % 3600) / 60);
+          const s = totalSec % 60;
+          formattedTime = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        } else {
+          // Se o cronômetro do topo estava zerado, usar o tempo real decorrido desde o início da sessão
+          const realElapsedSec = Math.max(1, Math.floor((Date.now() - sessionStartTimeRef.current) / 1000));
+          const h = Math.floor(realElapsedSec / 3600);
+          const m = Math.floor((realElapsedSec % 3600) / 60);
+          const s = realElapsedSec % 60;
+          formattedTime = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        }
+      }
+    } catch(e) {}
+
     const now = new Date();
     const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-    setModalData({ tempo: tempoTotal, obs: '', date: dateStr });
-    setTempFsrs(newFsrs);
-    setShowSaveModal(true);
+
+    setStopwatchData({
+      date: dateStr,
+      tempo: formattedTime,
+      materia: currentDeck.length > 0 ? (currentDeck[0].deckId?.toUpperCase() || 'DP') : 'DP',
+      categoria: 'Revisão / Flashcards',
+      assunto: deckName ? `Flashcards - ${deckName}` : `Flashcards Atena (${STUDY_MODES_CONFIG[studyMode].shortName})`,
+      acertos: correctCount,
+      erros: Math.max(0, currentDeck.length - correctCount),
+      paginas: 0,
+      obs: `Sessão de Flashcards concluída · Modo ${STUDY_MODES_CONFIG[studyMode].name}`,
+    });
+
+    setIsStopwatchModalOpen(true);
   };
 
   const handleRating = (rating: Rating) => {
@@ -572,7 +603,7 @@ export default function App() {
 
   // Atalhos de teclado na revisão (Espaço, 1-4 e 'E' para Editar)
   useEffect(() => {
-    if (currentScreen !== 'flashcards' || showSaveModal || isStopwatchModalOpen || isCreateModalOpen || isManagerModalOpen) return;
+    if (currentScreen !== 'flashcards' || isStopwatchModalOpen || isCreateModalOpen || isManagerModalOpen) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
@@ -612,7 +643,7 @@ export default function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentScreen, isFlipped, cardIndex, currentDeck, showSaveModal, isStopwatchModalOpen, isCreateModalOpen, isManagerModalOpen, flipCard]);
+  }, [currentScreen, isFlipped, cardIndex, currentDeck, isStopwatchModalOpen, isCreateModalOpen, isManagerModalOpen, flipCard]);
 
   // Manipulador de parada do Cronômetro Global (Sem alert!)
   const handleStopStopwatch = (minutes: number) => {
@@ -683,6 +714,10 @@ export default function App() {
       const resetSw = { isRunning: false, startTimestamp: 0, accumulatedSec: 0, isOpen: false };
       localStorage.setItem('delta_stopwatch_state', JSON.stringify(resetSw));
       window.dispatchEvent(new Event('storage'));
+
+      if (currentScreen === 'flashcards') {
+        setCurrentScreen('report');
+      }
     } catch (e) {
       console.error('Erro ao salvar no delta_estudos:', e);
     }
@@ -1530,7 +1565,7 @@ export default function App() {
           <div className="bg-white dark:bg-[#131929] p-6 rounded-3xl border border-gray-200 dark:border-[rgba(255,255,255,0.08)] shadow-sm text-center flex flex-col justify-center items-center">
             <FileText className="text-[#ff6b00] dark:text-[#ff8533] mb-2" size={32} />
             <p className="text-gray-500 dark:text-[#9aa5bb] text-xs font-bold uppercase tracking-wider font-mono">Tempo Registrado</p>
-            <p className="text-2xl font-black text-[#ff6b00] dark:text-[#ff8533] mt-1 font-mono">+{modalData.tempo} minutos</p>
+            <p className="text-2xl font-black text-[#ff6b00] dark:text-[#ff8533] mt-1 font-mono">{stopwatchData.tempo.includes(':') ? stopwatchData.tempo : `+${stopwatchData.tempo} min`}</p>
             <p className="text-xs text-gray-400 mt-1">Salvo em delta_estudos</p>
           </div>
 
@@ -1847,99 +1882,21 @@ export default function App() {
 
             <div className="pt-3 border-t border-gray-100 dark:border-[rgba(255,255,255,0.08)] flex justify-end gap-2">
               <button
-                onClick={() => setIsStopwatchModalOpen(false)}
+                onClick={() => {
+                  setIsStopwatchModalOpen(false);
+                  if (currentScreen === 'flashcards') {
+                    setCurrentScreen('report');
+                  }
+                }}
                 className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-[rgba(255,255,255,0.08)] text-gray-600 dark:text-[#9aa5bb] font-bold text-xs hover:bg-gray-100 dark:hover:bg-[#1a2235] transition cursor-pointer"
               >
-                Cancelar
+                Cancelar / Pular
               </button>
               <button
                 onClick={handleSaveStopwatchToTracker}
                 className="px-6 py-2.5 bg-[#ff6b00] hover:bg-[#e65c00] text-white font-extrabold text-xs rounded-xl shadow-md transition cursor-pointer"
               >
                 Salvar Registro
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL DE CONCLUSÃO DE SESSÃO */}
-      {showSaveModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fadeIn">
-          <div className="bg-white dark:bg-[#131929] border border-gray-200 dark:border-[rgba(255,255,255,0.1)] rounded-3xl w-full max-w-md shadow-2xl overflow-hidden p-6 space-y-4">
-            <div className="text-center space-y-1">
-              <div className="w-12 h-12 bg-emerald-500/10 text-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-2 border border-emerald-500/20">
-                <CheckCircle size={28} />
-              </div>
-              <h3 className="text-lg font-extrabold text-gray-900 dark:text-[#e8eaf0] font-display">
-                Sessão Concluída!
-              </h3>
-              <p className="text-xs text-gray-500 dark:text-[#9aa5bb]">
-                Deseja registrar essa sessão no Tracker de Estudos do AVA?
-              </p>
-            </div>
-
-            <div className="space-y-3">
-              <div>
-                <label className="text-[11px] font-bold uppercase text-gray-400 dark:text-[#9aa5bb]">
-                  Tempo Total (minutos)
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  value={modalData.tempo}
-                  onChange={(e) => setModalData(prev => ({ ...prev, tempo: parseInt(e.target.value) || 1 }))}
-                  className="w-full mt-1 p-2.5 bg-gray-50 dark:bg-[#0b0f1a] border border-gray-200 dark:border-[rgba(255,255,255,0.08)] rounded-xl text-xs font-bold text-gray-900 dark:text-[#e8eaf0] focus:border-[#ff6b00] outline-none font-mono"
-                />
-              </div>
-
-              <div>
-                <label className="text-[11px] font-bold uppercase text-gray-400 dark:text-[#9aa5bb]">
-                  Observações
-                </label>
-                <input
-                  type="text"
-                  value={modalData.obs}
-                  onChange={(e) => setModalData(prev => ({ ...prev, obs: e.target.value }))}
-                  placeholder="Ex: Revisão dos baralhos no modo Reta Final..."
-                  className="w-full mt-1 p-2.5 bg-gray-50 dark:bg-[#0b0f1a] border border-gray-200 dark:border-[rgba(255,255,255,0.08)] rounded-xl text-xs text-gray-900 dark:text-[#e8eaf0] focus:border-[#ff6b00] outline-none"
-                />
-              </div>
-            </div>
-
-            <div className="pt-3 border-t border-gray-100 dark:border-[rgba(255,255,255,0.08)] flex justify-end gap-2">
-              <button
-                onClick={() => {
-                  setShowSaveModal(false);
-                  setCurrentScreen('report');
-                }}
-                className="px-4 py-2 rounded-xl border border-gray-200 dark:border-[rgba(255,255,255,0.08)] text-gray-600 dark:text-[#9aa5bb] font-bold text-xs hover:bg-gray-100 dark:hover:bg-[#1a2235] transition cursor-pointer"
-              >
-                Pular Registro
-              </button>
-              <button
-                onClick={() => {
-                  try {
-                    const raw = localStorage.getItem('delta_estudos');
-                    const logs = raw ? JSON.parse(raw) : [];
-                    logs.push({
-                      date: modalData.date,
-                      mat: currentDeck.length > 0 ? (currentDeck[0].deckId?.toUpperCase() || 'DP') : 'DP',
-                      assunto: `Flashcards Atena (${deckName})`,
-                      categoria: 'Revisão / Flashcards',
-                      tempo: modalData.tempo,
-                      qts: currentDeck.length,
-                      acertos: correctCount,
-                      obs: modalData.obs || `Modo: ${STUDY_MODES_CONFIG[studyMode].shortName}`,
-                    });
-                    localStorage.setItem('delta_estudos', JSON.stringify(logs));
-                  } catch (e) {}
-                  setShowSaveModal(false);
-                  setCurrentScreen('report');
-                }}
-                className="px-5 py-2 bg-[#ff6b00] hover:bg-[#e65c00] text-white font-bold text-xs rounded-xl shadow-md transition cursor-pointer"
-              >
-                Salvar no Tracker
               </button>
             </div>
           </div>
