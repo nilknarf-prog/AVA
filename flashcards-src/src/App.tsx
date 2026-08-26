@@ -175,11 +175,15 @@ export default function App() {
   // Stopwatch Modal State
   const [isStopwatchModalOpen, setIsStopwatchModalOpen] = useState(false);
   const [stopwatchData, setStopwatchData] = useState({
+    date: '',
+    tempo: '00:15:00',
     materia: 'DP',
-    assunto: 'Flashcards Atena',
-    tempo: 15,
-    obs: '',
     categoria: 'Revisão / Flashcards',
+    assunto: 'Flashcards Atena',
+    acertos: 0,
+    erros: 0,
+    paginas: 0,
+    obs: '',
   });
 
   // FSRS & Study Modes State
@@ -587,30 +591,64 @@ export default function App() {
 
   // Manipulador de parada do Cronômetro Global (Sem alert!)
   const handleStopStopwatch = (minutes: number) => {
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    
+    let formattedTime = `${minutes} min`;
+    try {
+      const raw = localStorage.getItem('delta_stopwatch_state');
+      if (raw) {
+        const state = JSON.parse(raw);
+        const totalSec = state.accumulatedSec || (minutes * 60);
+        const h = Math.floor(totalSec / 3600);
+        const m = Math.floor((totalSec % 3600) / 60);
+        const s = totalSec % 60;
+        formattedTime = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+      }
+    } catch(e) {}
+
     setStopwatchData({
+      date: dateStr,
+      tempo: formattedTime,
       materia: currentDeck.length > 0 ? (currentDeck[0].deckId?.toUpperCase() || 'DP') : 'DP',
-      assunto: `Estudo de Flashcards Atena (${STUDY_MODES_CONFIG[studyMode].shortName})`,
-      tempo: Math.max(1, minutes),
-      obs: `Sessão de Flashcards FSRS · Modo ${STUDY_MODES_CONFIG[studyMode].name}`,
       categoria: 'Revisão / Flashcards',
+      assunto: `Estudo de Flashcards Atena (${STUDY_MODES_CONFIG[studyMode].shortName})`,
+      acertos: correctCount,
+      erros: currentDeck.length > 0 ? Math.max(0, currentDeck.length - correctCount) : 0,
+      paginas: 0,
+      obs: `Sessão de Flashcards FSRS · Modo ${STUDY_MODES_CONFIG[studyMode].name}`,
     });
     setIsStopwatchModalOpen(true);
   };
 
   const handleSaveStopwatchToTracker = () => {
     try {
+      let parsedMins = 1;
+      if (typeof stopwatchData.tempo === 'string' && stopwatchData.tempo.includes(':')) {
+        const parts = stopwatchData.tempo.split(':').map(p => parseInt(p) || 0);
+        if (parts.length === 3) {
+          parsedMins = Math.max(1, Math.round((parts[0] * 3600 + parts[1] * 60 + parts[2]) / 60));
+        } else if (parts.length === 2) {
+          parsedMins = Math.max(1, Math.round((parts[0] * 60 + parts[1]) / 60));
+        }
+      } else {
+        parsedMins = Math.max(1, parseInt(String(stopwatchData.tempo)) || 1);
+      }
+
       const raw = localStorage.getItem('delta_estudos');
       const logs = raw ? JSON.parse(raw) : [];
       const now = new Date();
-      const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const dateStr = stopwatchData.date || `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
       logs.push({
         date: dateStr,
         mat: stopwatchData.materia,
         assunto: stopwatchData.assunto || 'Flashcards Atena FSRS',
-        categoria: stopwatchData.categoria,
-        tempo: stopwatchData.tempo,
-        qts: correctCount,
-        acertos: correctCount,
+        categoria: stopwatchData.categoria || 'Revisão / Flashcards',
+        tempo: parsedMins,
+        qts: (stopwatchData.acertos || 0) + (stopwatchData.erros || 0),
+        acertos: stopwatchData.acertos || 0,
+        erros: stopwatchData.erros || 0,
+        paginas: stopwatchData.paginas || 0,
         obs: stopwatchData.obs || 'Sessão registrada via Atena Flashcards',
       });
       localStorage.setItem('delta_estudos', JSON.stringify(logs));
@@ -1597,15 +1635,15 @@ export default function App() {
         }}
       />
 
-      {/* MODAL DE REGISTRO DO CRONÔMETRO ESTILIZADO (SEM ALERT!) */}
+      {/* MODAL DE REGISTRO DO CRONÔMETRO ESTILIZADO (PADRÃO CANÔNICO IDÊNTICO AO INDEX) */}
       {isStopwatchModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fadeIn">
-          <div className="bg-white dark:bg-[#131929] border border-gray-200 dark:border-[rgba(255,255,255,0.1)] rounded-3xl w-full max-w-md shadow-2xl overflow-hidden p-6 space-y-4">
+          <div className="bg-white dark:bg-[#131929] border border-gray-200 dark:border-[rgba(255,255,255,0.1)] rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-gray-100 dark:border-[rgba(255,255,255,0.08)] pb-3">
               <div className="flex items-center gap-2">
                 <span className="text-xl">⏱️</span>
                 <h3 className="text-base font-extrabold text-gray-900 dark:text-[#e8eaf0] font-display">
-                  Registrar Sessão de Estudo
+                  Registro de Estudo
                 </h3>
               </div>
               <button
@@ -1616,62 +1654,150 @@ export default function App() {
               </button>
             </div>
 
-            <div className="space-y-3">
-              <div>
-                <label className="text-[11px] font-bold uppercase text-gray-400 dark:text-[#9aa5bb]">
-                  Matéria
-                </label>
-                <select
-                  value={stopwatchData.materia}
-                  onChange={(e) => setStopwatchData(prev => ({ ...prev, materia: e.target.value }))}
-                  className="w-full mt-1 p-2.5 bg-gray-50 dark:bg-[#0b0f1a] border border-gray-200 dark:border-[rgba(255,255,255,0.08)] rounded-xl text-xs font-bold text-gray-900 dark:text-[#e8eaf0] focus:border-[#ff6b00] outline-none"
-                >
-                  <option value="DP">Direito Penal (DP)</option>
-                  <option value="DPP">Dir. Processual Penal (DPP)</option>
-                  <option value="DC">Direito Constitucional (DC)</option>
-                  <option value="DA">Direito Administrativo (DA)</option>
-                  <option value="LPE">Legislação Penal Especial (LPE)</option>
-                  <option value="DCV">Direito Civil (DCV)</option>
-                  <option value="ML">Medicina Legal (ML)</option>
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-3.5 max-h-[72vh] overflow-y-auto pr-1">
+              {/* LINHA 1: DATA E TEMPO */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[11px] font-bold uppercase text-gray-400 dark:text-[#9aa5bb]">
-                    Tempo (minutos)
+                  <label className="text-[11px] font-bold uppercase text-gray-400 dark:text-[#9aa5bb] tracking-wider">
+                    Data
                   </label>
                   <input
-                    type="number"
-                    min="1"
-                    value={stopwatchData.tempo}
-                    onChange={(e) => setStopwatchData(prev => ({ ...prev, tempo: parseInt(e.target.value) || 1 }))}
-                    className="w-full mt-1 p-2.5 bg-gray-50 dark:bg-[#0b0f1a] border border-gray-200 dark:border-[rgba(255,255,255,0.08)] rounded-xl text-xs font-bold text-gray-900 dark:text-[#e8eaf0] focus:border-[#ff6b00] outline-none font-mono"
+                    type="date"
+                    value={stopwatchData.date}
+                    onChange={(e) => setStopwatchData(prev => ({ ...prev, date: e.target.value }))}
+                    className="w-full mt-1 p-2.5 bg-gray-50 dark:bg-[#0b0f1a] border border-gray-200 dark:border-[rgba(255,255,255,0.08)] rounded-xl text-xs font-bold text-gray-900 dark:text-[#e8eaf0] focus:border-[#ff6b00] outline-none"
                   />
                 </div>
-
                 <div>
-                  <label className="text-[11px] font-bold uppercase text-gray-400 dark:text-[#9aa5bb]">
-                    Categoria
+                  <label className="text-[11px] font-bold uppercase text-gray-400 dark:text-[#9aa5bb] tracking-wider">
+                    Tempo (HH:MM:SS ou min)
                   </label>
                   <input
                     type="text"
-                    value={stopwatchData.categoria}
-                    readOnly
-                    className="w-full mt-1 p-2.5 bg-gray-100 dark:bg-[#1a2235] border border-gray-200 dark:border-[rgba(255,255,255,0.08)] rounded-xl text-xs font-bold text-gray-500 dark:text-[#9aa5bb] outline-none"
+                    value={stopwatchData.tempo}
+                    onChange={(e) => setStopwatchData(prev => ({ ...prev, tempo: e.target.value }))}
+                    placeholder="00:45:00"
+                    className="w-full mt-1 p-2.5 bg-gray-50 dark:bg-[#0b0f1a] border border-gray-200 dark:border-[rgba(255,255,255,0.08)] rounded-xl text-xs font-bold text-gray-900 dark:text-[#e8eaf0] focus:border-[#ff6b00] outline-none font-mono"
                   />
                 </div>
               </div>
 
+              {/* LINHA 2: MATÉRIA E CATEGORIA */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[11px] font-bold uppercase text-gray-400 dark:text-[#9aa5bb] tracking-wider">
+                    Matéria
+                  </label>
+                  <select
+                    value={stopwatchData.materia}
+                    onChange={(e) => setStopwatchData(prev => ({ ...prev, materia: e.target.value }))}
+                    className="w-full mt-1 p-2.5 bg-gray-50 dark:bg-[#0b0f1a] border border-gray-200 dark:border-[rgba(255,255,255,0.08)] rounded-xl text-xs font-bold text-gray-900 dark:text-[#e8eaf0] focus:border-[#ff6b00] outline-none"
+                  >
+                    <option value="DP">Direito Penal (DP)</option>
+                    <option value="DPP">Dir. Processual Penal (DPP)</option>
+                    <option value="DC">Dir. Constitucional (DC)</option>
+                    <option value="DA">Dir. Administrativo (DA)</option>
+                    <option value="DCV">Direito Civil (DCV)</option>
+                    <option value="ML">Medicina Legal (ML)</option>
+                    <option value="LPE">Leg. Penal Especial (LPE)</option>
+                    <option value="DH">Direitos Humanos (DH)</option>
+                    <option value="DE">Dir. Empresarial (DE)</option>
+                    <option value="CR">Criminologia (CR)</option>
+                    <option value="RLM/REV">Revisão / Flashcards</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-bold uppercase text-gray-400 dark:text-[#9aa5bb] tracking-wider">
+                    Categoria
+                  </label>
+                  <select
+                    value={stopwatchData.categoria}
+                    onChange={(e) => setStopwatchData(prev => ({ ...prev, categoria: e.target.value }))}
+                    className="w-full mt-1 p-2.5 bg-gray-50 dark:bg-[#0b0f1a] border border-gray-200 dark:border-[rgba(255,255,255,0.08)] rounded-xl text-xs font-bold text-gray-900 dark:text-[#e8eaf0] focus:border-[#ff6b00] outline-none"
+                  >
+                    <option value="Teoria">Teoria</option>
+                    <option value="Questões">Questões</option>
+                    <option value="Revisão / Flashcards">Revisão / Flashcards</option>
+                    <option value="Simulado">Simulado</option>
+                    <option value="Lei Seca">Lei Seca</option>
+                    <option value="Jurisprudência">Jurisprudência</option>
+                    <option value="Discursiva">Discursiva</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* LINHA 3: TÓPICO / ASSUNTO */}
               <div>
-                <label className="text-[11px] font-bold uppercase text-gray-400 dark:text-[#9aa5bb]">
-                  Observações
+                <label className="text-[11px] font-bold uppercase text-gray-400 dark:text-[#9aa5bb] tracking-wider">
+                  Tópico / Assunto do Edital
+                </label>
+                <input
+                  type="text"
+                  value={stopwatchData.assunto}
+                  onChange={(e) => setStopwatchData(prev => ({ ...prev, assunto: e.target.value }))}
+                  placeholder="Ex: Teoria do Crime, Princípios..."
+                  className="w-full mt-1 p-2.5 bg-gray-50 dark:bg-[#0b0f1a] border border-gray-200 dark:border-[rgba(255,255,255,0.08)] rounded-xl text-xs text-gray-900 dark:text-[#e8eaf0] focus:border-[#ff6b00] outline-none"
+                />
+              </div>
+
+              {/* LINHA 4: QUESTÕES & PÁGINAS (CAIXA CINZA) */}
+              <div className="bg-gray-50 dark:bg-[#0b0f1a] border border-gray-200 dark:border-[rgba(255,255,255,0.08)] p-3 rounded-2xl">
+                <div className="grid grid-cols-3 gap-2.5">
+                  <div>
+                    <label className="text-[10.5px] font-extrabold uppercase text-emerald-600 dark:text-[#10b981]">
+                      Acertos
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={stopwatchData.acertos}
+                      onChange={(e) => setStopwatchData(prev => ({ ...prev, acertos: parseInt(e.target.value) || 0 }))}
+                      placeholder="0"
+                      className="w-full mt-1 p-2 bg-white dark:bg-[#131929] border border-gray-200 dark:border-[rgba(255,255,255,0.08)] rounded-xl text-xs font-bold text-gray-900 dark:text-[#e8eaf0] focus:border-emerald-500 outline-none font-mono"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[10.5px] font-extrabold uppercase text-red-500">
+                      Erros
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={stopwatchData.erros}
+                      onChange={(e) => setStopwatchData(prev => ({ ...prev, erros: parseInt(e.target.value) || 0 }))}
+                      placeholder="0"
+                      className="w-full mt-1 p-2 bg-white dark:bg-[#131929] border border-gray-200 dark:border-[rgba(255,255,255,0.08)] rounded-xl text-xs font-bold text-gray-900 dark:text-[#e8eaf0] focus:border-red-500 outline-none font-mono"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[10.5px] font-extrabold uppercase text-gray-400 dark:text-[#9aa5bb]">
+                      Páginas
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={stopwatchData.paginas}
+                      onChange={(e) => setStopwatchData(prev => ({ ...prev, paginas: parseInt(e.target.value) || 0 }))}
+                      placeholder="0"
+                      className="w-full mt-1 p-2 bg-white dark:bg-[#131929] border border-gray-200 dark:border-[rgba(255,255,255,0.08)] rounded-xl text-xs font-bold text-gray-900 dark:text-[#e8eaf0] focus:border-[#ff6b00] outline-none font-mono"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* LINHA 5: COMENTÁRIOS */}
+              <div>
+                <label className="text-[11px] font-bold uppercase text-gray-400 dark:text-[#9aa5bb] tracking-wider">
+                  Comentários & Anotações
                 </label>
                 <input
                   type="text"
                   value={stopwatchData.obs}
                   onChange={(e) => setStopwatchData(prev => ({ ...prev, obs: e.target.value }))}
-                  placeholder="Ex: Revisão dos gargalos de Penal no FSRS..."
+                  placeholder="Dificuldades, artigos ou notas da sessão..."
                   className="w-full mt-1 p-2.5 bg-gray-50 dark:bg-[#0b0f1a] border border-gray-200 dark:border-[rgba(255,255,255,0.08)] rounded-xl text-xs text-gray-900 dark:text-[#e8eaf0] focus:border-[#ff6b00] outline-none"
                 />
               </div>
@@ -1680,15 +1806,15 @@ export default function App() {
             <div className="pt-3 border-t border-gray-100 dark:border-[rgba(255,255,255,0.08)] flex justify-end gap-2">
               <button
                 onClick={() => setIsStopwatchModalOpen(false)}
-                className="px-4 py-2 rounded-xl border border-gray-200 dark:border-[rgba(255,255,255,0.08)] text-gray-600 dark:text-[#9aa5bb] font-bold text-xs hover:bg-gray-100 dark:hover:bg-[#1a2235] transition cursor-pointer"
+                className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-[rgba(255,255,255,0.08)] text-gray-600 dark:text-[#9aa5bb] font-bold text-xs hover:bg-gray-100 dark:hover:bg-[#1a2235] transition cursor-pointer"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleSaveStopwatchToTracker}
-                className="px-5 py-2 bg-[#ff6b00] hover:bg-[#e65c00] text-white font-bold text-xs rounded-xl shadow-md transition cursor-pointer"
+                className="px-6 py-2.5 bg-[#ff6b00] hover:bg-[#e65c00] text-white font-extrabold text-xs rounded-xl shadow-md transition cursor-pointer"
               >
-                Salvar no Tracker
+                Salvar Registro
               </button>
             </div>
           </div>

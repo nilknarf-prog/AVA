@@ -1,6 +1,6 @@
 /**
  * Delta AVA — Global Resilient Stopwatch (Multi-tab Sync via localStorage timestamps)
- * Garante sincronização perfeita entre guias e impede congelamento em abas em segundo plano.
+ * Renderizado no cabeçalho em todas as telas (Index, Painéis, Atena), sem botão flutuante.
  */
 (function() {
   'use strict';
@@ -25,6 +25,7 @@
   function saveStoredState(state) {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      window.dispatchEvent(new Event('storage'));
     } catch (e) {}
   }
 
@@ -45,28 +46,28 @@
   }
 
   let timerInterval = null;
-  let domContainer = null;
-  let domDisplay = null;
-  let domWidget = null;
-  let domFab = null;
-  let domPulse = null;
 
   function updateDisplay() {
     const state = getStoredState();
     const elapsed = getElapsedSeconds(state);
-    if (domDisplay) {
-      domDisplay.innerText = secToHHMMSS(elapsed);
-    }
-    if (domPulse) {
-      domPulse.className = 'delta-sw-pulse ' + (state.isRunning ? 'running' : 'paused');
-    }
-    if (domFab) {
+    const timeStr = secToHHMMSS(elapsed);
+
+    const timeDisplays = document.querySelectorAll('.delta-sw-time-display');
+    timeDisplays.forEach(el => { el.innerText = timeStr; });
+
+    const indicators = document.querySelectorAll('.delta-sw-indicator');
+    indicators.forEach(el => {
       if (state.isRunning) {
-        domFab.classList.add('is-running');
+        el.classList.add('running');
       } else {
-        domFab.classList.remove('is-running');
+        el.classList.remove('running');
       }
-    }
+    });
+
+    const playBtns = document.querySelectorAll('.delta-btn-play');
+    const pauseBtns = document.querySelectorAll('.delta-btn-pause');
+    playBtns.forEach(btn => { btn.style.display = state.isRunning ? 'none' : 'inline-block'; });
+    pauseBtns.forEach(btn => { btn.style.display = state.isRunning ? 'inline-block' : 'none'; });
   }
 
   function startTicking() {
@@ -104,7 +105,7 @@
   function stopAndSave() {
     pause();
     const state = getStoredState();
-    const totalSec = state.accumulatedSec;
+    const totalSec = state.accumulatedSec || 0;
     if (totalSec <= 0) return;
 
     const timeStr = secToHHMMSS(totalSec);
@@ -119,7 +120,7 @@
       return;
     }
 
-    // Se estiver em outra página (ex: direito_penal_teoria_do_crime.html)
+    // Se estiver em painel ou outra página estática
     const pageTitle = document.title.replace('Delta · ', '').replace(' · Delegado', '') || 'Estudo de Painel';
     const matGuess = pageTitle.toLowerCase().includes('penal') ? 'DP' :
                      pageTitle.toLowerCase().includes('constitucional') ? 'DC' :
@@ -127,28 +128,24 @@
                      pageTitle.toLowerCase().includes('civil') ? 'DCV' :
                      pageTitle.toLowerCase().includes('medicina') ? 'ML' : 'DP';
 
-    const confirmSave = confirm(`Deseja registrar essa sessão de estudo?\n\n⏱️ Tempo: ${timeStr} (${totalMins} min)\n📚 Matéria: ${pageTitle}`);
-    if (confirmSave) {
-      try {
-        const rawLogs = localStorage.getItem('delta_estudos') || '[]';
-        const logs = JSON.parse(rawLogs);
-        const now = new Date();
-        const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-        logs.push({
-          date: dateStr,
-          mat: matGuess,
-          assunto: pageTitle,
-          categoria: 'Teoria',
-          tempo: totalMins,
-          qts: 0,
-          acertos: 0,
-          obs: 'Registrado via Cronômetro Global AVA'
-        });
-        localStorage.setItem('delta_estudos', JSON.stringify(logs));
-        alert(`✅ Sessão de ${totalMins} min registrada com sucesso no AVA!`);
-      } catch (e) {
-        console.error('Erro ao salvar no storage:', e);
-      }
+    try {
+      const rawLogs = localStorage.getItem('delta_estudos') || '[]';
+      const logs = JSON.parse(rawLogs);
+      const now = new Date();
+      const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      logs.push({
+        date: dateStr,
+        mat: matGuess,
+        assunto: pageTitle,
+        categoria: 'Teoria',
+        tempo: totalMins,
+        qts: 0,
+        acertos: 0,
+        obs: 'Registrado via Cronômetro Global AVA'
+      });
+      localStorage.setItem('delta_estudos', JSON.stringify(logs));
+    } catch (e) {
+      console.error('Erro ao salvar no storage:', e);
     }
     resetState();
   }
@@ -160,58 +157,38 @@
       accumulatedSec: 0,
       isOpen: false
     });
-    if (domWidget) domWidget.style.display = 'none';
     stopTicking();
   }
 
-  function toggleWidget() {
-    const state = getStoredState();
-    state.isOpen = !state.isOpen;
-    saveStoredState(state);
-    if (domWidget) {
-      domWidget.style.display = state.isOpen ? 'flex' : 'none';
+  function renderHeaderWidget() {
+    let container = document.getElementById('headerStopwatch');
+    
+    // Se não existir o container id, procurar no header
+    if (!container) {
+      const headerRight = document.querySelector('header .header-inner div:last-child') || document.querySelector('header .header-inner');
+      if (!headerRight) return;
+      
+      container = document.createElement('div');
+      container.id = 'headerStopwatch';
+      container.className = 'delta-header-stopwatch';
+      headerRight.insertBefore(container, headerRight.firstChild);
     }
-  }
 
-  function renderDom() {
-    // Se o DOM já tiver container delta-sw, não recriar
-    if (document.querySelector('.delta-sw-container')) return;
-
-    domContainer = document.createElement('div');
-    domContainer.className = 'delta-sw-container';
-
-    domContainer.innerHTML = `
-      <div class="delta-sw-widget" id="deltaSwWidget">
-        <div class="delta-sw-header">
-          <span>Cronômetro AVA</span>
-          <span class="delta-sw-pulse" id="deltaSwPulse"></span>
-        </div>
-        <div class="delta-sw-time" id="deltaSwDisplay">00:00:00</div>
-        <div class="delta-sw-controls">
-          <button class="delta-sw-btn delta-btn-play" id="deltaSwPlay" title="Iniciar / Continuar">▶️</button>
-          <button class="delta-sw-btn delta-btn-pause" id="deltaSwPause" title="Pausar">⏸️</button>
-          <button class="delta-sw-btn delta-btn-stop" id="deltaSwStop" title="Finalizar e Salvar">⏹️</button>
-        </div>
+    container.innerHTML = `
+      <span class="delta-sw-indicator" title="Status do cronômetro"></span>
+      <span class="delta-sw-time-display">00:00:00</span>
+      <div class="delta-sw-actions">
+        <button class="delta-sw-btn-mini delta-btn-play" title="Iniciar / Continuar cronômetro">▶️</button>
+        <button class="delta-sw-btn-mini delta-btn-pause" title="Pausar cronômetro" style="display:none;">⏸️</button>
+        <button class="delta-sw-btn-mini delta-btn-stop" title="Finalizar e Salvar estudo">⏹️</button>
       </div>
-      <button class="delta-fab-btn" id="deltaFabBtn" title="Cronômetro de Estudo">⏱️</button>
     `;
 
-    document.body.appendChild(domContainer);
-
-    domWidget = document.getElementById('deltaSwWidget');
-    domDisplay = document.getElementById('deltaSwDisplay');
-    domPulse = document.getElementById('deltaSwPulse');
-    domFab = document.getElementById('deltaFabBtn');
-
-    document.getElementById('deltaSwPlay').addEventListener('click', play);
-    document.getElementById('deltaSwPause').addEventListener('click', pause);
-    document.getElementById('deltaSwStop').addEventListener('click', stopAndSave);
-    domFab.addEventListener('click', toggleWidget);
+    container.querySelector('.delta-btn-play').addEventListener('click', play);
+    container.querySelector('.delta-btn-pause').addEventListener('click', pause);
+    container.querySelector('.delta-btn-stop').addEventListener('click', stopAndSave);
 
     const state = getStoredState();
-    if (state.isOpen) {
-      domWidget.style.display = 'flex';
-    }
     if (state.isRunning) {
       startTicking();
     } else {
@@ -223,7 +200,6 @@
   window.addEventListener('storage', function(e) {
     if (e.key === STORAGE_KEY) {
       const state = getStoredState();
-      if (domWidget) domWidget.style.display = state.isOpen ? 'flex' : 'none';
       if (state.isRunning) {
         startTicking();
       } else {
@@ -232,7 +208,6 @@
     }
   });
 
-  // Atualização ao focar/retornar à aba
   document.addEventListener('visibilitychange', function() {
     if (!document.hidden) {
       updateDisplay();
@@ -240,8 +215,18 @@
   });
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', renderDom);
+    document.addEventListener('DOMContentLoaded', renderHeaderWidget);
   } else {
-    renderDom();
+    renderHeaderWidget();
   }
+
+  // Expor globalmente para controle via JS
+  window.DeltaStopwatch = {
+    play,
+    pause,
+    stopAndSave,
+    resetState,
+    getStoredState,
+    secToHHMMSS
+  };
 })();

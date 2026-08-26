@@ -99,19 +99,21 @@
   .app-view { display: none; }
   .app-view.active { display: block; animation: delta-rise .35s ease; }
 
-  /* ── MODAL GENÉRICO ──────────────────────── */
-  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.65); backdrop-filter:blur(3px); z-index:999; display:none; align-items:center; justify-content:center; }
-  .modal-content { background:var(--surface); border:1px solid var(--border); border-radius:12px; width:100%; max-width:540px; overflow:hidden; box-shadow:0 12px 40px rgba(0,0,0,0.3); }
+  /* ── MODAL GENÉRICO ANTI-OVERFLOW ────────── */
+  *, *::before, *::after { box-sizing: border-box; }
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(4px); z-index:999; display:none; align-items:center; justify-content:center; }
+  .modal-content { background:var(--surface); border:1px solid var(--border); border-radius:20px; width:95%; max-width:560px; overflow:hidden; box-shadow:0 16px 50px rgba(0,0,0,0.4); box-sizing:border-box; }
   .modal-header { padding:18px 22px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
   .modal-header h2 { font-size:17px; font-weight:800; color:var(--text); margin:0; }
   .btn-close { background:none; border:none; color:var(--text-dim); font-size:24px; cursor:pointer; }
-  .modal-body { padding:20px 22px; display:flex; flex-direction:column; gap:14px; max-height:75vh; overflow-y:auto; }
-  .modal-row { display:flex; gap:14px; }
-  .modal-group { flex:1; display:flex; flex-direction:column; gap:5px; }
-  .modal-group label { font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; }
-  .modal-group input, .modal-group select, .modal-group textarea { background:var(--surface2); border:1px solid var(--border); color:var(--text); padding:9px 12px; border-radius:var(--r-sm); font-size:13px; outline:none; }
-  .modal-group input:focus, .modal-group select:focus { border-color:var(--brand); }
-  .box-gray { background:var(--surface2); padding:12px 14px; border-radius:var(--r-sm); border:1px solid var(--border); }
+  .modal-body { padding:20px 22px; display:flex; flex-direction:column; gap:14px; max-height:75vh; overflow-y:auto; overflow-x:hidden; box-sizing:border-box; }
+  .modal-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; width:100%; box-sizing:border-box; }
+  .modal-row-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; width:100%; box-sizing:border-box; }
+  .modal-group { min-width:0; width:100%; display:flex; flex-direction:column; gap:5px; box-sizing:border-box; }
+  .modal-group label { font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:.04em; }
+  .modal-group input, .modal-group select, .modal-group textarea { width:100%; min-width:0; box-sizing:border-box; background:var(--surface2); border:1px solid var(--border); color:var(--text); padding:10px 12px; border-radius:var(--r-sm); font-size:13px; outline:none; font-family:inherit; }
+  .modal-group input:focus, .modal-group select:focus, .modal-group textarea:focus { border-color:var(--brand); }
+  .box-gray { background:var(--surface2); padding:12px 14px; border-radius:var(--r-sm); border:1px solid var(--border); width:100%; box-sizing:border-box; }
   .modal-footer { padding:16px 22px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:12px; background:var(--surface-hover); }
   .btn-save { background:var(--brand); color:#fff; border:none; padding:10px 18px; border-radius:var(--r-sm); font-weight:700; font-size:13px; cursor:pointer; transition:transform .15s; }
   .btn-save:hover { transform:translateY(-1px); }
@@ -193,7 +195,8 @@
     </div>
 
     <!-- AÇÕES DO CABEÇALHO -->
-    <div style="display:flex; align-items:center; gap:12px;">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <div id="headerStopwatch" class="delta-header-stopwatch"></div>
       <button class="btn-quick-add" onclick="openRegistroModal()">
         <span>+</span> Adicionar Estudo
       </button>
@@ -690,18 +693,20 @@
         <label>Tópico / Assunto do Edital</label>
         <input type="text" id="modalAssunto" placeholder="Ex: Teoria do Crime, Princípios...">
       </div>
-      <div class="modal-row box-gray">
-        <div class="modal-group">
-          <label style="color:var(--green);">Questões (Acertos)</label>
-          <input type="number" id="modalAcertos" placeholder="0" min="0">
-        </div>
-        <div class="modal-group">
-          <label style="color:#ef4444;">Questões (Erros)</label>
-          <input type="number" id="modalErros" placeholder="0" min="0">
-        </div>
-        <div class="modal-group">
-          <label style="color:var(--text-dim);">Páginas Lidas</label>
-          <input type="number" id="modalPaginas" placeholder="0" min="0">
+      <div class="box-gray">
+        <div class="modal-row-3">
+          <div class="modal-group">
+            <label style="color:var(--green);">Questões (Acertos)</label>
+            <input type="number" id="modalAcertos" placeholder="0" min="0">
+          </div>
+          <div class="modal-group">
+            <label style="color:#ef4444;">Questões (Erros)</label>
+            <input type="number" id="modalErros" placeholder="0" min="0">
+          </div>
+          <div class="modal-group">
+            <label style="color:var(--text-dim);">Páginas Lidas</label>
+            <input type="number" id="modalPaginas" placeholder="0" min="0">
+          </div>
         </div>
       </div>
       <div class="modal-group">
