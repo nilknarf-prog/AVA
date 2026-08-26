@@ -544,6 +544,7 @@
           <div class="fc-badge-left">
             <span class="fc-subject-pill">${(card.assunto || card.sigla || 'MAT').toUpperCase()}</span>
             <span class="fc-state-pill ${stateClass}">${stateText}</span>
+            <button class="fc-edit-btn-inline" onclick="DeltaRevisoes.openEditCardModal('${card.id}')" title="Editar este cartão agora">✏️ Editar</button>
           </div>
           <div class="fc-live-latency-pill pill-fluente" id="fcLiveTimerBox" title="Tempo de resposta ao vivo">
             <span>⏱️</span>
@@ -865,10 +866,116 @@
     renderActiveCard();
   }
 
+  // --- EDIÇÃO DE CARTÃO EM TEMPO REAL ---
+  function openEditCardModal(cardId) {
+    const card = activeSessionCards.find(c => c.id === cardId);
+    if (!card) return;
+
+    let editModal = document.getElementById('deltaInlineCardEditModal');
+    if (!editModal) {
+      editModal = document.createElement('div');
+      editModal.id = 'deltaInlineCardEditModal';
+      editModal.className = 'modal-backdrop';
+      editModal.style.zIndex = '9999';
+      document.body.appendChild(editModal);
+    }
+
+    editModal.innerHTML = `
+      <div class="modal-content" style="max-width: 520px; border-radius: 24px;">
+        <div class="modal-header">
+          <div class="modal-title">
+            <span>✏️</span>
+            <h3>Editar Flashcard</h3>
+          </div>
+          <button class="modal-close" onclick="DeltaRevisoes.closeEditCardModal()">&times;</button>
+        </div>
+        <div class="modal-body" style="gap: 12px;">
+          <div class="modal-group">
+            <label>Tópico / Assunto</label>
+            <input type="text" id="inlineEditAssunto" class="modal-input" value="${(card.assunto || '').replace(/"/g, '&quot;')}" />
+          </div>
+          <div class="modal-group">
+            <label>Frente do Cartão (Pergunta ou Oclusão {{c1::termo}})</label>
+            <textarea id="inlineEditFrente" class="modal-input" rows="3" style="resize:vertical;">${card.frente || ''}</textarea>
+          </div>
+          <div class="modal-group">
+            <label>Verso do Cartão (Gabarito & Fundamentação)</label>
+            <textarea id="inlineEditVerso" class="modal-input" rows="4" style="resize:vertical;">${card.verso || ''}</textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-cancel" onclick="DeltaRevisoes.closeEditCardModal()">Cancelar</button>
+          <button class="btn-save" onclick="DeltaRevisoes.saveEditedCard('${card.id}')">Salvar Alterações</button>
+        </div>
+      </div>
+    `;
+
+    editModal.style.display = 'flex';
+  }
+
+  function closeEditCardModal() {
+    const editModal = document.getElementById('deltaInlineCardEditModal');
+    if (editModal) editModal.style.display = 'none';
+  }
+
+  function saveEditedCard(cardId) {
+    const card = activeSessionCards.find(c => c.id === cardId);
+    if (!card) return;
+
+    const newAssunto = (document.getElementById('inlineEditAssunto')?.value || '').trim();
+    const newFrente = (document.getElementById('inlineEditFrente')?.value || '').trim();
+    const newVerso = (document.getElementById('inlineEditVerso')?.value || '').trim();
+
+    if (!newFrente || !newVerso) {
+      alert('Preencha a Frente e o Verso do cartão.');
+      return;
+    }
+
+    try {
+      const overrides = JSON.parse(localStorage.getItem('atena_card_overrides') || '{}');
+      overrides[cardId] = {
+        ...(overrides[cardId] || {}),
+        assunto: newAssunto,
+        frente: newFrente,
+        verso: newVerso
+      };
+      localStorage.setItem('atena_card_overrides', JSON.stringify(overrides));
+
+      // Atualizar também customCards se for custom
+      const customCards = JSON.parse(localStorage.getItem('atena_custom_cards') || '[]');
+      const cIdx = customCards.findIndex(c => c.id === cardId);
+      if (cIdx >= 0) {
+        customCards[cIdx] = { ...customCards[cIdx], assunto: newAssunto, frente: newFrente, verso: newVerso };
+        localStorage.setItem('atena_custom_cards', JSON.stringify(customCards));
+      }
+
+      // Atualizar no objeto da sessão ativa
+      card.assunto = newAssunto;
+      card.frente = newFrente;
+      card.verso = newVerso;
+
+      closeEditCardModal();
+      renderActiveCard();
+    } catch(e) {
+      console.error('Erro ao salvar edição do cartão:', e);
+    }
+  }
+
   // Atalho de teclado (Espaço e números 1-4)
   document.addEventListener('keydown', function(e) {
     const modal = document.getElementById('modalReviewPlayer');
     if (!modal || modal.style.display !== 'flex') return;
+
+    const editModal = document.getElementById('deltaInlineCardEditModal');
+    if (editModal && editModal.style.display === 'flex') return;
+    if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+    if (e.key === 'e' || e.key === 'E') {
+      e.preventDefault();
+      const card = activeSessionCards[currentCardIndex];
+      if (card) openEditCardModal(card.id);
+      return;
+    }
 
     if (e.code === 'Space') {
       e.preventDefault();
@@ -894,7 +1001,10 @@
     flipCurrentCard,
     rateCard,
     setCardFlag,
-    restartFailedCardsSession
+    restartFailedCardsSession,
+    openEditCardModal,
+    closeEditCardModal,
+    saveEditedCard
   };
 
 })();

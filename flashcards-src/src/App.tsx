@@ -3,7 +3,7 @@ import {
   Layers, Flame, ArrowLeft, CheckCircle, Play,
   CalendarClock, BookOpen, FileText, Sun, Moon,
   BrainCircuit, Sparkles, Plus, Bookmark,
-  BarChart3, Info, X
+  BarChart3, Info, X, Edit3
 } from 'lucide-react';
 import { bancosDeQuestoes, type Card, type Deck } from './data';
 import {
@@ -537,6 +537,17 @@ export default function App() {
       }
     });
 
+    // Atualizar em tempo real o baralho atual da sessão se estiver revisando
+    setCurrentDeck(prev => prev.map(c => {
+      const updated = list.find(savedCard => savedCard.id === c.id);
+      return updated ? { ...c, ...updated, deckId } : c;
+    }));
+
+    setTodayCards(prev => prev.map(c => {
+      const updated = list.find(savedCard => savedCard.id === c.id);
+      return updated ? { ...c, ...updated, deckId } : c;
+    }));
+
     setIsCreateModalOpen(false);
     setEditingCard(null);
   };
@@ -559,12 +570,25 @@ export default function App() {
     }
   };
 
-  // Atalhos de teclado na revisão
+  // Atalhos de teclado na revisão (Espaço, 1-4 e 'E' para Editar)
   useEffect(() => {
-    if (currentScreen !== 'flashcards' || showSaveModal || isStopwatchModalOpen) return;
+    if (currentScreen !== 'flashcards' || showSaveModal || isStopwatchModalOpen || isCreateModalOpen || isManagerModalOpen) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+      if (e.key === 'e' || e.key === 'E') {
+        e.preventDefault();
+        const currentCard = currentDeck[cardIndex];
+        if (currentCard) {
+          setEditingCard({
+            card: { ...currentCard },
+            deckId: currentCard.deckId || (currentDeck[0]?.deckId ?? 'dp')
+          });
+          setIsCreateModalOpen(true);
+        }
+        return;
+      }
 
       if (e.code === 'Space' || e.code === 'Enter') {
         e.preventDefault();
@@ -588,7 +612,7 @@ export default function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentScreen, isFlipped, cardIndex, currentDeck, showSaveModal, isStopwatchModalOpen, flipCard]);
+  }, [currentScreen, isFlipped, cardIndex, currentDeck, showSaveModal, isStopwatchModalOpen, isCreateModalOpen, isManagerModalOpen, flipCard]);
 
   // Manipulador de parada do Cronômetro Global (Sem alert!)
   const handleStopStopwatch = (minutes: number) => {
@@ -1004,6 +1028,23 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Botão de Editar Cartão Imediato */}
+            <button
+              onClick={() => {
+                setEditingCard({
+                  card: { ...card },
+                  deckId: card.deckId || (currentDeck[0]?.deckId ?? 'dp')
+                });
+                setIsCreateModalOpen(true);
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-[#131929] border border-gray-200 dark:border-[rgba(255,255,255,0.08)] hover:border-[#ff6b00] text-gray-700 dark:text-[#e8eaf0] hover:text-[#ff6b00] dark:hover:text-[#ff8533] text-xs font-bold shadow-sm transition cursor-pointer"
+              title="Editar este cartão agora (Atalho: Tecla E)"
+            >
+              <Edit3 size={13} className="text-[#ff6b00]" />
+              <span className="hidden sm:inline">Editar</span>
+              <kbd className="hidden md:inline-block px-1 py-0.2 text-[9px] font-mono bg-gray-100 dark:bg-[#1a2235] text-gray-400 rounded border border-gray-200 dark:border-white/10">E</kbd>
+            </button>
+
             {/* Seletor rápido de bandeiras */}
             <div className="flex items-center bg-white dark:bg-[#131929] border border-gray-200 dark:border-[rgba(255,255,255,0.08)] p-1 rounded-xl shadow-sm gap-1">
               {(Object.keys(FLAG_CONFIG) as FlagColor[]).map((f) => (

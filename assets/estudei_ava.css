@@ -1458,6 +1458,24 @@
 .fc-state-pill.state-learning { background: rgba(249, 115, 22, 0.12); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.25); }
 .fc-state-pill.state-review { background: rgba(16, 185, 129, 0.12); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.25); }
 
+.fc-edit-btn-inline {
+  background: rgba(255, 255, 255, 0.06);
+  color: #9aa5bb;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.fc-edit-btn-inline:hover {
+  background: rgba(255, 107, 0, 0.15);
+  color: #ff8533;
+  border-color: rgba(255, 107, 0, 0.4);
+}
+
 .fc-live-latency-pill {
   font-family: var(--font-mono);
   font-size: 11px;
