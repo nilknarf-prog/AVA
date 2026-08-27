@@ -467,33 +467,142 @@
   }
 
   function formatClozeFront(text) {
-    if (!text) return '';
-    if (!/\{\{c\d+::.+?\}\}/.test(text)) return text;
-    return text.replace(/\{\{c(\d+)::([^}:]+)(?:::([^}]+))?\}\}/g, function(match, num, answer, hint) {
-      const label = hint ? `💡 ${hint}` : '[...]';
-      const cleanAnswer = answer.trim();
-      return `<span class="fc-cloze-badge" data-label="${label}" data-answer="${encodeURIComponent(cleanAnswer)}" onclick="event.stopPropagation(); this.classList.toggle('revealed'); this.innerText = this.classList.contains('revealed') ? decodeURIComponent(this.dataset.answer) : this.dataset.label;" title="Clique para revelar o termo">${label}</span>`;
-    });
+    return formatRichCardText(text, false);
   }
 
   function formatClozeBack(text) {
-    if (!text) return '';
-    if (!/\{\{c\d+::.+?\}\}/.test(text)) return text;
-    return text.replace(/\{\{c(\d+)::([^}:]+)(?:::([^}]+))?\}\}/g, function(match, num, answer, hint) {
-      return `<span class="fc-cloze-answer">${answer.trim()}</span>`;
-    });
+    return formatRichCardText(text, true);
   }
 
   function highlightKeywords(text) {
+    return formatRichCardText(text, true);
+  }
+
+  function formatRichCardText(text, isBack) {
     if (!text) return '';
-    const formatted = formatClozeBack(text);
-    const KEYWORDS = ['Exceção', 'Súmula', 'Vedada', 'Proibida', 'Prazo', 'NÃO', 'INCONDICIONADA', 'GRAVE', 'SIM', 'SEMPRE', 'NUNCA', 'JAMAIS', 'APENAS', 'MAIOR', 'ROXIN', 'JAKOBS', 'EX TUNC', 'EX NUNC', 'DOLO ESPECÍFICO'];
-    let res = formatted;
-    KEYWORDS.forEach(kw => {
-      const reg = new RegExp(`\\b(${kw})\\b`, 'gi');
-      res = res.replace(reg, `<span class="kw-highlight">$1</span>`);
+
+    // 1. Processar Callout Boxes (:::sumula ... :::)
+    text = text.replace(/:::([a-z]+)\n?([\s\S]*?):::/gi, function(_, type, content) {
+      let icon = '📖';
+      let title = 'Informação';
+      let boxClass = 'callout-default';
+      const t = (type || '').toLowerCase();
+      if (t === 'sumula' || t === 'jurisprudencia' || t === 'stf' || t === 'stj') {
+        icon = '⚖️';
+        title = 'Súmula / Jurisprudência (STF/STJ)';
+        boxClass = 'callout-sumula';
+      } else if (t === 'lei' || t === 'leiseca' || t === 'artigo') {
+        icon = '📜';
+        title = 'Letra da Lei (Artigo / Dispositivo)';
+        boxClass = 'callout-lei';
+      } else if (t === 'pegadinha' || t === 'cuidado' || t === 'alerta') {
+        icon = '⚠️';
+        title = 'Pegadinha da Banca / Cuidado!';
+        boxClass = 'callout-pegadinha';
+      } else if (t === 'dica' || t === 'macete' || t === 'mnemonico') {
+        icon = '💡';
+        title = 'Dica / Macete Mnemônico';
+        boxClass = 'callout-dica';
+      } else if (t === 'excecao' || t === 'vedado') {
+        icon = '🛡️';
+        title = 'Exceção à Regra / Proibição';
+        boxClass = 'callout-excecao';
+      }
+      return `<div class="fc-callout-box ${boxClass}"><div class="fc-callout-header">${icon} <span>${title}</span></div><div class="fc-callout-content">${formatLineContent(content.trim(), isBack)}</div></div>`;
     });
-    return res;
+
+    return formatLineContent(text, isBack);
+  }
+
+  function formatLineContent(rawText, isBack) {
+    if (!rawText) return '';
+    const lines = rawText.split('\n');
+    const output = [];
+    let currentList = null;
+
+    const flushList = () => {
+      if (!currentList) return;
+      if (currentList.type === 'ul') {
+        output.push(`<ul class="fc-bullet-list" style="margin:8px 0; padding-left:4px; list-style:none; text-align:left;">${currentList.items.map(item => `<li class="fc-bullet-item" style="display:flex; align-items:flex-start; gap:8px; margin-bottom:4px;"><span class="fc-bullet-dot" style="color:#ff6b00; font-weight:bold; font-size:16px; line-height:1; user-select:none; margin-top:2px;">•</span><span class="fc-item-txt" style="flex:1;">${parseInlineMarkup(item, isBack)}</span></li>`).join('')}</ul>`);
+      } else {
+        output.push(`<ol class="fc-ordered-list" style="margin:8px 0; padding-left:4px; list-style:none; text-align:left;">${currentList.items.map((item, idx) => `<li class="fc-ordered-item" style="display:flex; align-items:flex-start; gap:8px; margin-bottom:4px;"><span class="fc-ordered-num" style="color:#ff6b00; font-family:monospace; font-weight:bold; font-size:12px; user-select:none; min-width:18px; margin-top:2px;">${idx + 1}.</span><span class="fc-item-txt" style="flex:1;">${parseInlineMarkup(item, isBack)}</span></li>`).join('')}</ol>`);
+      }
+      currentList = null;
+    };
+
+    lines.forEach(line => {
+      const trimmed = line.trim();
+      const bulletMatch = line.match(/^(\s*)([-*•])\s+(.*)$/);
+      const numMatch = line.match(/^(\s*)(\d+)\.\s+(.*)$/);
+
+      if (bulletMatch) {
+        if (currentList && currentList.type !== 'ul') flushList();
+        if (!currentList) currentList = { type: 'ul', items: [] };
+        currentList.items.push(bulletMatch[3]);
+      } else if (numMatch) {
+        if (currentList && currentList.type !== 'ol') flushList();
+        if (!currentList) currentList = { type: 'ol', items: [] };
+        currentList.items.push(numMatch[3]);
+      } else {
+        flushList();
+        if (trimmed === '') {
+          output.push('<div class="fc-spacer-line" style="height:10px;"></div>');
+        } else {
+          output.push(`<div class="fc-text-line" style="min-height:1.4em; margin:2px 0;">${parseInlineMarkup(line, isBack)}</div>`);
+        }
+      }
+    });
+
+    flushList();
+    return output.join('');
+  }
+
+  function parseInlineMarkup(text, isBack) {
+    if (!text) return '';
+
+    // Clozes
+    if (!isBack) {
+      text = text.replace(/\{\{c(\d+)::([^}:]+)(?:::([^}]+))?\}\}/g, function(_, num, answer, hint) {
+        const label = hint ? `💡 ${hint}` : '[...]';
+        const cleanAnswer = answer.trim();
+        return `<span class="fc-cloze-badge" data-label="${label}" data-answer="${encodeURIComponent(cleanAnswer)}" onclick="event.stopPropagation(); this.classList.toggle('revealed'); this.innerText = this.classList.contains('revealed') ? decodeURIComponent(this.dataset.answer) : this.dataset.label;" title="Clique para revelar o termo">${label}</span>`;
+      });
+    } else {
+      text = text.replace(/\{\{c(\d+)::([^}:]+)(?:::([^}]+))?\}\}/g, function(_, num, answer, hint) {
+        return `<span class="fc-cloze-answer">${answer.trim()}</span>`;
+      });
+    }
+
+    // Marca-texto
+    text = text.replace(/<mark:([a-z]+)>([\s\S]*?)<\/mark>/gi, '<mark class="fc-mark-$1" style="padding:2px 6px; border-radius:6px; font-weight:700;">$2</mark>');
+    text = text.replace(/==([\s\S]*?)==/g, '<mark class="fc-mark-yellow" style="background:rgba(254,240,138,0.8); color:#713f12; padding:2px 6px; border-radius:6px; font-weight:700;">$1</mark>');
+
+    // Cores
+    text = text.replace(/<color:([a-z#0-9]+)>([\s\S]*?)<\/color>/gi, '<span style="color:$1; font-weight:700;">$2</span>');
+
+    // Negrito, Itálico, Sublinhado, Riscado
+    text = text.replace(/\*\*([\s\S]*?)\*\*/g, '<strong>$1</strong>');
+    text = text.replace(/<b>([\s\S]*?)<\/b>/gi, '<strong>$1</strong>');
+    text = text.replace(/\*([^*\n]+)\*/g, '<em>$1</em>');
+    text = text.replace(/<i>([\s\S]*?)<\/i>/gi, '<em>$1</em>');
+    text = text.replace(/<u>([\s\S]*?)<\/u>/gi, '<u style="text-decoration-color:#ff6b00; text-underline-offset:3px;">$1</u>');
+    text = text.replace(/__([\s\S]*?)__/g, '<u style="text-decoration-color:#ff6b00; text-underline-offset:3px;">$1</u>');
+    text = text.replace(/~~([\s\S]*?)~~/g, '<s style="opacity:0.6;">$1</s>');
+    text = text.replace(/<s>([\s\S]*?)<\/s>/gi, '<s style="opacity:0.6;">$1</s>');
+
+    // Links e Imagens
+    text = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<div class="fc-inline-img-box" style="margin:8px 0; text-align:center;"><img src="$2" alt="$1" class="fc-inline-img" style="max-height:220px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.15);" /></div>');
+    text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" class="fc-inline-link" style="color:#ff6b00; font-weight:700; text-decoration:underline;">$1 ↗</a>');
+
+    if (isBack) {
+      const KEYWORDS = ['Exceção', 'Súmula', 'Vedada', 'Proibida', 'Prazo', 'NÃO', 'INCONDICIONADA', 'GRAVE', 'SIM', 'SEMPRE', 'NUNCA', 'JAMAIS', 'APENAS', 'MAIOR', 'ROXIN', 'JAKOBS', 'EX TUNC', 'EX NUNC', 'DOLO ESPECÍFICO'];
+      KEYWORDS.forEach(kw => {
+        const reg = new RegExp(`\\b(${kw})\\b`, 'gi');
+        text = text.replace(reg, `<span class="kw-highlight">$1</span>`);
+      });
+    }
+
+    return text;
   }
 
   function renderActiveCard() {

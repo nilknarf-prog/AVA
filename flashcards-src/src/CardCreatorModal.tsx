@@ -3,7 +3,8 @@ import {
   X, Sparkles, Eye, Check, Bold, Italic, Underline, Strikethrough,
   Image as ImageIcon, Link as LinkIcon, Tag, AlignLeft, AlignCenter,
   AlignRight, AlignJustify, Scale, BookOpen, AlertTriangle, Lightbulb,
-  ShieldAlert, Highlighter, Palette, Split, MousePointerClick
+  ShieldAlert, Highlighter, Palette, Split, MousePointerClick,
+  List, ListOrdered
 } from 'lucide-react';
 import { type Card, type Deck } from './data';
 import { wrapWithCloze, hasCloze, extractClozeNumbers } from './cloze';
@@ -188,6 +189,45 @@ export const CardCreatorModal: React.FC<CardCreatorModalProps> = ({
     const updated = currentVal.slice(0, start) + calloutBlock + currentVal.slice(end);
 
     setActiveValue(updated);
+  };
+
+  // Inserir Lista de Marcadores ou Lista Numerada
+  const handleInsertList = (type: 'bullet' | 'ordered') => {
+    const el = getActiveTextarea();
+    if (!el) return;
+
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
+    const currentVal = getActiveValue();
+    const selected = currentVal.slice(start, end);
+
+    if (selected.length > 0) {
+      const lines = selected.split('\n');
+      const formattedLines = lines.map((line, idx) => {
+        const trimmed = line.replace(/^([-*•]|\d+\.)\s*/, '');
+        return type === 'bullet' ? `- ${trimmed}` : `${idx + 1}. ${trimmed}`;
+      });
+      const replacement = formattedLines.join('\n');
+      const updated = currentVal.slice(0, start) + replacement + currentVal.slice(end);
+      setActiveValue(updated);
+      setTimeout(() => {
+        if (el) {
+          el.focus();
+          el.setSelectionRange(start, start + replacement.length);
+        }
+      }, 50);
+    } else {
+      const prefix = (start > 0 && currentVal[start - 1] !== '\n') ? '\n' : '';
+      const itemTag = type === 'bullet' ? `${prefix}- ` : `${prefix}1. `;
+      const updated = currentVal.slice(0, start) + itemTag + currentVal.slice(end);
+      setActiveValue(updated);
+      setTimeout(() => {
+        if (el) {
+          el.focus();
+          el.setSelectionRange(start + itemTag.length, start + itemTag.length);
+        }
+      }, 50);
+    }
   };
 
   // Inserção de Cloze (Mesmo Cartão vs Novo Cartão)
@@ -592,7 +632,29 @@ export const CardCreatorModal: React.FC<CardCreatorModalProps> = ({
               </button>
             </div>
 
-            {/* 2. Marca-texto / Highlighter */}
+            {/* 2. Listas e Marcadores (Bullet Points & Numéricas) */}
+            <div className="flex items-center bg-white dark:bg-zinc-800 rounded-xl p-0.5 border border-gray-200/80 dark:border-zinc-700 shadow-sm">
+              <button
+                type="button"
+                onClick={() => handleInsertList('bullet')}
+                className="flex items-center gap-1 px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-700 text-gray-700 dark:text-zinc-200 font-semibold"
+                title="Lista com Marcadores (Bullet Points: - item ou • item)"
+              >
+                <List size={15} />
+                <span className="hidden sm:inline text-[11px]">Lista</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleInsertList('ordered')}
+                className="flex items-center gap-1 px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-700 text-gray-700 dark:text-zinc-200 font-semibold"
+                title="Lista Numerada (1. 2. 3.)"
+              >
+                <ListOrdered size={15} />
+                <span className="hidden sm:inline text-[11px]">Numérica</span>
+              </button>
+            </div>
+
+            {/* 3. Marca-texto / Highlighter */}
             <div className="relative">
               <button
                 type="button"

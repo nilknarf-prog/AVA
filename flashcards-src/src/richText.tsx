@@ -80,7 +80,7 @@ export const ImageLightboxModal: React.FC<{ imageUrl: string | null; onClose: ()
 };
 
 /**
- * Parser de blocos e formatação rica de flashcards
+ * Parser de blocos e formatação rica de flashcards (suporte a listas, quebras de linha e destaques)
  */
 export const RichContentRenderer: React.FC<RichTextProps> = ({
   content,
@@ -118,9 +118,10 @@ export const RichContentRenderer: React.FC<RichTextProps> = ({
 
       if (matchStart > lastIdx) {
         segments.push(
-          <div key={`seg-${lastIdx}`} className="inline">
-            {renderInlineMarkdown(
+          <div key={`seg-${lastIdx}`} className="w-full">
+            {renderLinesAndLists(
               text.substring(lastIdx, matchStart),
+              `seg-${lastIdx}`,
               isBack,
               targetCloze,
               setLightboxImage,
@@ -151,9 +152,10 @@ export const RichContentRenderer: React.FC<RichTextProps> = ({
 
     if (lastIdx < text.length) {
       segments.push(
-        <div key={`seg-end-${lastIdx}`} className="inline">
-          {renderInlineMarkdown(
+        <div key={`seg-end-${lastIdx}`} className="w-full">
+          {renderLinesAndLists(
             text.substring(lastIdx),
+            `seg-end-${lastIdx}`,
             isBack,
             targetCloze,
             setLightboxImage,
@@ -169,13 +171,107 @@ export const RichContentRenderer: React.FC<RichTextProps> = ({
 
   return (
     <>
-      <div className={`leading-relaxed ${alignClass} ${className} break-words`}>
+      <div className={`leading-relaxed ${alignClass} ${className} break-words space-y-0.5`}>
         {renderBlocks(content)}
       </div>
       <ImageLightboxModal imageUrl={lightboxImage} onClose={() => setLightboxImage(null)} />
     </>
   );
 };
+
+/**
+ * Processador de Linhas, Quebras de Linha e Listas (Bullet Points & Numéricas)
+ */
+function renderLinesAndLists(
+  text: string,
+  keyPrefix: string,
+  isBack: boolean,
+  targetCloze: number,
+  onImageClick: (url: string) => void,
+  revealedIndices?: Set<number>,
+  onToggleReveal?: (clozeIndex: number) => void
+): React.ReactNode[] {
+  if (!text) return [];
+
+  const lines = text.split('\n');
+  const result: React.ReactNode[] = [];
+  let currentList: { type: 'ul' | 'ol'; items: string[] } | null = null;
+
+  const flushList = (idx: number) => {
+    if (!currentList) return;
+    if (currentList.type === 'ul') {
+      result.push(
+        <ul key={`${keyPrefix}-ul-${idx}`} className="my-2 space-y-1.5 list-none pl-1 text-left">
+          {currentList.items.map((itemText, iIdx) => (
+            <li key={`li-${idx}-${iIdx}`} className="flex items-start gap-2 text-left">
+              <span className="text-[#ff6b00] dark:text-[#ff8533] font-bold select-none text-base leading-none mt-0.5">•</span>
+              <span className="flex-1 leading-relaxed">
+                {renderInlineMarkdown(itemText, isBack, targetCloze, onImageClick, revealedIndices, onToggleReveal, `${keyPrefix}-li-${idx}-${iIdx}`)}
+              </span>
+            </li>
+          ))}
+        </ul>
+      );
+    } else {
+      result.push(
+        <ol key={`${keyPrefix}-ol-${idx}`} className="my-2 space-y-1.5 list-none pl-1 text-left">
+          {currentList.items.map((itemText, iIdx) => (
+            <li key={`oli-${idx}-${iIdx}`} className="flex items-start gap-2 text-left">
+              <span className="text-[#ff6b00] dark:text-[#ff8533] font-mono font-bold text-xs select-none mt-0.5 min-w-[20px]">
+                {iIdx + 1}.
+              </span>
+              <span className="flex-1 leading-relaxed">
+                {renderInlineMarkdown(itemText, isBack, targetCloze, onImageClick, revealedIndices, onToggleReveal, `${keyPrefix}-oli-${idx}-${iIdx}`)}
+              </span>
+            </li>
+          ))}
+        </ol>
+      );
+    }
+    currentList = null;
+  };
+
+  lines.forEach((line, lineIdx) => {
+    const trimmed = line.trim();
+    // Verifica se é bullet point (- item, * item, • item)
+    const bulletMatch = line.match(/^(\s*)([-*•])\s+(.*)$/);
+    // Verifica se é lista numerada (1. item, 2. item)
+    const numMatch = line.match(/^(\s*)(\d+)\.\s+(.*)$/);
+
+    if (bulletMatch) {
+      if (currentList && currentList.type !== 'ul') {
+        flushList(lineIdx);
+      }
+      if (!currentList) {
+        currentList = { type: 'ul', items: [] };
+      }
+      currentList.items.push(bulletMatch[3]);
+    } else if (numMatch) {
+      if (currentList && currentList.type !== 'ol') {
+        flushList(lineIdx);
+      }
+      if (!currentList) {
+        currentList = { type: 'ol', items: [] };
+      }
+      currentList.items.push(numMatch[3]);
+    } else {
+      flushList(lineIdx);
+      if (trimmed === '') {
+        // Linha vazia (Enter duplo) -> espaçamento vertical elegante
+        result.push(<div key={`${keyPrefix}-empty-${lineIdx}`} className="h-3" />);
+      } else {
+        result.push(
+          <div key={`${keyPrefix}-ln-${lineIdx}`} className="min-h-[1.5em] leading-relaxed">
+            {renderInlineMarkdown(line, isBack, targetCloze, onImageClick, revealedIndices, onToggleReveal, `${keyPrefix}-ln-${lineIdx}`)}
+          </div>
+        );
+      }
+    }
+  });
+
+  flushList(lines.length);
+  return result;
+}
 
 /**
  * Renderiza caixas de destaque especializadas para concursos (Callouts)
@@ -248,7 +344,7 @@ function renderCalloutBox(
         <span>{title}</span>
       </div>
       <div className="leading-relaxed">
-        {renderInlineMarkdown(content, isBack, targetCloze, onImageClick, revealedIndices, onToggleReveal)}
+        {renderLinesAndLists(content, `callout-${type}`, isBack, targetCloze, onImageClick, revealedIndices, onToggleReveal)}
       </div>
     </div>
   );
@@ -263,16 +359,17 @@ function renderInlineMarkdown(
   targetCloze: number,
   onImageClick: (url: string) => void,
   revealedIndices?: Set<number>,
-  onToggleReveal?: (clozeIndex: number) => void
+  onToggleReveal?: (clozeIndex: number) => void,
+  keyPrefix = 't'
 ): React.ReactNode[] {
   if (!text) return [];
 
   // Se houver tags Cloze, intercalar com o parser de Cloze
   if (hasCloze(text)) {
-    return renderClozeWithRichText(text, isBack, targetCloze, onImageClick, revealedIndices, onToggleReveal);
+    return renderClozeWithRichText(text, isBack, targetCloze, onImageClick, revealedIndices, onToggleReveal, keyPrefix);
   }
 
-  return parseRichTokens(text, 't', onImageClick);
+  return parseRichTokens(text, keyPrefix, onImageClick);
 }
 
 /**
@@ -284,7 +381,8 @@ function renderClozeWithRichText(
   targetCloze: number,
   onImageClick: (url: string) => void,
   revealedIndices?: Set<number>,
-  onToggleReveal?: (clozeIndex: number) => void
+  onToggleReveal?: (clozeIndex: number) => void,
+  keyPrefix = 'cl'
 ): React.ReactNode[] {
   const elements: React.ReactNode[] = [];
   let lastIndex = 0;
@@ -299,7 +397,7 @@ function renderClozeWithRichText(
 
     // Texto antes da tag cloze
     if (matchStart > lastIndex) {
-      elements.push(...parseRichTokens(text.substring(lastIndex, matchStart), `cl-pre-${matchStart}`, onImageClick));
+      elements.push(...parseRichTokens(text.substring(lastIndex, matchStart), `${keyPrefix}-pre-${matchStart}`, onImageClick));
     }
 
     const isTarget = targetCloze === 0 || clozeIndex === targetCloze;
@@ -311,7 +409,7 @@ function renderClozeWithRichText(
         const label = hint ? `💡 ${hint}` : '...';
         elements.push(
           <button
-            key={`cloze-btn-${matchStart}`}
+            key={`${keyPrefix}-cloze-btn-${matchStart}`}
             type="button"
             onClick={(e) => {
               e.stopPropagation();
@@ -330,10 +428,10 @@ function renderClozeWithRichText(
         // Revelado individualmente pelo aluno
         elements.push(
           <span
-            key={`cloze-rev-${matchStart}`}
+            key={`${keyPrefix}-cloze-rev-${matchStart}`}
             className="inline-flex flex-col items-center font-bold px-2.5 py-0.5 mx-1 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-500/40 shadow-sm animate-fadeIn"
           >
-            <span>{parseRichTokens(answer, `cl-ansrev-${matchStart}`, onImageClick)}</span>
+            <span>{parseRichTokens(answer, `${keyPrefix}-ansrev-${matchStart}`, onImageClick)}</span>
             {hint && (
               <span className="text-[9px] font-normal text-emerald-700/70 dark:text-emerald-300/70 italic">
                 ({hint})
@@ -343,17 +441,17 @@ function renderClozeWithRichText(
         );
       } else {
         // Contexto visível para outros clozes em cartões desmembrados
-        elements.push(...parseRichTokens(answer, `cl-ans-${matchStart}`, onImageClick));
+        elements.push(...parseRichTokens(answer, `${keyPrefix}-ans-${matchStart}`, onImageClick));
       }
     } else {
       // VERSO DO CARTÃO (REVELADO TOTAL)
       if (isTarget) {
         elements.push(
           <span
-            key={`cloze-back-${matchStart}`}
+            key={`${keyPrefix}-cloze-back-${matchStart}`}
             className="inline-flex flex-col items-center font-bold px-2.5 py-0.5 mx-1 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-500/40 shadow-sm"
           >
-            <span>{parseRichTokens(answer, `cl-backans-${matchStart}`, onImageClick)}</span>
+            <span>{parseRichTokens(answer, `${keyPrefix}-backans-${matchStart}`, onImageClick)}</span>
             {hint && (
               <span className="text-[10px] font-normal text-emerald-700/70 dark:text-emerald-300/70 italic">
                 ({hint})
@@ -362,7 +460,7 @@ function renderClozeWithRichText(
           </span>
         );
       } else {
-        elements.push(...parseRichTokens(answer, `cl-backctx-${matchStart}`, onImageClick));
+        elements.push(...parseRichTokens(answer, `${keyPrefix}-backctx-${matchStart}`, onImageClick));
       }
     }
 
@@ -370,7 +468,7 @@ function renderClozeWithRichText(
   }
 
   if (lastIndex < text.length) {
-    elements.push(...parseRichTokens(text.substring(lastIndex), `cl-post-${lastIndex}`, onImageClick));
+    elements.push(...parseRichTokens(text.substring(lastIndex), `${keyPrefix}-post-${lastIndex}`, onImageClick));
   }
 
   return elements;
@@ -386,8 +484,9 @@ function parseRichTokens(
 ): React.ReactNode[] {
   if (!rawText) return [];
 
+  // Regex para tokens inline (sem conflito com \n)
   const tokensRegex =
-    /(!\[([^\]]*)\]\(([^)]+)\))|(\[([^\]]+)\]\(([^)]+)\))|(<mark:([a-z]+)>([\s\S]*?)<\/mark>)|(==([\s\S]*?)==)|(<color:([a-z#0-9]+)>([\s\S]*?)<\/color>)|(<u>([\s\S]*?)<\/u>)|(__([\s\S]*?)__)|(~~([\s\S]*?)~~)|(<s>([\s\S]*?)<\/s>)|(\*\*([\s\S]*?)\*\*)|(<b>([\s\S]*?)<\/b>)|(\*([^*\n]+)\*)|(<i>([\s\S]*?)<\/i>|(\n))/g;
+    /(!\[([^\]]*)\]\(([^)]+)\))|(\[([^\]]+)\]\(([^)]+)\))|(<mark:([a-z]+)>([\s\S]*?)<\/mark>)|(==([\s\S]*?)==)|(<color:([a-z#0-9]+)>([\s\S]*?)<\/color>)|(<u>([\s\S]*?)<\/u>)|(__([\s\S]*?)__)|(~~([\s\S]*?)~~)|(<s>([\s\S]*?)<\/s>)|(\*\*([\s\S]*?)\*\*)|(<b>([\s\S]*?)<\/b>)|(\*([^*\n]+)\*)|(<i>([\s\S]*?)<\/i>)/g;
 
   const nodes: React.ReactNode[] = [];
   let lastIndex = 0;
@@ -410,7 +509,7 @@ function parseRichTokens(
       const alt = match[2] || 'Imagem do flashcard';
       const url = match[3];
       nodes.push(
-        <div key={`${keyPrefix}-img-${matchStart}`} className="my-3 flex flex-col items-center group relative cursor-pointer" onClick={() => onImageClick(url)}>
+        <div key={`${keyPrefix}-img-${matchStart}`} className="my-2.5 flex flex-col items-center group relative cursor-pointer" onClick={() => onImageClick(url)}>
           <img
             src={url}
             alt={alt}
@@ -528,10 +627,6 @@ function parseRichTokens(
           {parseRichTokens(text, `${keyPrefix}-subi-${matchStart}`, onImageClick)}
         </em>
       );
-    }
-    // 10. Quebra de linha: \n
-    else if (match[31] === '\n') {
-      nodes.push(<br key={`${keyPrefix}-br-${matchStart}`} />);
     }
 
     lastIndex = matchStart + match[0].length;
