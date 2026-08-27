@@ -26,6 +26,25 @@ const COMMON_TAGS = [
   'pos-edital', 'prazo', 'pegadinha', 'doutrina', 'constitucional', 'penal'
 ];
 
+export function normalizeTitle(str: string): string {
+  if (!str) return '';
+  const trimmed = str.trim().replace(/\s+/g, ' ');
+  const lowerWords = ['de', 'da', 'do', 'das', 'dos', 'e', 'em', 'no', 'na', 'nos', 'nas', 'por', 'para', 'com', 'sem', 'a', 'o', 'as', 'os'];
+  const uppercaseWords = ['STF', 'STJ', 'CPP', 'CP', 'CF', 'CF/88', 'LINDB', 'ECA', 'LPE', 'DP', 'DPP', 'DC', 'DA', 'ML', 'DCV', 'DH', 'DE', 'CR', 'RLM', 'FSRS', 'SRS', 'ANPP', 'CPI', 'PRF', 'PF'];
+
+  return trimmed.split(' ').map((word, idx) => {
+    const upperCandidate = word.toUpperCase().replace(/[^A-Z0-9/]/g, '');
+    if (uppercaseWords.includes(upperCandidate)) {
+      return word.toUpperCase();
+    }
+    const lowerCandidate = word.toLowerCase();
+    if (idx > 0 && lowerWords.includes(lowerCandidate)) {
+      return lowerCandidate;
+    }
+    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  }).join(' ');
+}
+
 export const CardCreatorModal: React.FC<CardCreatorModalProps> = ({
   isOpen,
   onClose,
@@ -43,6 +62,21 @@ export const CardCreatorModal: React.FC<CardCreatorModalProps> = ({
   const [verso, setVerso] = useState<string>('');
   const [clozeText, setClozeText] = useState<string>('');
   const [extra, setExtra] = useState<string>('');
+
+  // Tópicos existentes no baralho selecionado
+  const existingDeckAssuntos = useMemo(() => {
+    const set = new Set<string>();
+    const currentDeck = availableDecks.find((d) => d.id === selectedDeckId);
+    if (currentDeck && currentDeck.cards) {
+      currentDeck.cards.forEach((c) => {
+        if (c.assunto) {
+          const cleanAssunto = c.assunto.replace(/\s*\[Card\s+\d+\/\d+\]\s*$/i, '');
+          set.add(normalizeTitle(cleanAssunto));
+        }
+      });
+    }
+    return Array.from(set).sort();
+  }, [availableDecks, selectedDeckId]);
 
   // Novo: Modo de Omissão de Palavras (Mesmo cartão por clique vs Desmembrar em novos cartões)
   const [clozeMultiOption, setClozeMultiOption] = useState<'single_interactive' | 'multi_cards'>('single_interactive');
@@ -329,6 +363,8 @@ export const CardCreatorModal: React.FC<CardCreatorModalProps> = ({
       targetDeckId = 'custom_' + Date.now();
     }
 
+    const cleanAssunto = normalizeTitle(assunto);
+
     if (tipo === 'cloze') {
       if (!clozeText.trim() || !hasCloze(clozeText)) {
         alert('Para o tipo Cloze (Ocultação), inclua pelo menos uma marcação {{c1::palavra}} no texto.');
@@ -341,7 +377,7 @@ export const CardCreatorModal: React.FC<CardCreatorModalProps> = ({
       if (clozeMultiOption === 'multi_cards' && clozeNums.length > 1 && !editingCard) {
         const cardsToCreate: Card[] = clozeNums.map((cNum, idx) => ({
           id: `user_card_${Date.now()}_c${cNum}`,
-          assunto: `${assunto.trim()} [Card ${idx + 1}/${clozeNums.length}]`,
+          assunto: `${cleanAssunto} [Card ${idx + 1}/${clozeNums.length}]`,
           frente: clozeText.trim(),
           verso: extra.trim() || `Termo c${cNum} memorizado.`,
           tipo: 'cloze',
@@ -362,7 +398,7 @@ export const CardCreatorModal: React.FC<CardCreatorModalProps> = ({
         // CASO B: Cartão Único com Revelação Interativa (ou edição)
         const singleCard: Card = {
           id: editingCard ? editingCard.card.id : `user_card_${Date.now()}`,
-          assunto: assunto.trim(),
+          assunto: cleanAssunto,
           frente: clozeText.trim(),
           verso: extra.trim() || 'Termos ocultos memorizados.',
           tipo: 'cloze',
@@ -387,7 +423,7 @@ export const CardCreatorModal: React.FC<CardCreatorModalProps> = ({
       }
       const basicCard: Card = {
         id: editingCard ? editingCard.card.id : `user_card_${Date.now()}`,
-        assunto: assunto.trim(),
+        assunto: cleanAssunto,
         frente: frente.trim(),
         verso: verso.trim(),
         tipo: 'basico',
@@ -544,17 +580,53 @@ export const CardCreatorModal: React.FC<CardCreatorModalProps> = ({
 
           {/* Assunto / Tema & Bandeira de Cor */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="sm:col-span-2">
-              <label className="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-zinc-400 mb-1">
-                Assunto / Tópico Jurídico
-              </label>
+            <div className="sm:col-span-2 space-y-1.5">
+              <div className="flex justify-between items-center">
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-zinc-400">
+                  Assunto / Tópico Jurídico
+                </label>
+                {existingDeckAssuntos.length > 0 && (
+                  <span className="text-[10px] text-gray-400 font-mono">
+                    {existingDeckAssuntos.length} tópicos cadastrados
+                  </span>
+                )}
+              </div>
               <input
+                list="card-creator-assuntos"
                 type="text"
-                placeholder="Ex: Teoria da Imputação Objetiva, Prisão Preventiva..."
+                placeholder="Selecione um tópico existente ou digite um novo..."
                 value={assunto}
                 onChange={(e) => setAssunto(e.target.value)}
                 className="w-full bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-xl px-3.5 py-2 text-sm text-gray-900 dark:text-zinc-100 focus:outline-none focus:border-[#ff6b00]"
               />
+              <datalist id="card-creator-assuntos">
+                {existingDeckAssuntos.map((a) => (
+                  <option key={a} value={a} />
+                ))}
+              </datalist>
+
+              {/* Chips rápidos dos tópicos do baralho */}
+              {existingDeckAssuntos.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 pt-1 max-h-20 overflow-y-auto">
+                  {existingDeckAssuntos.slice(0, 8).map((a) => {
+                    const isSelected = normalizeTitle(assunto) === a;
+                    return (
+                      <button
+                        key={a}
+                        type="button"
+                        onClick={() => setAssunto(a)}
+                        className={`text-[11px] font-semibold px-2.5 py-1 rounded-lg border transition cursor-pointer ${
+                          isSelected
+                            ? 'bg-[#ff6b00] text-white border-[#ff6b00] shadow-sm'
+                            : 'bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-zinc-400 border-gray-200 dark:border-zinc-700 hover:border-[#ff6b00]'
+                        }`}
+                      >
+                        {a}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             <div>

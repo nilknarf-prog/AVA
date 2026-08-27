@@ -120,6 +120,18 @@
   .btn-util { background:transparent; border:1px solid var(--border); color:var(--text); padding:8px 14px; border-radius:var(--r-sm); font-size:12px; font-weight:600; cursor:pointer; transition:background .15s; }
   .btn-util:hover { background:var(--surface-hover); border-color:var(--text-dim); }
 
+  /* ── QUICK CHIPS & AUTOCOMPLETE ─────────── */
+  .quick-chips-grid { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+  .quick-chip {
+    background: var(--surface); border: 1px solid var(--border); color: var(--text-muted);
+    font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 12px;
+    cursor: pointer; transition: all .15s ease; user-select: none; display: inline-flex; align-items: center; gap: 4px;
+  }
+  .quick-chip:hover { border-color: var(--brand); color: var(--text); background: var(--surface-hover); transform: translateY(-1px); }
+  .quick-chip.active { background: var(--brand) !important; border-color: var(--brand) !important; color: #ffffff !important; box-shadow: 0 2px 8px rgba(255,107,0,0.35); font-weight: 800; }
+  .quick-chip-add { border-style: dashed; color: var(--brand); font-weight: 800; }
+  .quick-chip-add:hover { background: var(--brand-soft); color: var(--brand); }
+
   /* ── TIMELINE HISTÓRICO ──────────────────── */
   .history-timeline-list { display:flex; flex-direction:column; gap:12px; }
   .htl-item { display:flex; gap:12px; position:relative; }
@@ -671,7 +683,7 @@
       <div class="modal-row">
         <div class="modal-group">
           <label>Matéria</label>
-          <select id="modalMat">
+          <select id="modalMat" onchange="onModalMatChange()">
             <option value="DP">Direito Penal (DP)</option>
             <option value="DPP">Processo Penal (DPP)</option>
             <option value="DC">Dir. Constitucional (DC)</option>
@@ -686,21 +698,26 @@
           </select>
         </div>
         <div class="modal-group">
-          <label>Categoria</label>
-          <input list="categorias-list" id="modalCategoria" placeholder="Ex: Teoria, Questões, Revisão">
-          <datalist id="categorias-list">
-            <option value="Teoria">
-            <option value="Questões">
-            <option value="Revisão">
-            <option value="Simulado">
-            <option value="Lei Seca">
-            <option value="Jurisprudência">
-          </datalist>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <label>Categoria</label>
+            <span style="font-size:10px; color:var(--brand); cursor:pointer; font-weight:700;" onclick="promptNewCategoria()">+ Nova</span>
+          </div>
+          <input list="categorias-list" id="modalCategoria" placeholder="Selecione ou digite..." oninput="syncCategoriaChips()">
+          <datalist id="categorias-list"></datalist>
         </div>
       </div>
+      <div class="modal-group" style="margin-top:-6px;">
+        <div class="quick-chips-grid" id="categoriaChipsContainer"></div>
+      </div>
+
       <div class="modal-group">
-        <label>Tópico / Assunto do Edital</label>
-        <input type="text" id="modalAssunto" placeholder="Ex: Teoria do Crime, Princípios...">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <label>Tópico / Assunto do Edital</label>
+          <span id="topicCountBadge" style="font-size:10px; color:var(--text-dim); font-family:var(--font-mono);"></span>
+        </div>
+        <input list="assuntos-list" id="modalAssunto" placeholder="Selecione abaixo ou digite o assunto..." oninput="syncAssuntoChips()">
+        <datalist id="assuntos-list"></datalist>
+        <div class="quick-chips-grid" id="assuntoChipsContainer" style="max-height:85px; overflow-y:auto; padding:2px;"></div>
       </div>
       <div class="box-gray">
         <div class="modal-row-3">
@@ -1486,6 +1503,164 @@
     `).join('');
   }
 
+  // --- NORMALIZAÇÃO & CATEGORIAS/TÓPICOS INTELIGENTES ---
+  function normalizeTitle(str) {
+    if (!str) return '';
+    const trimmed = str.trim().replace(/\s+/g, ' ');
+    const lowerWords = ['de', 'da', 'do', 'das', 'dos', 'e', 'em', 'no', 'na', 'nos', 'nas', 'por', 'para', 'com', 'sem', 'a', 'o', 'as', 'os'];
+    const uppercaseWords = ['STF', 'STJ', 'CPP', 'CP', 'CF', 'CF/88', 'LINDB', 'ECA', 'LPE', 'DP', 'DPP', 'DC', 'DA', 'ML', 'DCV', 'DH', 'DE', 'CR', 'RLM', 'FSRS', 'SRS', 'ANPP', 'CPI', 'PRF', 'PF'];
+
+    return trimmed.split(' ').map((word, idx) => {
+      const upperCandidate = word.toUpperCase().replace(/[^A-Z0-9/]/g, '');
+      if (uppercaseWords.includes(upperCandidate)) {
+        return word.toUpperCase();
+      }
+      const lowerCandidate = word.toLowerCase();
+      if (idx > 0 && lowerWords.includes(lowerCandidate)) {
+        return lowerCandidate;
+      }
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    }).join(' ');
+  }
+
+  const DEFAULT_CATEGORIAS = ['Teoria', 'Revisão', 'Questões', 'Flashcards', 'Lei Seca', 'Jurisprudência', 'Simulado', 'Discursiva'];
+  const STORAGE_CUSTOM_CAT_KEY = 'delta_custom_categorias';
+
+  function getAvailableCategorias() {
+    let custom = [];
+    try {
+      custom = JSON.parse(localStorage.getItem(STORAGE_CUSTOM_CAT_KEY) || '[]');
+    } catch(e) {}
+    const set = new Set([...DEFAULT_CATEGORIAS, ...custom]);
+    return Array.from(set);
+  }
+
+  function saveCustomCategoria(cat) {
+    if (!cat) return;
+    const norm = normalizeTitle(cat);
+    let custom = [];
+    try {
+      custom = JSON.parse(localStorage.getItem(STORAGE_CUSTOM_CAT_KEY) || '[]');
+    } catch(e) {}
+    if (!custom.includes(norm) && !DEFAULT_CATEGORIAS.includes(norm)) {
+      custom.push(norm);
+      localStorage.setItem(STORAGE_CUSTOM_CAT_KEY, JSON.stringify(custom));
+    }
+  }
+
+  function promptNewCategoria() {
+    const name = prompt('Nome da Nova Categoria de Estudo (ex: Resumos, Informativos):');
+    if (name && name.trim()) {
+      const norm = normalizeTitle(name);
+      saveCustomCategoria(norm);
+      selectCategoria(norm);
+    }
+  }
+
+  function renderCategoriaChips() {
+    const container = document.getElementById('categoriaChipsContainer');
+    const datalist = document.getElementById('categorias-list');
+    const inputVal = (document.getElementById('modalCategoria')?.value || '').trim();
+    const cats = getAvailableCategorias();
+
+    if (datalist) {
+      datalist.innerHTML = cats.map(c => `<option value="${c}">`).join('');
+    }
+
+    if (container) {
+      container.innerHTML = cats.map(c => `
+        <span class="quick-chip ${c.toLowerCase() === inputVal.toLowerCase() ? 'active' : ''}" onclick="selectCategoria('${c.replace(/'/g, "\\'")}')">${c}</span>
+      `).join('') + `<span class="quick-chip quick-chip-add" onclick="promptNewCategoria()">+ Nova</span>`;
+    }
+  }
+
+  function selectCategoria(cat) {
+    const input = document.getElementById('modalCategoria');
+    if (input) {
+      input.value = cat;
+      renderCategoriaChips();
+    }
+  }
+
+  function syncCategoriaChips() {
+    const inputVal = (document.getElementById('modalCategoria')?.value || '').trim().toLowerCase();
+    document.querySelectorAll('#categoriaChipsContainer .quick-chip').forEach(el => {
+      if (el.classList.contains('quick-chip-add')) return;
+      el.classList.toggle('active', el.innerText.trim().toLowerCase() === inputVal);
+    });
+  }
+
+  function getAvailableAssuntosForMat(matSigla) {
+    const assuntos = new Set();
+
+    // 1. Tópicos do Edital Verticalizado
+    if (window.DeltaEdital && window.DeltaEdital.getTopicosPorMateria) {
+      const topicosEdital = DeltaEdital.getTopicosPorMateria(matSigla);
+      topicosEdital.forEach(t => assuntos.add(normalizeTitle(t)));
+    }
+
+    // 2. Assuntos dos Flashcards
+    if (window.DeltaRevisoes && window.DeltaRevisoes.getAssuntosPorDeck) {
+      const assuntosFlash = DeltaRevisoes.getAssuntosPorDeck(matSigla);
+      assuntosFlash.forEach(a => assuntos.add(normalizeTitle(a)));
+    }
+
+    // 3. Assuntos de estudos anteriores
+    logs.forEach(l => {
+      if (l.mat && l.mat.toLowerCase() === (matSigla || '').toLowerCase() && l.assunto) {
+        assuntos.add(normalizeTitle(l.assunto));
+      }
+    });
+
+    return Array.from(assuntos).sort();
+  }
+
+  function onModalMatChange() {
+    updateAssuntoSuggestions();
+  }
+
+  function updateAssuntoSuggestions() {
+    const mat = document.getElementById('modalMat')?.value || 'DP';
+    const assuntos = getAvailableAssuntosForMat(mat);
+    const datalist = document.getElementById('assuntos-list');
+    const container = document.getElementById('assuntoChipsContainer');
+    const badge = document.getElementById('topicCountBadge');
+    const inputVal = (document.getElementById('modalAssunto')?.value || '').trim().toLowerCase();
+
+    if (badge) {
+      badge.innerText = `${assuntos.length} tópicos cadastrados`;
+    }
+
+    if (datalist) {
+      datalist.innerHTML = assuntos.map(a => `<option value="${a.replace(/"/g, '&quot;')}">`).join('');
+    }
+
+    if (container) {
+      if (assuntos.length === 0) {
+        container.innerHTML = `<span style="font-size:11px; color:var(--text-dim); padding:2px;">Nenhum tópico pré-cadastrado. Digite para criar.</span>`;
+      } else {
+        container.innerHTML = assuntos.slice(0, 12).map(a => `
+          <span class="quick-chip ${a.toLowerCase() === inputVal ? 'active' : ''}" onclick="selectAssunto('${a.replace(/'/g, "\\'")}')">${a}</span>
+        `).join('');
+      }
+    }
+  }
+
+  function selectAssunto(assunto) {
+    const input = document.getElementById('modalAssunto');
+    if (input) {
+      input.value = assunto;
+      syncAssuntoChips();
+    }
+  }
+
+  function syncAssuntoChips() {
+    const inputVal = (document.getElementById('modalAssunto')?.value || '').trim().toLowerCase();
+    document.querySelectorAll('#assuntoChipsContainer .quick-chip').forEach(el => {
+      el.classList.toggle('active', el.innerText.trim().toLowerCase() === inputVal);
+    });
+  }
+
   // --- MODAL DE REGISTRO DE ESTUDO ---
   function openRegistroModal(editIndex = null) {
     const modal = document.getElementById('registroModal');
@@ -1518,6 +1693,9 @@
       document.getElementById('modalPaginas').value = '';
       document.getElementById('modalObs').value = '';
     }
+
+    renderCategoriaChips();
+    updateAssuntoSuggestions();
     modal.style.display = 'flex';
   }
 
@@ -1530,17 +1708,21 @@
     const dt = document.getElementById('modalData').value;
     const tempo = document.getElementById('modalTempo').value;
     const mat = document.getElementById('modalMat').value;
-    const cat = document.getElementById('modalCategoria').value || 'Teoria';
-    const assunto = document.getElementById('modalAssunto').value;
+    const rawCat = document.getElementById('modalCategoria').value || 'Teoria';
+    const rawAssunto = document.getElementById('modalAssunto').value;
     const acertos = parseInt(document.getElementById('modalAcertos').value) || 0;
     const erros = parseInt(document.getElementById('modalErros').value) || 0;
     const paginas = parseInt(document.getElementById('modalPaginas').value) || 0;
     const obs = document.getElementById('modalObs').value;
 
-    if (!dt || !assunto) {
+    if (!dt || !rawAssunto.trim()) {
       alert('Data e Assunto são obrigatórios!');
       return;
     }
+
+    const cat = normalizeTitle(rawCat);
+    const assunto = normalizeTitle(rawAssunto);
+    saveCustomCategoria(cat);
 
     const qts = acertos + erros;
     const sessionObj = {

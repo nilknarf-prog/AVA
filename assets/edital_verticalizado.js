@@ -579,6 +579,42 @@
     }
   }
 
+  function getTopicosPorMateria(siglaOuNome) {
+    if (!siglaOuNome) return [];
+    const plan = getActivePlan();
+    const query = siglaOuNome.trim().toLowerCase();
+    const results = [];
+
+    // Busca no plano ativo
+    if (plan && plan.disciplinas) {
+      const disc = plan.disciplinas.find(d => 
+        (d.sigla && d.sigla.toLowerCase() === query) ||
+        (d.nome && d.nome.toLowerCase() === query) ||
+        (d.sigla && query.includes(d.sigla.toLowerCase()))
+      );
+      if (disc && disc.topicos) {
+        disc.topicos.forEach(t => {
+          if (t.nome && !results.includes(t.nome)) results.push(t.nome);
+        });
+      }
+    }
+
+    // Se não encontrou no plano ativo, busca no template padrão
+    if (results.length === 0) {
+      const defDisc = DEFAULT_SUBJECTS_TEMPLATE.find(d => 
+        (d.sigla && d.sigla.toLowerCase() === query) ||
+        (d.nome && d.nome.toLowerCase() === query)
+      );
+      if (defDisc && defDisc.topicos) {
+        defDisc.topicos.forEach(t => {
+          if (t.nome && !results.includes(t.nome)) results.push(t.nome);
+        });
+      }
+    }
+
+    return results;
+  }
+
   function renderAll() {
     renderEditalView('view-edital-content');
     if (window.renderDashboardEstudei) {
@@ -609,7 +645,8 @@
     openCreatePlanModal,
     promptRenamePlan,
     openAddDisciplinaModal,
-    openAddTopicoModal
+    openAddTopicoModal,
+    getTopicosPorMateria
   };
 
 })();

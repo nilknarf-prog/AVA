@@ -270,12 +270,13 @@
 
   // Coleta dados locais para sincronização
   function getLocalPayload() {
-    let estudos = [], fsrs = {}, customCards = [], customDecks = [], cardOverrides = {};
+    let estudos = [], fsrs = {}, customCards = [], customDecks = [], cardOverrides = {}, customCategorias = [];
     try { estudos = JSON.parse(localStorage.getItem('delta_estudos') || '[]'); } catch (e) {}
     try { fsrs = JSON.parse(localStorage.getItem('atena_srs') || '{}'); } catch (e) {}
     try { customCards = JSON.parse(localStorage.getItem('atena_custom_cards') || '[]'); } catch (e) {}
     try { customDecks = JSON.parse(localStorage.getItem('atena_custom_decks') || '[]'); } catch (e) {}
     try { cardOverrides = JSON.parse(localStorage.getItem('atena_card_overrides') || '{}'); } catch (e) {}
+    try { customCategorias = JSON.parse(localStorage.getItem('delta_custom_categorias') || '[]'); } catch (e) {}
 
     return {
       version: 2,
@@ -285,6 +286,7 @@
       customCards,
       customDecks,
       cardOverrides,
+      customCategorias,
       studyMode: localStorage.getItem('atena_study_mode') || 'pos-edital',
       theme: localStorage.getItem('delta-theme') || 'dark',
     };
@@ -341,6 +343,12 @@
       if (remote.cardOverrides && typeof remote.cardOverrides === 'object') {
         const localOverrides = JSON.parse(localStorage.getItem('atena_card_overrides') || '{}');
         localStorage.setItem('atena_card_overrides', JSON.stringify({ ...localOverrides, ...remote.cardOverrides }));
+      }
+
+      if (Array.isArray(remote.customCategorias)) {
+        const localCats = JSON.parse(localStorage.getItem('delta_custom_categorias') || '[]');
+        const mergedCats = Array.from(new Set([...localCats, ...remote.customCategorias]));
+        localStorage.setItem('delta_custom_categorias', JSON.stringify(mergedCats));
       }
 
       localStorage.setItem('delta_last_sync_timestamp', String(Date.now()));

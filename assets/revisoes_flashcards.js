@@ -1097,6 +1097,42 @@
     }
   });
 
+  // Utilitário de Normalização Canônica (Title Case inteligente e deduplicação)
+  function normalizeTitle(str) {
+    if (!str) return '';
+    const trimmed = str.trim().replace(/\s+/g, ' ');
+    const lowerWords = ['de', 'da', 'do', 'das', 'dos', 'e', 'em', 'no', 'na', 'nos', 'nas', 'por', 'para', 'com', 'sem', 'a', 'o', 'as', 'os'];
+    const uppercaseWords = ['STF', 'STJ', 'CPP', 'CP', 'CF', 'CF/88', 'LINDB', 'ECA', 'LPE', 'DP', 'DPP', 'DC', 'DA', 'ML', 'DCV', 'DH', 'DE', 'CR', 'RLM', 'FSRS', 'SRS', 'ANPP', 'CPI', 'PRF', 'PF'];
+
+    return trimmed.split(' ').map((word, idx) => {
+      const upperCandidate = word.toUpperCase().replace(/[^A-Z0-9/]/g, '');
+      if (uppercaseWords.includes(upperCandidate)) {
+        return word.toUpperCase();
+      }
+      const lowerCandidate = word.toLowerCase();
+      if (idx > 0 && lowerWords.includes(lowerCandidate)) {
+        return lowerCandidate;
+      }
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    }).join(' ');
+  }
+
+  function getAssuntosPorDeck(deckId) {
+    const cards = getAllCards();
+    const query = (deckId || '').toLowerCase();
+    const assuntos = new Set();
+
+    cards.forEach(c => {
+      if (!deckId || (c.deckId && c.deckId.toLowerCase() === query)) {
+        if (c.assunto) {
+          assuntos.add(normalizeTitle(c.assunto));
+        }
+      }
+    });
+
+    return Array.from(assuntos).sort();
+  }
+
   // Exposição Global
   window.DeltaRevisoes = {
     getAllCards,
@@ -1113,7 +1149,9 @@
     restartFailedCardsSession,
     openEditCardModal,
     closeEditCardModal,
-    saveEditedCard
+    saveEditedCard,
+    normalizeTitle,
+    getAssuntosPorDeck
   };
 
 })();
