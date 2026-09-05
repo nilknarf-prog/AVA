@@ -81,7 +81,6 @@
       ]
     }
   ];
-  ];
 
   // --- GERENCIAMENTO DE ESTADO ---
   let plans = [];
@@ -342,7 +341,12 @@
     if (targetTopico) {
       targetTopico.acertos = (parseInt(targetTopico.acertos) || 0) + parseInt(acertos || 0);
       targetTopico.erros = (parseInt(targetTopico.erros) || 0) + parseInt(erros || 0);
-      targetTopico.dataEstudo = dateStr || new Date().toISOString().split('T')[0];
+      let localDateStr = dateStr;
+      if (!localDateStr) {
+        const now = new Date();
+        localDateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      }
+      targetTopico.dataEstudo = localDateStr;
       targetTopico.concluido = true;
       savePlans();
     }

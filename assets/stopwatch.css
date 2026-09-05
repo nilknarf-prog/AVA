@@ -1,14 +1,20 @@
 /* ── GLOBAL STOPWATCH WIDGET & FAB ── */
 .delta-sw-container {
   position: fixed;
-  bottom: 24px;
-  right: 24px;
+  bottom: max(20px, calc(env(safe-area-inset-bottom) + 12px));
+  right: max(16px, env(safe-area-inset-right));
   z-index: 9999;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 12px;
   font-family: 'Public Sans', 'Inter', sans-serif;
+}
+@media (max-width: 640px) {
+  .delta-sw-container {
+    bottom: max(16px, calc(env(safe-area-inset-bottom) + 10px));
+    right: max(12px, env(safe-area-inset-right));
+  }
 }
 
 .delta-sw-widget {

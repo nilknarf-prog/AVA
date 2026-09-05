@@ -27,6 +27,38 @@ export interface Deck {
   isCustom?: boolean;
 }
 
+export function generateDeckSigla(titulo: string): string {
+  if (!titulo) return 'MAT';
+  const clean = titulo.trim().toUpperCase();
+  const known: Record<string, string> = {
+    'CRIMINOLOGIA': 'CR',
+    'DIREITO TRIBUTÁRIO': 'DT',
+    'DIREITO TRIBUTARIO': 'DT',
+    'DIREITO AMBIENTAL': 'DAMB',
+    'MEDICINA LEGAL': 'ML',
+    'LEGISLAÇÃO ESPECIAL': 'LPE',
+    'LEGISLACAO ESPECIAL': 'LPE',
+    'DIREITO FINANCEIRO': 'DFIN',
+    'DIREITO PREVIDENCIÁRIO': 'DPREV',
+    'DIREITO PREVIDENCIARIO': 'DPREV',
+    'DIREITO ELEITORAL': 'DELE',
+    'DIREITO PROCESSUAL CIVIL': 'DPC',
+    'DIREITO CONSTITUCIONAL': 'DC',
+    'DIREITO PENAL': 'DP',
+    'DIREITO PROCESSUAL PENAL': 'DPP',
+    'DIREITO ADMINISTRATIVO': 'DA',
+    'DIREITO CIVIL': 'DCV',
+    'DIREITO EMPRESARIAL': 'DE',
+    'DIREITOS HUMANOS': 'DH',
+  };
+  if (known[clean]) return known[clean];
+  const words = clean.split(/\s+/).filter(w => !['DE', 'DO', 'DA', 'DOS', 'DAS', 'E', 'EM', 'PARA'].includes(w));
+  if (words.length >= 2) {
+    return words.map(w => w[0]).join('').slice(0, 4);
+  }
+  return clean.slice(0, 4);
+}
+
 export const bancosDeQuestoes: Deck[] = [
   {
     id: 'dp',

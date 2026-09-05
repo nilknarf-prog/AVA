@@ -3,9 +3,9 @@ import {
   Layers, Flame, ArrowLeft, CheckCircle, Play,
   CalendarClock, BookOpen, FileText, Sun, Moon,
   BrainCircuit, Sparkles, Plus, Bookmark,
-  BarChart3, Info, X, Edit3, Cloud
+  BarChart3, Info, X, Edit3, Cloud, FolderPlus, Trash2
 } from 'lucide-react';
-import { bancosDeQuestoes, type Card, type Deck } from './data';
+import { bancosDeQuestoes, type Card, type Deck, generateDeckSigla } from './data';
 import {
   Rating,
   CardState,
@@ -243,17 +243,44 @@ export default function App() {
     };
   }, []);
 
-  // 1. Carregar Custom Cards, Decks e Overrides do localStorage
+  // 1. Carregar Custom Cards, Decks e Overrides do localStorage com Auto-recuperação
   useEffect(() => {
     try {
+      let loadedCustomCards: Card[] = [];
       const savedCustomCards = localStorage.getItem('atena_custom_cards');
       if (savedCustomCards) {
-        setCustomCards(JSON.parse(savedCustomCards));
+        loadedCustomCards = JSON.parse(savedCustomCards);
+        setCustomCards(loadedCustomCards);
       }
+      let loadedCustomDecks: Deck[] = [];
       const savedCustomDecks = localStorage.getItem('atena_custom_decks');
       if (savedCustomDecks) {
-        setCustomDecks(JSON.parse(savedCustomDecks));
+        loadedCustomDecks = JSON.parse(savedCustomDecks);
       }
+
+      // Auto-recuperação: se existirem cards com deckId "custom_..." que não estão em loadedCustomDecks, recriar o deck!
+      let decksChanged = false;
+      loadedCustomCards.forEach((c) => {
+        if (c.deckId && c.deckId.startsWith('custom_')) {
+          if (!loadedCustomDecks.some((d) => d.id === c.deckId)) {
+            const inferred = c.assunto ? c.assunto.replace(/\s*\[Card\s+\d+\/\d+\]\s*$/i, '') : 'Matéria Personalizada';
+            loadedCustomDecks.push({
+              id: c.deckId,
+              titulo: inferred,
+              sigla: generateDeckSigla(inferred),
+              descricao: `Baralho personalizado de ${inferred}`,
+              cards: [],
+              isCustom: true,
+            });
+            decksChanged = true;
+          }
+        }
+      });
+      setCustomDecks(loadedCustomDecks);
+      if (decksChanged) {
+        localStorage.setItem('atena_custom_decks', JSON.stringify(loadedCustomDecks));
+      }
+
       const savedOverrides = localStorage.getItem('atena_card_overrides');
       if (savedOverrides) {
         setCardOverrides(JSON.parse(savedOverrides));
@@ -283,6 +310,7 @@ export default function App() {
         merged.push({
           ...cd,
           cards: [],
+          isCustom: true,
         });
       }
     });
@@ -292,7 +320,24 @@ export default function App() {
       if (override && override._deleted) return;
       const cardToUse = override ? { ...c, ...override } : c;
       const targetDeckId = cardToUse.deckId || 'dp';
-      const deck = merged.find((m) => m.id === targetDeckId);
+      let deck = merged.find((m) => m.id === targetDeckId);
+
+      // AUTO-RECUPERAÇÃO: se o cartão tem um deckId personalizado que ainda não estava em merged,
+      // NUNCA jogar no Direito Penal! Cria o baralho exclusivo para ele!
+      if (!deck && targetDeckId.startsWith('custom_')) {
+        const inferredTitle = cardToUse.assunto ? cardToUse.assunto.replace(/\s*\[Card\s+\d+\/\d+\]\s*$/i, '') : 'Matéria Personalizada';
+        const recoveredDeck: Deck = {
+          id: targetDeckId,
+          titulo: inferredTitle,
+          sigla: generateDeckSigla(inferredTitle),
+          descricao: `Baralho personalizado de ${inferredTitle}`,
+          cards: [],
+          isCustom: true,
+        };
+        merged.push(recoveredDeck);
+        deck = recoveredDeck;
+      }
+
       if (deck) {
         if (!deck.cards.some((existing) => existing.id === cardToUse.id)) {
           deck.cards.push({ ...cardToUse, isCustom: true });
@@ -572,7 +617,46 @@ export default function App() {
   };
 
   // Salvar ou Editar Card (Universal)
-  const handleSaveCard = (cardsToSave: Card | Card[], deckId: string, closeModal = true) => {
+  const handleSaveCard = (
+    cardsToSave: Card | Card[],
+    deckId: string,
+    closeModal = true,
+    newDeck?: Deck
+  ) => {
+    let effectiveDeckId = deckId;
+
+    if (newDeck) {
+      effectiveDeckId = newDeck.id;
+      setCustomDecks((prev) => {
+        const exists = prev.some((d) => d.id === newDeck.id);
+        const updated = exists
+          ? prev.map((d) => (d.id === newDeck.id ? { ...d, ...newDeck } : d))
+          : [...prev, newDeck];
+        localStorage.setItem('atena_custom_decks', JSON.stringify(updated));
+        return updated;
+      });
+    } else if (deckId && deckId.startsWith('custom_')) {
+      setCustomDecks((prev) => {
+        const exists = prev.some((d) => d.id === deckId) || bancosDeQuestoes.some((d) => d.id === deckId);
+        if (!exists) {
+          const first = Array.isArray(cardsToSave) ? cardsToSave[0] : cardsToSave;
+          const inferred = first?.assunto ? first.assunto.replace(/\s*\[Card\s+\d+\/\d+\]\s*$/i, '') : 'Matéria Personalizada';
+          const autoDeck: Deck = {
+            id: deckId,
+            titulo: inferred,
+            sigla: generateDeckSigla(inferred),
+            descricao: `Baralho personalizado de ${inferred}`,
+            cards: [],
+            isCustom: true,
+          };
+          const updated = [...prev, autoDeck];
+          localStorage.setItem('atena_custom_decks', JSON.stringify(updated));
+          return updated;
+        }
+        return prev;
+      });
+    }
+
     const list = Array.isArray(cardsToSave) ? cardsToSave : [cardsToSave];
     
     list.forEach(card => {
@@ -590,6 +674,7 @@ export default function App() {
             imageUrl: card.imageUrl,
             align: card.align,
             targetCloze: card.targetCloze,
+            deckId: effectiveDeckId,
           }
         };
         setCardOverrides(newOverrides);
@@ -599,9 +684,9 @@ export default function App() {
         const updatedCustom = [...customCards];
         const idx = updatedCustom.findIndex(c => c.id === card.id);
         if (idx >= 0) {
-          updatedCustom[idx] = { ...card, deckId };
+          updatedCustom[idx] = { ...card, deckId: effectiveDeckId, isCustom: true };
         } else {
-          updatedCustom.push({ ...card, deckId, isCustom: true });
+          updatedCustom.push({ ...card, deckId: effectiveDeckId, isCustom: true });
         }
         setCustomCards(updatedCustom);
         localStorage.setItem('atena_custom_cards', JSON.stringify(updatedCustom));
@@ -611,12 +696,12 @@ export default function App() {
     // Atualizar em tempo real o baralho atual da sessão se estiver revisando
     setCurrentDeck(prev => prev.map(c => {
       const updated = list.find(savedCard => savedCard.id === c.id);
-      return updated ? { ...c, ...updated, deckId } : c;
+      return updated ? { ...c, ...updated, deckId: effectiveDeckId } : c;
     }));
 
     setTodayCards(prev => prev.map(c => {
       const updated = list.find(savedCard => savedCard.id === c.id);
-      return updated ? { ...c, ...updated, deckId } : c;
+      return updated ? { ...c, ...updated, deckId: effectiveDeckId } : c;
     }));
 
     if (closeModal) {
@@ -625,6 +710,83 @@ export default function App() {
     }
 
     // Auto-sync com a nuvem
+    uploadAvaToCloud(supabaseUser);
+  };
+
+  // Criar Baralho diretamente
+  const handleCreateDeckPrompt = () => {
+    const title = prompt('Nome da Nova Matéria / Baralho (ex: Criminologia, Direito Tributário):');
+    if (!title || !title.trim()) return;
+    const trimmed = title.trim();
+    const defaultSigla = generateDeckSigla(trimmed);
+    const siglaPrompt = prompt('Sigla da matéria (ex: CR, DT):', defaultSigla);
+    const sigla = (siglaPrompt || defaultSigla).trim().toUpperCase();
+
+    const safeSlug = trimmed
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]/g, '_')
+      .slice(0, 20);
+    const newDeckId = `custom_${safeSlug}_${Date.now()}`;
+
+    const newDeck: Deck = {
+      id: newDeckId,
+      titulo: trimmed,
+      sigla,
+      descricao: `Baralho personalizado de ${trimmed}`,
+      cards: [],
+      isCustom: true,
+    };
+
+    setCustomDecks((prev) => {
+      const updated = [...prev, newDeck];
+      localStorage.setItem('atena_custom_decks', JSON.stringify(updated));
+      return updated;
+    });
+
+    uploadAvaToCloud(supabaseUser);
+
+    if (confirm(`Baralho "${trimmed}" criado com sucesso! Deseja criar o primeiro flashcard para ele agora?`)) {
+      setEditingCard(null);
+      setManagerInitialDeck(newDeckId);
+      setIsCreateModalOpen(true);
+    }
+  };
+
+  // Renomear Baralho Personalizado
+  const handleRenameDeck = (deck: Deck) => {
+    const newTitle = prompt('Novo nome para o baralho:', deck.titulo);
+    if (!newTitle || !newTitle.trim() || newTitle.trim() === deck.titulo) return;
+    const trimmed = newTitle.trim();
+    const newSigla = prompt('Sigla do baralho (ex: CR, DT):', deck.sigla || generateDeckSigla(trimmed)) || deck.sigla;
+
+    setCustomDecks((prev) => {
+      const updated = prev.map((d) =>
+        d.id === deck.id ? { ...d, titulo: trimmed, sigla: newSigla.trim().toUpperCase(), descricao: `Baralho personalizado de ${trimmed}` } : d
+      );
+      localStorage.setItem('atena_custom_decks', JSON.stringify(updated));
+      return updated;
+    });
+    uploadAvaToCloud(supabaseUser);
+  };
+
+  // Excluir Baralho Personalizado
+  const handleDeleteDeck = (deck: Deck) => {
+    if (!confirm(`Deseja realmente excluir o baralho "${deck.titulo}" e todos os seus ${deck.cards.length} cartões?`)) return;
+
+    setCustomDecks((prev) => {
+      const updated = prev.filter((d) => d.id !== deck.id);
+      localStorage.setItem('atena_custom_decks', JSON.stringify(updated));
+      return updated;
+    });
+
+    setCustomCards((prev) => {
+      const updated = prev.filter((c) => c.deckId !== deck.id);
+      localStorage.setItem('atena_custom_cards', JSON.stringify(updated));
+      return updated;
+    });
+
     uploadAvaToCloud(supabaseUser);
   };
 
@@ -972,13 +1134,23 @@ export default function App() {
         </div>
 
         {/* Lista de Baralhos */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <h3 className="text-lg font-bold text-gray-900 dark:text-[#e8eaf0] flex items-center gap-2 font-display">
             Baralhos de Estudo ({totalCardsCount} Cartões)
           </h3>
-          <span className="text-xs text-gray-500 dark:text-[#9aa5bb] font-mono">
-            {allDecks.length} matérias disponíveis
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-gray-500 dark:text-[#9aa5bb] font-mono">
+              {allDecks.length} matérias disponíveis
+            </span>
+            <button
+              onClick={handleCreateDeckPrompt}
+              className="px-3.5 py-1.5 rounded-xl bg-[#ff6b00]/10 hover:bg-[#ff6b00]/20 text-[#ff6b00] dark:text-[#ff8533] text-xs font-extrabold flex items-center gap-1.5 transition border border-[#ff6b00]/25 cursor-pointer shadow-sm active:scale-95"
+              title="Criar novo baralho / matéria de estudo"
+            >
+              <FolderPlus size={15} />
+              <span>+ Novo Baralho</span>
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -996,11 +1168,38 @@ export default function App() {
               >
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] uppercase tracking-widest text-[#ff6b00] dark:text-[#ff8533] font-mono font-bold">
-                      {deck.sigla} · Carreira Policial
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <span className={`text-[10px] uppercase tracking-widest font-mono font-bold ${deck.isCustom ? 'text-amber-500 dark:text-amber-400' : 'text-[#ff6b00] dark:text-[#ff8533]'}`}>
+                        {deck.isCustom ? `⭐ ${deck.sigla} · Baralho Personalizado` : `${deck.sigla} · Carreira Policial`}
+                      </span>
+                    </div>
                     
                     <div className="flex items-center gap-1.5">
+                      {deck.isCustom && (
+                        <div className="flex items-center gap-1 mr-1">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRenameDeck(deck);
+                            }}
+                            title="Renomear este baralho"
+                            className="p-1 rounded-lg text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition cursor-pointer"
+                          >
+                            <Edit3 size={13} />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteDeck(deck);
+                            }}
+                            title="Excluir este baralho"
+                            className="p-1 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition cursor-pointer"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      )}
+
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#ff6b00]/15 text-[#ff6b00] dark:text-[#ff8533] font-mono">
                         {dueInDeck} para hoje
                       </span>
@@ -1077,12 +1276,25 @@ export default function App() {
                     <BookOpen size={15} /> {deck.cards.length} Cartões
                   </button>
 
-                  <button
-                    onClick={() => startDeck(deck.cards, deck.titulo)}
-                    className="text-[#ff6b00] dark:text-[#ff8533] font-extrabold text-xs sm:text-sm flex items-center gap-1 group-hover:gap-2 transition-all cursor-pointer"
-                  >
-                    Estudar Baralho Completo <ArrowLeft size={16} className="rotate-180" />
-                  </button>
+                  {deck.cards.length > 0 ? (
+                    <button
+                      onClick={() => startDeck(deck.cards, deck.titulo)}
+                      className="text-[#ff6b00] dark:text-[#ff8533] font-extrabold text-xs sm:text-sm flex items-center gap-1 group-hover:gap-2 transition-all cursor-pointer"
+                    >
+                      Estudar Baralho Completo <ArrowLeft size={16} className="rotate-180" />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        setEditingCard(null);
+                        setManagerInitialDeck(deck.id);
+                        setIsCreateModalOpen(true);
+                      }}
+                      className="text-[#ff6b00] dark:text-[#ff8533] font-extrabold text-xs sm:text-sm flex items-center gap-1 transition-all cursor-pointer bg-[#ff6b00]/10 hover:bg-[#ff6b00]/20 px-3 py-1.5 rounded-xl border border-[#ff6b00]/20"
+                    >
+                      + Criar Primeiro Flashcard
+                    </button>
+                  )}
                 </div>
 
               </div>
@@ -1750,6 +1962,7 @@ export default function App() {
         onSaveCard={handleSaveCard}
         availableDecks={allDecks}
         editingCard={editingCard}
+        initialDeckId={managerInitialDeck !== 'all' ? managerInitialDeck : undefined}
       />
 
       {/* GERENCIADOR E EDITOR UNIVERSAL DE CARDS */}
@@ -1768,7 +1981,10 @@ export default function App() {
         }}
         onDeleteCard={handleDeleteCard}
         onOpenCreateModal={(defaultDeckId) => {
-          setEditingCard(defaultDeckId ? { card: { id: '', deckId: defaultDeckId, assunto: '', frente: '', verso: '', tipo: 'basico' }, deckId: defaultDeckId } : null);
+          if (defaultDeckId && defaultDeckId !== 'all') {
+            setManagerInitialDeck(defaultDeckId);
+          }
+          setEditingCard(defaultDeckId && defaultDeckId !== 'all' ? { card: { id: '', deckId: defaultDeckId, assunto: '', frente: '', verso: '', tipo: 'basico' }, deckId: defaultDeckId } : null);
           setIsManagerModalOpen(false);
           setIsCreateModalOpen(true);
         }}

@@ -1900,6 +1900,10 @@
   }
 }
 @media (max-width: 768px) {
+  .top-kpis-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
   .conquistas-grid {
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   }
@@ -1918,10 +1922,54 @@
     gap: 10px;
   }
   .modal-row {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
   }
   .modal-row-3 {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Tabelas Responsivas para Mobile / iOS */
+  .edital-table-wrap {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    width: 100% !important;
+  }
+  .edital-table {
+    min-width: 650px !important;
+  }
+  .dash-subjects-table {
+    min-width: 420px !important;
+  }
+  .streak-dots-grid {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  .edital-disc-header {
+    padding: 12px 14px !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+  .edh-left {
+    gap: 8px !important;
+    flex: 1 1 100% !important;
+  }
+  .disc-name {
+    font-size: 14px !important;
+  }
+  .edh-right {
+    width: 100% !important;
+    justify-content: space-between !important;
+  }
+  .rev-actions-toolbar {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+  .btn-rev-start-all {
+    width: 100% !important;
+    text-align: center !important;
+  }
+  .rev-subj-select-wrap {
+    width: 100% !important;
   }
 }
 @media (max-width: 600px) {
@@ -1949,6 +1997,12 @@
   .chart-header-tabs {
     flex-wrap: wrap;
     gap: 8px;
+  }
+  .delta-cloud-btn .cloud-btn-label {
+    display: none !important;
+  }
+  .delta-cloud-btn {
+    padding: 0 9px !important;
   }
 }
 

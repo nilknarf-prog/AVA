@@ -6,7 +6,7 @@ import {
   ShieldAlert, Highlighter, Palette, Split, MousePointerClick,
   List, ListOrdered
 } from 'lucide-react';
-import { type Card, type Deck } from './data';
+import { type Card, type Deck, generateDeckSigla } from './data';
 import { wrapWithCloze, hasCloze, extractClozeNumbers } from './cloze';
 import {
   RichContentRenderer, FLAG_CONFIG, type FlagColor, type TextAlignment,
@@ -16,9 +16,10 @@ import {
 interface CardCreatorModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSaveCard: (card: Card | Card[], deckId: string, closeModal?: boolean) => void;
+  onSaveCard: (card: Card | Card[], deckId: string, closeModal?: boolean, newDeck?: Deck) => void;
   availableDecks: Deck[];
   editingCard?: { card: Card; deckId: string } | null;
+  initialDeckId?: string;
 }
 
 const COMMON_TAGS = [
@@ -51,9 +52,10 @@ export const CardCreatorModal: React.FC<CardCreatorModalProps> = ({
   onSaveCard,
   availableDecks,
   editingCard,
+  initialDeckId,
 }) => {
   const [tipo, setTipo] = useState<'basico' | 'cloze'>('cloze');
-  const [selectedDeckId, setSelectedDeckId] = useState<string>('dp');
+  const [selectedDeckId, setSelectedDeckId] = useState<string>(initialDeckId || availableDecks[0]?.id || 'dp');
   const [customDeckName, setCustomDeckName] = useState<string>('');
   const [isCreatingNewDeck, setIsCreatingNewDeck] = useState<boolean>(false);
 
@@ -120,6 +122,8 @@ export const CardCreatorModal: React.FC<CardCreatorModalProps> = ({
     if (editingCard) {
       const { card, deckId } = editingCard;
       setSelectedDeckId(deckId);
+      setIsCreatingNewDeck(false);
+      setCustomDeckName('');
       setAssunto(card.assunto || '');
       setExtra(card.extra || '');
       setFlag(card.flag || null);
@@ -141,8 +145,13 @@ export const CardCreatorModal: React.FC<CardCreatorModalProps> = ({
       }
     } else {
       resetForm();
+      if (initialDeckId) {
+        setSelectedDeckId(initialDeckId);
+      } else if (availableDecks.length > 0 && !availableDecks.some((d) => d.id === selectedDeckId)) {
+        setSelectedDeckId(availableDecks[0].id);
+      }
     }
-  }, [editingCard, isOpen]);
+  }, [editingCard, isOpen, initialDeckId]);
 
   const resetForm = () => {
     setAssunto('');
@@ -355,12 +364,39 @@ export const CardCreatorModal: React.FC<CardCreatorModalProps> = ({
     }
 
     let targetDeckId = selectedDeckId;
+    let newDeckToCreate: Deck | undefined = undefined;
+
     if (isCreatingNewDeck) {
-      if (!customDeckName.trim()) {
-        alert('Por favor, digite o nome do novo baralho.');
+      const trimmedDeckName = customDeckName.trim();
+      if (!trimmedDeckName) {
+        alert('Por favor, digite o nome do novo baralho (ex: Criminologia, Direito Tributário).');
         return;
       }
-      targetDeckId = 'custom_' + Date.now();
+
+      // Verificar se já existe baralho com esse nome
+      const existingDeck = availableDecks.find(
+        (d) => d.titulo.trim().toLowerCase() === trimmedDeckName.toLowerCase()
+      );
+
+      if (existingDeck) {
+        targetDeckId = existingDeck.id;
+      } else {
+        const safeSlug = trimmedDeckName
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/[^a-z0-9]/g, '_')
+          .slice(0, 20);
+        targetDeckId = `custom_${safeSlug}_${Date.now()}`;
+        newDeckToCreate = {
+          id: targetDeckId,
+          titulo: trimmedDeckName,
+          sigla: generateDeckSigla(trimmedDeckName),
+          descricao: `Baralho personalizado de ${trimmedDeckName}`,
+          cards: [],
+          isCustom: true,
+        };
+      }
     }
 
     const cleanAssunto = normalizeTitle(assunto);
@@ -393,7 +429,7 @@ export const CardCreatorModal: React.FC<CardCreatorModalProps> = ({
           align,
         }));
 
-        onSaveCard(cardsToCreate, targetDeckId, !createAnother);
+        onSaveCard(cardsToCreate, targetDeckId, !createAnother, newDeckToCreate);
       } else {
         // CASO B: Cartão Único com Revelação Interativa (ou edição)
         const singleCard: Card = {
@@ -414,7 +450,7 @@ export const CardCreatorModal: React.FC<CardCreatorModalProps> = ({
           align,
         };
 
-        onSaveCard(singleCard, targetDeckId, !createAnother);
+        onSaveCard(singleCard, targetDeckId, !createAnother, newDeckToCreate);
       }
     } else {
       if (!frente.trim() || !verso.trim()) {
@@ -437,7 +473,13 @@ export const CardCreatorModal: React.FC<CardCreatorModalProps> = ({
         align,
       };
 
-      onSaveCard(basicCard, targetDeckId, !createAnother);
+      onSaveCard(basicCard, targetDeckId, !createAnother, newDeckToCreate);
+    }
+
+    if (isCreatingNewDeck) {
+      setSelectedDeckId(targetDeckId);
+      setIsCreatingNewDeck(false);
+      setCustomDeckName('');
     }
 
     setSavedFeedback(true);
@@ -509,14 +551,14 @@ export const CardCreatorModal: React.FC<CardCreatorModalProps> = ({
                   >
                     {availableDecks.map((d) => (
                       <option key={d.id} value={d.id}>
-                        {d.sigla} · {d.titulo}
+                        {d.isCustom ? '⭐ ' : ''}{d.sigla} · {d.titulo}
                       </option>
                     ))}
                   </select>
                   <button
                     type="button"
                     onClick={() => setIsCreatingNewDeck(true)}
-                    className="px-3 py-2 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 rounded-xl text-xs font-bold hover:bg-gray-200 transition"
+                    className="px-3 py-2 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 rounded-xl text-xs font-bold hover:bg-gray-200 dark:hover:bg-zinc-700 transition"
                   >
                     + Novo
                   </button>
@@ -525,15 +567,16 @@ export const CardCreatorModal: React.FC<CardCreatorModalProps> = ({
                 <div className="flex gap-2">
                   <input
                     type="text"
-                    placeholder="Nome do Novo Baralho"
+                    placeholder="Nome da Nova Matéria (ex: Criminologia)"
                     value={customDeckName}
                     onChange={(e) => setCustomDeckName(e.target.value)}
-                    className="flex-1 bg-white dark:bg-zinc-900 border border-[#ff6b00] rounded-xl px-3 py-2 text-xs sm:text-sm text-gray-900 dark:text-zinc-100"
+                    autoFocus
+                    className="flex-1 bg-white dark:bg-zinc-900 border border-[#ff6b00] rounded-xl px-3 py-2 text-xs sm:text-sm text-gray-900 dark:text-zinc-100 focus:outline-none ring-1 ring-[#ff6b00]"
                   />
                   <button
                     type="button"
                     onClick={() => setIsCreatingNewDeck(false)}
-                    className="px-3 py-2 bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-zinc-400 rounded-xl text-xs"
+                    className="px-3 py-2 bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-zinc-400 rounded-xl text-xs font-semibold hover:bg-gray-200 dark:hover:bg-zinc-700 transition"
                   >
                     Cancelar
                   </button>

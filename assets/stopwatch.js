@@ -106,6 +106,30 @@
         background: #ef4444 !important;
         transform: scale(1.08) !important;
       }
+      @media (max-width: 640px) {
+        .delta-stopwatch-pill {
+          height: 32px !important;
+          padding: 2px 6px 2px 8px !important;
+          gap: 5px !important;
+        }
+        .delta-stopwatch-pill .dsw-time {
+          font-size: 11.5px !important;
+          letter-spacing: 0.4px !important;
+        }
+        .delta-stopwatch-pill .dsw-btn {
+          width: 20px !important;
+          height: 20px !important;
+          border-radius: 4px !important;
+        }
+        .delta-stopwatch-pill .dsw-btn svg {
+          width: 10px !important;
+          height: 10px !important;
+        }
+        .delta-stopwatch-pill .dsw-divider {
+          height: 12px !important;
+          margin: 0 1px !important;
+        }
+      }
     `;
     document.head.appendChild(style);
   }
